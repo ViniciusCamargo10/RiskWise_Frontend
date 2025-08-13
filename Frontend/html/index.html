@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head> 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RiskWise Dashboard</title>
+    <link rel="stylesheet" href="../css/style.css">
+
+</head>
+<body>
+    <div class="container">
+        <!-- Botão de ajuda -->
+        <button class="help-button" onclick="abrirModal()" aria-label="Ajuda">?</button>
+
+        <!-- Cabeçalho -->
+        <header class="header">
+            <h1 class="welcome-text">Hi, welcome back!</h1>
+        </header>
+
+        <!-- Área principal com os botões -->
+        <main class="main-content">
+            <div class="grid-container">
+                <button class="card" onclick="handleCardClick('home', event)" aria-label="Home">
+                    <img src="../imagens/home.png" alt="Ícone Casa" class="card-icon">
+                </button>
+                <button class="card" onclick="handleCardClick('calculator', event)" aria-label="Calculator">
+                    <img src="../imagens/calculator.png" alt="Ícone Calculadora" class="card-icon">
+                </button>
+                <button class="card" onclick="handleCardClick('document', event)" aria-label="Document">
+                    <img src="../imagens/documents.png" alt="Ícone Documento" class="card-icon">
+                </button>
+                <button class="card" onclick="handleCardClick('search', event)" aria-label="Search">
+                    <img src="../imagens/loupe.png" alt="Ícone Busca" class="card-icon">
+                </button>
+            </div>
+        </main>
+
+        <!-- Layout em branco para calculadora -->
+        <div id="layoutCalculadora" class="layout-blank">
+            <h2>Calculadora</h2>
+            <p>Este espaço está em branco e pronto para receber conteúdo futuramente.</p>
+        </div>
+
+        <!-- Rodapé com logo -->
+        <footer class="footer">
+            <img src="../imagens/LogoRiskWise.png" alt="Logo RiskWise" class="logo-image">
+        </footer>
+    </div>
+
+    <!-- Modal de contato -->
+    <div id="modalEmail" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModal()">&times;</span>
+            <h2>Contato do Responsável</h2>
+            <p>vinicius.camargo@syngenta.com</p>
+        </div>
+    </div>
+
+    <script src="../javascript/script.js"></script>
+</body>
+</html>
