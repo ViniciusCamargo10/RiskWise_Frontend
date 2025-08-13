@@ -8,6 +8,18 @@
 </head>
 <body>
     <div class="container">
+        <!-- Botão de ajuda -->
+        <button class="help-button" onclick="abrirModal()" aria-label="Ajuda">?</button>
+        
+        <!-- Modal de contato -->
+        <div id="modalEmail" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="fecharModal()">&times;</span>
+                <h2>Contato do Responsável</h2>
+                <p>vinicius.camargo@syngenta.com</p>
+            </div>
+        </div>
+
         <!-- Menu Lateral -->
         <div class="sidebar">
             <img src="../imagens/riskwise_logo.png" alt="Logo RiskWise" class="sidebar-logo">

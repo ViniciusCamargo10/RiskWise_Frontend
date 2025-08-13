@@ -19,3 +19,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+function abrirModal() {
+        document.getElementById('modalEmail').style.display = 'flex';
+    }
+
+    function fecharModal() {
+        document.getElementById('modalEmail').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('modalEmail');
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    };
