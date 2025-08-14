@@ -30,10 +30,10 @@ function handleCardClick(cardType, event) {
             window.location.href = 'calculator.html';
             break;
         case 'document':
-            alert('Funcionalidade Documentos - Em desenvolvimento');
+            window.location.href = 'report.html';
             break;
         case 'search':
-            alert('Funcionalidade Busca - Em desenvolvimento');
+            window.location.href = 'library.html';
             break;
         default:
             alert('Ação não definida');
