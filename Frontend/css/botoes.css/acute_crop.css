@@ -8,7 +8,6 @@
 
 body {
     font-family: 'Poppins', sans-serif;
-    background: url('fundo.jpg') no-repeat center center fixed;
     background-size: cover;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
