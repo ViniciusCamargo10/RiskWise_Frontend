@@ -58,13 +58,48 @@
         
         </div>
 
-        <!-- Área Principal -->
-        <div class="main">
-            <h1>CROP🧺</h1>
+      
+    <div class="main">
+      <h1>CROP 🍰 <span class="highlight">ACUTE</span> DIET CALCULATOR</h1>
 
-        <table id="tabela-dados"></table>
+      <div class="filters">
+        <select id="filtro-cultivo">
+          <option value="">Todos os Cultivos</option>
+        </select>
+        <select id="filtro-ano">
+          <option value="">Todos os Anos</option>
+        </select>
+      </div>
 
-        </div>    
-    <script src="../../javascript/Botoes.js/acute_crop.js" defer></script>
+      <div class="table-wrapper">
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>Cultivo</th>
+              <th>ANO POF</th>
+              <th>Região</th>
+              <th>Caso Fórmula</th>
+              <th>LMR (mg/kg)</th>
+              <th>HR/MCR (mg/kg)</th>
+              <th>MREC/STMR (mg/kg)</th>
+              <th>IMEA (mg/kg p.c/dia)</th>
+              <th>%DRFA ANVISA</th>
+              <th>%DRFA SYNGENTA</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-corpo">
+            <!-- Linhas inseridas via JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="action-buttons">
+        <button class="btn-clear" onclick="limparTabela()">Clean</button>
+        <button class="btn-excel" onclick="voltar()">Back to Calculator</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>

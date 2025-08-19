@@ -102,44 +102,34 @@ function abrirModal() {
     };
 
 
-fetch('../../javascript/Botoes.js/acute_crop.json')
-  .then(response => response.json())
-  .then(data => {
-    renderTabela(data);
-  });
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const response = await fetch('../../javascript/Botoes.js/acute_crop.json');
+    const dados = await response.json();
+    renderizarTabela(dados);
+  } catch (error) {
+    console.error("Erro ao carregar o JSON:", error);
+  }
+});
 
-function renderTabela(dados) {
-  const tabela = document.getElementById('tabela-dados');
+function renderizarTabela(dados) {
+  const tabela = document.getElementById('tabela-corpo');
   tabela.innerHTML = '';
-  tabela.innerHTML += `
-    <tr>
-      <th>Cultivo</th>
-      <th>Ano POF</th>
-      <th>Região</th>
-      <th>Caso Fórmula</th>
-      <th>LMR (mg/kg)</th>
-      <th>HR/MCR (mg/kg)</th>
-      <th>MREC/STMR (mg/kg)</th>
-      <th>IMEA (mg/kg p.c/dia)</th>
-      <th>%DRFA ANVISA</th>
-      <th>%DRFA SYNGENTA</th>
-    </tr>
-  `;
-  dados.forEach(item => {
-    tabela.innerHTML += `
-      <tr>
-        <td>${item['Cultivo/ Matriz Animal'] || ''}</td>
-        <td>${item['ANO POF'] || ''}</td>
-        <td>${item['Região'] || ''}</td>
-        <td>${item['Caso Fórmula'] || ''}</td>
-        <td>${item['LMR (mg/kg)'] || ''}</td>
-        <td>${item['HR/MCR (mg/kg)'] || ''}</td>
-        <td>${item['MREC/STMR (mg/kg)'] || ''}</td>
-        <td>${item['IMEA (mg/kg p.c./dia)'] || ''}</td>
-        <td>${item['%DRFA ANVISA'] || ''}</td>
-        <td>${item['%DRFA SYNGENTA'] || ''}</td>
-      </tr>
+
+  dados.forEach((linha) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${linha['Cultivo'] || linha['Cultivo/ Matriz Animal']}</td>
+      <td>${linha['ANO POF']}</td>
+      <td>${linha['Região']}</td>
+      <td>${linha['Caso Fórmula']}</td>
+      <td><input type="text" value="${linha['LMR (mg/kg)'] || '-'}" /></td>
+      <td><input type="text" value="${linha['HR/MCR (mg/kg)'] || '-'}" /></td>
+      <td><input type="text" value="${linha['MREC/STMR (mg/kg)'] || '-'}" /></td>
+      <td>${linha['IMEA (mg/kg p.c/dia)'] || 'NA'}</td>
+      <td>${linha['%DRFA ANVISA'] || 'NA'}</td>
+      <td>${linha['%DRFA SYNGENTA'] || 'NA'}</td>
     `;
+    tabela.appendChild(tr);
   });
 }
-
