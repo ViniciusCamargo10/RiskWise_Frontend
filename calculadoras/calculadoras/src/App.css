@@ -1,42 +1,325 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
+/* ====== Fonte ====== */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;800&display=swap');
+
+/* ====== Reset básico ====== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root{
+  --brand-900: #1b5e20;
+  --brand-800: #2e7d32;
+  --brand-700: #388e3c;
+  --brand-600: #43a047;
+  --brand-300: #c8e6c9;
+
+  --gray-100: #f5f6f8;
+  --gray-200: #eceff1;
+  --gray-300: #e0e0e0;
+  --gray-700: #333;
+
+  --white: #fff;
+  --red-500: #e74c3c;
+  --shadow: 0 8px 25px rgba(0, 0, 0, 0.18);
+}
+
+/* ====== Página ====== */
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: var(--gray-100);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 1rem;
+  overflow: hidden;
+  color: var(--gray-700);
+}
+
+/* ====== Container geral (fundo verde + card branco dentro) ====== */
+.container {
+  position: relative;
+  display: flex;
+  width: 100%;
+  max-width: 900px;
+  min-height: 77vh;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  margin:auto;
+
+  /* mesmo efeito do seu HTML: degradê verde ao fundo */
+  background: linear-gradient(135deg, var(--brand-800), var(--brand-700));
+}
+
+/* ====== Botão de ajuda (abre modal) ====== */
+.help-button {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: linear-gradient(135deg, #ffffff, #e8f5e9);
+  color: var(--brand-800);
+  font-size: 1.25rem;
+  font-weight: 700;
+  border: 2px solid var(--brand-800);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  transition: all 0.25s ease;
+  text-align: center;
+  line-height: 40px;
+}
+
+.help-button:hover {
+  background: linear-gradient(135deg, var(--brand-300), #ffffff);
+  transform: scale(1.06);
+}
+
+/* ====== Modal de ajuda ====== */
+.modal {
+  display: flex;
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background-color: rgba(0,0,0,0.55);
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: var(--white);
   padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 420px;
+  text-align: center;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.28);
+  position: relative;
+  animation: fadeInModal 0.22s ease;
+}
+
+.modal-content h2 {
+  margin-bottom: 0.75rem;
+  color: var(--brand-800);
+}
+
+.modal-content p {
+  font-size: 1rem;
+  color: var(--gray-700);
+}
+
+.close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 2rem;
+  color: var(--gray-700);
+  cursor: pointer;
+}
+
+@keyframes fadeInModal {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ====== Sidebar ====== */
+.sidebar {
+  width: 84px;
+  background: var(--white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 0;
+  gap: 18px;
+  border-top-left-radius: 24px;
+  border-bottom-left-radius: 24px;
+  /* leve separação visual do card branco */
+  box-shadow: 2px 0 10px rgba(0,0,0,0.06);
+}
+
+.sidebar-logo {
+  width: 76px;
+  height: auto;
+  display: block;
+}
+
+.sidebar-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+  color: var(--brand-800);
+  text-decoration: none;
+}
+
+.sidebar-icon:hover {
+  background: var(--gray-200);
+  transform: scale(1.06);
+}
+
+.sidebar-icon svg {
+  width: 26px;
+  height: 26px;
+  color: #000;
+  pointer-events: none;
+}
+
+/* (opcional) estado ativo da rota */
+.sidebar-icon.active {
+  background: var(--brand-300);
+}
+
+/* ====== Área principal (card branco) ====== */
+.main {
+  flex: 1;
+  background: var(--white);
+  margin: 16px;
+  border-radius: 18px;
+  padding: 32px;
+  overflow: hidden;
+
+  /* Adições para centralizar conteúdo */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* centraliza verticalmente */
+  align-items: center;     /* centraliza horizontalmente */
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Título e destaques */
+.main h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.12);
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.highlight {
+  color: var(--brand-800);
+}
+
+/* ====== Espaços para próxima etapa (filtros/tabela) ====== */
+.filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.filters select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--gray-300);
+  background: var(--white);
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.table-container {
+  width: 100%;
+  overflow: auto;
+  border: 1px solid var(--gray-300);
+  border-radius: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--white);
+  min-width: 840px;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  background: var(--brand-800);
+  color: var(--white);
+  text-align: left;
+  padding: 10px 12px;
+  font-weight: 600;
+}
+
+tbody td {
+  padding: 10px 12px;
+  border-top: 1px solid var(--gray-200);
+}
+
+tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+
+/* Botões de ação (voltar/limpar) */
+.actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+}
+
+.btn {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 0;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: inherit;
+  transition: transform .1s ease, filter .15s ease;
+}
+
+.btn:active { transform: translateY(1px); }
+
+.btn-primary {
+  background: var(--brand-800);
+  color: var(--white);
+}
+
+.btn-danger {
+  background: var(--red-500);
+  color: var(--white);
+}
+
+.btn:hover { filter: brightness(0.96); }
+
+/* ====== Responsivo ====== */
+@media (max-width: 1024px) {
+  .filters {
+    grid-template-columns: repeat(2, minmax(200px, 1fr));
   }
-  to {
-    transform: rotate(360deg);
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 1rem;
   }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+  .container {
+    width: 100%;
+    max-width: 100%;
+    min-height: auto;
   }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+  .sidebar {
+    width: 72px;
+  }
+  .main {
+    margin: 12px;
+    padding: 18px;
+  }
+  .main h1 {
+    font-size: 1.6rem;
+  }
+  .filters {
+    grid-template-columns: 1fr;
+  }
 }
