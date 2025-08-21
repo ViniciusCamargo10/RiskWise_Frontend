@@ -101,35 +101,3 @@ function abrirModal() {
         }
     };
 
-
-document.addEventListener("DOMContentLoaded", async () => {
-  try {
-    const response = await fetch('../../javascript/Botoes.js/acute_crop.json');
-    const dados = await response.json();
-    renderizarTabela(dados);
-  } catch (error) {
-    console.error("Erro ao carregar o JSON:", error);
-  }
-});
-
-function renderizarTabela(dados) {
-  const tabela = document.getElementById('tabela-corpo');
-  tabela.innerHTML = '';
-
-  dados.forEach((linha) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${linha['Cultivo'] || linha['Cultivo/ Matriz Animal']}</td>
-      <td>${linha['ANO POF']}</td>
-      <td>${linha['Região']}</td>
-      <td>${linha['Caso Fórmula']}</td>
-      <td><input type="text" value="${linha['LMR (mg/kg)'] || '-'}" /></td>
-      <td><input type="text" value="${linha['HR/MCR (mg/kg)'] || '-'}" /></td>
-      <td><input type="text" value="${linha['MREC/STMR (mg/kg)'] || '-'}" /></td>
-      <td>${linha['IMEA (mg/kg p.c/dia)'] || 'NA'}</td>
-      <td>${linha['%DRFA ANVISA'] || 'NA'}</td>
-      <td>${linha['%DRFA SYNGENTA'] || 'NA'}</td>
-    `;
-    tabela.appendChild(tr);
-  });
-}
