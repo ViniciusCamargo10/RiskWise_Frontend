@@ -46,9 +46,9 @@ body {
 .container {
   position: relative;
   display: flex;
-  width: 100%;
+  width: 100%; 
   max-width: 900px;
-  min-height: 77vh;
+  min-height: 82vh;
   border-radius: 24px;
   overflow: hidden;
   box-shadow: var(--shadow);
@@ -323,3 +323,4 @@ tbody tr:nth-child(even) {
     grid-template-columns: 1fr;
   }
 }
+
