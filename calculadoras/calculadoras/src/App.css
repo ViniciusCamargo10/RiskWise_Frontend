@@ -58,7 +58,6 @@ body {
   background: linear-gradient(135deg, var(--brand-800), var(--brand-700));
 }
 
-/* ====== Botão de ajuda (abre modal) ====== */
 .help-button {
   position: absolute;
   top: 18px;
@@ -76,6 +75,8 @@ body {
   transition: all 0.25s ease;
   text-align: center;
   line-height: 40px;
+  text-decoration: none; /* remove sublinhado do link */
+  display: inline-block;
 }
 
 .help-button:hover {
@@ -185,7 +186,7 @@ body {
 /* ====== Área principal (card branco) ====== */
 .main {
   flex: 1;
-  background: var(--white);
+  background: var(--green);
   margin: 16px;
   border-radius: 18px;
   padding: 32px;
@@ -199,17 +200,36 @@ body {
   text-align: center;
 }
 
-/* Título e destaques */
-.main h1 {
-  font-size: 2rem;
-  font-weight: 800;
-  margin-bottom: 1rem;
-  text-shadow: 0 2px 6px rgba(0,0,0,0.12);
+.title-wrapper {
+  position: absolute;
+  top: 32px;
+  left: 120px;
+  text-align: left;
+}
+
+.crop-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 0;
+  letter-spacing: 1px;
+}
+
+.calculator-title {
+  font-size: 1.75rem;
+  font-weight: 500;
+  color: var(--white);
+  margin-top: 4px;
 }
 
 .highlight {
-  color: var(--brand-800);
+  color: var(--white);
+  background: none;
+  padding: 0;
+  border-radius: 0;
 }
+
+
 
 /* ====== Espaços para próxima etapa (filtros/tabela) ====== */
 .filters {

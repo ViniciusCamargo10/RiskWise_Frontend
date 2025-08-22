@@ -1,25 +1,17 @@
-import React, { useState } from "react";
+import React from "react";
 
 const HelpModal = () => {
-  const [open, setOpen] = useState(false);
+  const email = "vinicius.camargo@syngenta.com";
+  const subject = "Ajuda";
+  const body = "Olá, preciso de ajuda com...";
+
+  const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
   return (
     <>
-      <button className="help-button" onClick={() => setOpen(true)}>
+      <a href={mailtoLink} className="help-button">
         ?
-      </button>
-
-      {open && (
-        <div className="modal" onClick={() => setOpen(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <span className="close" onClick={() => setOpen(false)}>
-              &times;
-            </span>
-            <h2>Contato do Responsável</h2>
-            <p>vinicius.camargo@syngenta.com</p>
-          </div>
-        </div>
-      )}
+      </a>
     </>
   );
 };

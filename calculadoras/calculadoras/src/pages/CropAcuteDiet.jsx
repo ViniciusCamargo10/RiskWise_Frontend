@@ -1,20 +1,25 @@
 import React from "react";
 import Sidebar from "../components/Sidebar";
 import HelpModal from "../components/HelpModal";
+import acuteCropData from '../assets/data/acute_crop.json';
 
-const CropAcuteDiet = () => {
+
+
+const CropAcuteDietPage = () => {
   return (
     <div className="container">
       <HelpModal />
       <Sidebar />
       <div className="main">
-        <h1>
-          CROP <span className="highlight">ACUTE</span> DIET CALCULATOR
-        </h1>
-        {/* Aqui depois vamos colocar os filtros e a tabela */}
+        <div className="title-wrapper">
+          <h1 className="crop-title">CROP</h1>
+          <h2 className="calculator-title">
+            <span className="highlight">ACUTE</span> DIET CALCULATOR
+          </h2>
+        </div>
       </div>
     </div>
   );
 };
 
-export default CropAcuteDiet;
+export default CropAcuteDietPage;
