@@ -202,7 +202,7 @@ body {
 .section h2 {
     color: #fff;
     font-size: 1.4rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
     padding-left: 10px;
 }
 
@@ -269,3 +269,38 @@ body {
     padding: 1rem;
 }
 
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem; /* Mais espaço entre os botões */
+    padding: 1rem;
+    margin-top: 0; /* Remove espaço extra */
+    position: relative;
+    top: -40px; /* Sobe os botões */
+    left: -15px;
+}
+
+
+.action-buttons button {
+    font-weight: bold;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 20px; /* Bordas meio circulares */
+    cursor: pointer;
+    color: #fff;
+    font-size: 1rem;
+    transition: opacity 0.3s ease;
+}
+
+.action-buttons button:hover {
+    opacity: 0.85;
+}
+
+/* Cores específicas */
+.btn-back {
+    background-color: #000000dc; /* Verde */
+}
+
+.btn-clear {
+    background-color: #000000dc; /* Vermelho */
+}
