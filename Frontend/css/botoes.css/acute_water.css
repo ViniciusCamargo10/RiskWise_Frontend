@@ -17,6 +17,7 @@ body {
     align-items: center;
     min-height: 100vh;
     padding: 2rem;
+    overflow: hidden;
 }
 
 .container {
@@ -25,8 +26,9 @@ body {
     background: linear-gradient(135deg, #2e7d32, #388e3c);
     border-radius: 24px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
-    width: 95%;
-    max-width: 1200px;
+    overflow: hidden;
+    width: 80%;
+    max-width: 900px;
     min-height: auto;
     margin: 0 auto;
 }
@@ -161,12 +163,12 @@ body {
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    padding: 3rem;
+    padding: 2rem;
     color: #fff;
     background-color: transparent;
-    height: auto;
-    max-height: none;
-    overflow: auto;
+    height: 85vh;
+    max-height: 85vh;
+    overflow: hidden;
     width: 100%;
 }
 
@@ -202,11 +204,19 @@ body {
     font-size: 2rem;
     font-weight: 800;
     color: #fff;
-    margin-bottom: 0.5rem;
     text-align: left;
+    padding: 0.5rem;
     top: left;
     align-self: flex-start;
-    margin-left: 25px;
+    margin-left: 16px;
+}
+
+.main h2 {
+    color: #fff;
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+    margin-right: auto;
+    margin-left: 24px;
 }
 
 
@@ -214,7 +224,7 @@ body {
     margin-bottom: 2rem;
 }
 
-.section h2 {
+.section h3 {
     color: #fff;
     font-size: 1.4rem;
     margin-bottom: 1rem;
@@ -309,14 +319,6 @@ body {
 /* Cores específicas */
 .btn-back {
     background-color: #000000dc; /* Verde */
-}
-
-.btn-pdf {
-    background-color: #000000dc; /* Azul */
-}
-
-.btn-clear {
-    background-color: #000000dc; /* Vermelho */
 }
 
 
