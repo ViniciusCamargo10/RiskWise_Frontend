@@ -204,7 +204,7 @@ body {
     font-size: 2.4rem;
     font-weight: 800;
     text-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
 }
 
 .grid {
@@ -222,6 +222,7 @@ body {
     box-shadow: 0 6px 20px rgba(0,0,0,0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     align-self: start;
+    margin-top: -126px;
 }
 
 .card:hover {
@@ -249,6 +250,43 @@ body {
     margin-bottom: 0.8rem;
     color: #555;
 }
+
+.card_water {
+    background: #fff;
+    color: #333;
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    align-self: start;
+}
+
+.card_water:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.card_water h2 {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #1565c0;
+}
+
+.sub-card_water {
+    background: #f9f9f9;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+}
+
+.sub-card_water h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
+    color: #555;
+}
+
 
 .btn-sub {
     display: inline-block; /* Faz o link se comportar como botão */
