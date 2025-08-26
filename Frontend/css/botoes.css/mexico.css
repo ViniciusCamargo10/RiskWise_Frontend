@@ -110,7 +110,7 @@ body {
     to { opacity: 1; transform: scale(1); }
 }
 
-/* Sidebar atualizada */
+/* Sidebar */
 .sidebar {
     width: 80px;
     background: #ffffff;
@@ -141,7 +141,6 @@ body {
     cursor: pointer;
     transition: background 0.3s ease, transform 0.2s ease;
     color: #2e7d32;
-    
     text-decoration: none;
 }
 
@@ -172,7 +171,7 @@ body {
     width: 100%;
 }
 
-/* Conteúdo com rolagem dentro da main */
+/* Conteúdo com rolagem */
 .main-scroll {
     overflow-y: auto;
     width: 100%;
@@ -192,29 +191,30 @@ body {
     border-radius: 8px;
 }
 
-.logo-mexico {
-    width: 30px;
-    height: auto;
-    margin-right: 10px;
-}
-
+/* Cabeçalho com bandeira e título */
 .main-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    gap: 8px; /* Espaço entre bandeira e título */
+    margin-bottom: 10px;
     width: 100%;
+    justify-content: flex-start;
+    margin-left: 45px;
 }
 
-.main h1 {
+.logo-mexico {
+    order: 2;
+    width: 33px; /* Bandeira pequena */
+    height: auto;
+    object-fit: contain;
+}
+
+.main-header h1 {
+    order: 1;
     font-size: 2rem;
-    font-weight: 800;
+    font-weight: 1800;
     color: #fff;
-    text-align: left;
-    padding: 0.5rem;
-    top: left;
-    align-self: flex-start;
-    margin-left: 16px;
+    margin: 0;
 }
 
 .main h2 {
@@ -224,7 +224,6 @@ body {
     margin-right: auto;
     margin-left: 24px;
 }
-
 
 .section {
     margin-bottom: 2rem;
@@ -311,7 +310,7 @@ body {
     font-weight: bold;
     border: none;
     padding: 0.8rem 1.5rem;
-    border-radius: 20px; /* Bordas meio circulares */
+    border-radius: 20px;
     cursor: pointer;
     color: #fff;
     font-size: 1rem;
@@ -322,41 +321,33 @@ body {
     opacity: 0.85;
 }
 
-/* Cores específicas */
 .btn-back {
-    background-color: #000000dc; /* Verde */
+    background-color: #000000dc;
 }
-
 
 /* ===== Telas grandes ===== */
 @media (min-width: 1200px) {
-  /* 1) Deixe o cartão menor também em altura */
   .container {
     width: 80%;
-    max-width: 900px;      /* ajuste a gosto */
-    max-height: 80vh;      /* limite de altura do cartão */
-    overflow: hidden;      /* só a área interna rola */
+    max-width: 900px;
+    max-height: 80vh;
+    overflow: hidden;
     margin: 0 auto;
   }
 
-  /* 2) Reduza a altura disponível para o conteúdo */
   .main {
-    height: 65vh;          /* menor que 85vh */
+    height: 65vh;
     max-height: 65vh;
     padding: 1.5rem;
   }
 
-  /* 3) Permita que a área rolável se ajuste ao novo espaço */
   .main-scroll {
-    /* ESSENCIAL para flex: permite encolher dentro de .main */
-    min-height: 0;         
+    min-height: 0;
     overflow-y: auto;
   }
 
-  /* 4) Tipografia e respiros um pouco menores (opcional) */
   h1 { font-size: 1.6rem; }
   h2 { font-size: 1.2rem; }
   .report-table { font-size: 0.8rem; }
   .action-buttons { padding: 0.75rem; gap: 0.75rem; }
 }
-
