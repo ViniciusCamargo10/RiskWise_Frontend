@@ -27,7 +27,7 @@ function handleCardClick(cardType, event) {
             alert('Você já está na home');
             break;
         case 'calculator':
-            window.location.href = 'calculator.html';
+            window.location.href = 'calculatorHome.html';
             break;
         case 'document':
             window.location.href = 'report.html';

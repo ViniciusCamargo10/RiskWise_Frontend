@@ -29,7 +29,7 @@ body {
     overflow: hidden;
     width: 80%;
     max-width: 900px;
-    min-height: auto;
+    height: 68vh;
     margin: 0 auto;
 }
 
