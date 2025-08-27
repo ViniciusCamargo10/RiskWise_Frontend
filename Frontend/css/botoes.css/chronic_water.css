@@ -194,23 +194,29 @@ body {
 
 .main-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    gap: 5px;
     width: 100%;
+    justify-content: flex-start;
+    padding-left: 18px;
 }
 
-.main h1 {
+.logo-ag {
+    order: 2;
+    width: 37px;
+    height: auto;
+    object-fit: contain;
+    margin-top: 2px;
+}
+
+.main-header h1 {
+    order: 1;
     font-size: 2rem;
     font-weight: 800;
-    color: #fff;
-    text-align: left;
+    color: #fdfdfd;
     padding: 0.5rem;
-    top: left;
     align-self: flex-start;
-    margin-left: 16px;
 }
-
 .main h2 {
     color: #fff;
     font-size: 1.4rem;
