@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RiskWise - Ferramenta de Cálculo</title>
-    <link rel="stylesheet" href="../css/calculatorHome.css">
+    <link rel="stylesheet" href="../css/HomeCropBR.css">
 </head>
 <body>
     <div class="container">
@@ -29,6 +29,13 @@
                 </svg>
             </a>
 
+                <!-- calculator Icon -->
+            <a href="calculatorHome.html" id="btn-calculator" class="sidebar-icon" aria-label="Voltar para a calculadora">
+                    <svg fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm1 2a1 1 0 000 2h6a1 1 0 100-2H7zm6 7a1 1 0 112 0v3a1 1 0 11-2 0v-3zm-3 3a1 1 0 100 2h.01a1 1 0 100-2H10zm-4 1a1 1 0 011-1h.01a1 1 0 110 2H7a1 1 0 01-1-1zm1-4a1 1 0 100 2h.01a1 1 0 100-2H7zm2 1a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zm4-4a1 1 0 100 2h.01a1 1 0 100-2H13zM9 9a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zM7 8a1 1 0 000 2h.01a1 1 0 000-2H7z" clip-rule="evenodd"/>
+                    </svg>
+            </a>    
+
             <!-- Você tinha ícones misturados com <div>. Deixe tudo como <a> -->
             <a href="report.html" id="btn-report" class="sidebar-icon" aria-label="Ir para Report">
                 <svg fill="currentColor" viewBox="0 0 20 20">
@@ -49,33 +56,25 @@
                 <a href="mailto:vinicius.camargo@syngenta.com" class="help-button" aria-label="Ajuda">?</a>
             </div>
 
-            <h1>Hi, choose your calculator !</h1>
-        
+            <div class="main-header">
+                <img src="../imagens/water.png" alt="Ícone do br" class="logo-br">
+                <h1>WATER CALCULATORS !</h1>
+            </div>
+
             <!-- IMPORTANTE: todos os botões ficam dentro deste container -->
             <div class="button-container">
-                <a href="./Botoes_html/mexico.html" class="button mexico" aria-label="Abrir calculadora México">
-                    <img src="../imagens/BandeiraMX.png" alt="Bandeira do México">
-                    <h2>MX CROP</h2>
-                    <p>Chronic Calculator.</p>
+                <a href="./Botoes_html/acute_water.html" class="button mexico" aria-label="Abrir calculadora México">
+                    <img src="../imagens/warning.png" alt="logo acute">
+                    <h2>ACUTE</h2>
+                    
                 </a>
 
-                <a href="./HomeCropBR.html" class="button brasil" aria-label="Abrir calculadora Brasil">
-                    <img src="../imagens/BandeiraBR.png" alt="Bandeira do Brasil">
-                    <h2>BR CROP</h2>
-                    <p>Acute and Chronic dietary calculators.</p>
+                <a href="./Botoes_html/chronic_water.html" class="button brasil" aria-label="Abrir calculadora Brasil">
+                    <img src="../imagens/repeat.png" alt="logo Chronic">
+                    <h2>CHRONIC</h2>
+                    
                 </a>
-
-                <a href="./HomeWater.html" class="button water" aria-label="Abrir calculadora Water">
-                    <img src="../imagens/water.png" alt="Ícone água">
-                    <h2>WATER</h2>
-                    <p>Acute and Chronic dietary calculators.</p>
-                </a>
-
-                <a href="./Botoes_html/animal.html" class="button animal" aria-label="Abrir módulo Animal">
-                    <img src="../imagens/cow.png" alt="Ícone animal">
-                    <h2>Animal</h2>
-                    <p>Under construction.</p>
-                </a>
+                
             </div>
         </div>
     </div>
