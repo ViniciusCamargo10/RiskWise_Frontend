@@ -24,80 +24,91 @@ body {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
     width: 80%;
     max-width: 900px;
-    height: 68vh;/* altura fixa como no report */
+    height: 68vh; /* altura fixa como no report */
     overflow: hidden;
 }
 
-/* ===== BOTÕES ATUALIZADOS ===== */
+/* ===== BOTÕES (RETÂNGULO GARANTIDO – layout empilhado) ===== */
 .button-container {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, auto); /* usa a largura fixa do .button */
     justify-content: center;
-    gap: 20px 50px; /* 40px vertical, 60px horizontal */
-    margin-top: 0px;
+    justify-items: center;  /* centraliza cada botão na célula */
+    gap: 20px 50px;
+    margin-top: 0;
     padding: 10px 0;
 }
 
 .button {
     position: relative;
     background: rgba(255, 255, 255, 0.25);
-    border-radius: 20px;
-    padding: 18px;
-    width: 180px;
+    width: 280px;            /* largura fixa -> retângulo */
+    height: 180px;           /* altura fixa -> retângulo */
+    padding: 12px 16px;
+    border-radius: 12px;     /* cantos arredondados sutis */
     cursor: pointer;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    text-align: center;
     color: #fff;
-    transition: all 0.4s ease;
     overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+
+    /* conteúdo empilhado, mas controlando altura */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;  /* centraliza verticalmente o conteúdo */
+    align-items: center;
+    gap: 8px;
+    text-align: center;
 }
 
 .button img {
-    width: 80px;
+    width: 80px;   /* menor para caber no retângulo */
     height: 80px;
-    margin-bottom: 10px;
-    transition: transform 0.4s ease;
+    margin: 0;
+    transition: transform 0.25s ease;
 }
 
 .button h2 {
-    font-size: 22px;
-    margin-bottom: 6px;
+    font-size: 25px;
+    line-height: 1.1;
+    margin: 0;
     font-weight: 700;
 }
 
 .button p {
-    font-size: 14px;
+    font-size: 12px;
+    line-height: 1.2;
+    margin: 0;
     color: #e0e0e0;
+    max-width: 95%;
+    white-space: nowrap;       /* evita quebrar em múltiplas linhas */
+    overflow: hidden;
+    text-overflow: ellipsis;   /* reticências se o texto for grande */
 }
 
+/* Efeito de brilho e hover */
 .button::before {
     content: "";
     position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
+    inset: -60%; /* cobre bem o botão */
     background: linear-gradient(120deg, #4caf50, #81c784, #66bb6a);
-    transform: rotate(45deg);
+    transform: rotate(35deg);
     opacity: 0;
-    transition: opacity 0.4s ease;
+    transition: opacity 0.25s ease;
     z-index: 0;
 }
 
-.button:hover::before {
-    opacity: 0.3;
-}
+.button:hover::before { opacity: 0.35; }
 
 .button:hover {
-    transform: translateY(-10px) scale(1.05);
+    transform: translateY(-6px);
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
 }
 
-.button:hover img {
-    transform: scale(1.1);
-}
+.button:hover img { transform: scale(1.08); }
+.button:active { transform: translateY(-2px) scale(0.98); }
 
 /* ===== BOTÃO DE AJUDA ===== */
 .help-button {
@@ -129,10 +140,9 @@ body {
 
 .help-wrapper {
     position: absolute;
-    top: 0px;
-    right: 0px;
+    top: 0;
+    right: 0;
 }
-
 
 /* ===== MODAL ===== */
 .modal {
@@ -255,7 +265,7 @@ body {
     font-size: 2.4rem;
     font-weight: 800;
     text-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     margin-top: -20px;
 }
 

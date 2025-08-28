@@ -153,7 +153,7 @@ body {
 /* Main Content */
 .main-content {
     flex: 1;
-    padding: 3rem; /* Reduzido para diminuir espaço */
+    padding: 1.5rem; /* Reduzido para diminuir espaço */
     max-width: 1200px;
 }
 
@@ -161,7 +161,7 @@ body {
     font-size: 2.2rem;
     font-weight: 300;
     color: #fff;
-    margin-bottom: 20px; /* Reduzido */
+    margin-bottom: 10px; /* Reduzido */
     letter-spacing: 2px;
 }
 

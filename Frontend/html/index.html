@@ -11,34 +11,41 @@
     <div class="container">
         <!-- Botão de ajuda -->
         <a href="mailto:vinicius.camargo@syngenta.com" class="help-button" aria-label="Ajuda">?</a>
-
-        <!-- Cabeçalho -->
-        <header class="header">
-            <h1 class="welcome-text">Hi, welcome back!</h1>
-        </header>
         
+        <div class="header-container">
+            <img src="../imagens/RiskLogo.png" alt="Icone do RiskLogo" class="logo-rk">
+            <h1 class="welcome-text">Hi, welcome back !</h1>
+        </div>
         <!-- Área principal com os botões -->
-        <main class="main-content">
-            <div class="grid-container">
-                <button class="card" onclick="handleCardClick('home', event)" aria-label="Home">
-                    <img src="../imagens/home.png" alt="Ícone Casa" class="card-icon">
-                </button> 
-                <button class="card" onclick="handleCardClick('calculator', event)" aria-label="Calculator">
-                    <img src="../imagens/calculator.png" alt="Ícone Calculadora" class="card-icon">
-                </button>
-                <button class="card" onclick="handleCardClick('document', event)" aria-label="Document">
-                    <img src="../imagens/documents.png" alt="Ícone Documento" class="card-icon">
-                </button>
-                <button class="card" onclick="handleCardClick('search', event)" aria-label="Search">
-                    <img src="../imagens/loupe.png" alt="Ícone Busca" class="card-icon">
-                </button>
+        
+        <main class="main">
+            <div class="button-container">
+                <div class="button" onclick="handleCardClick('home', event)">
+                    <img src="../imagens/house.png" alt="Ícone Casa">
+                    <h2>HOME</h2>
+                    <p>Página inicial</p>
+                </div>
+
+                <div class="button" onclick="handleCardClick('calculator', event)">
+                    <img src="../imagens/calculator.png" alt="Ícone Calculadora">
+                    <h2>CALCULADORA</h2>
+                    <p>Ferramenta de cálculo</p>
+                </div>
+
+                <div class="button" onclick="handleCardClick('document', event)">
+                    <img src="../imagens/documents.png" alt="Ícone Documento">
+                    <h2>DOCUMENTOS</h2>
+                    <p>Arquivos e relatórios</p>
+                </div>
+
+                <div class="button" onclick="handleCardClick('search', event)">
+                    <img src="../imagens/search.png" alt="Ícone Busca">
+                    <h2>BUSCA</h2>
+                    <p>Pesquisar dados</p>
+                </div>
             </div>
         </main>
 
-        <!-- Rodapé com logo -->
-        <footer class="footer">
-            <img src="../imagens/LogoRiskWise.png" alt="Logo RiskWise" class="logo-image">
-        </footer>
     </div>
 
     <!-- Modal de contato -->
