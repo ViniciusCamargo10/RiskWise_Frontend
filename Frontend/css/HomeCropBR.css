@@ -1,0 +1,313 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;800&display=swap');
+
+/* RESET BÁSICO */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* BODY / FUNDO */
+body {
+    font-family: 'Poppins', sans-serif;
+    background: url('fundo.jpg') no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+/* CONTAINER PRINCIPAL (CARD VERDE) */
+.container {
+    display: flex;
+    background: linear-gradient(135deg, #2e7d32, #388e3c);
+    border-radius: 24px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+    width: 80%;
+    max-width: 900px;
+    height: 68vh; /* altura fixa como no report */
+    overflow: hidden; /* cuidado: pode cortar conteúdo se aumentar muito o espaçamento */
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+    width: 80px;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 0;
+    gap: 20px;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    border-top-left-radius: 24px;
+    border-bottom-left-radius: 24px;
+}
+
+.sidebar-logo {
+    width: 80px;
+    height: auto;
+    display: block;
+    margin-left: 1px;
+}
+
+.sidebar-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+    color: #2e7d32;
+    text-decoration: none;
+}
+
+.sidebar-icon:hover {
+    background: #e0e0e0;
+    transform: scale(1.1);
+}
+
+.sidebar-icon svg {
+    width: 28px;
+    height: 28px;
+    color: #000;
+    pointer-events: none;
+}
+
+/* ===== ÁREA PRINCIPAL ===== */
+.main {
+    position: relative;
+    flex: 1;
+    padding: 2rem;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    /* CONTROLA O ESPAÇO ENTRE O TÍTULO E O GRID DE BOTÕES */
+    gap: 5rem; /* ajuste para 2rem/3rem/4rem conforme desejar */
+}
+
+/* Cabeçalho opcional dentro da .main (se você usar) */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+/* TÍTULO – remove margem negativa e deixa o gap controlar o espaço */
+.main h1 {
+    text-align: left;
+    align-self: flex-start;
+    font-size: 2.4rem;
+    font-weight: 800;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    margin: 0; /* <<< importante para não puxar tudo pra cima */
+}
+
+/* ===== BOTÕES (GRADE) ===== */
+.button-container {
+    display: grid;
+    grid-template-columns: repeat(2, auto); /* usa a largura fixa do .button */
+    justify-content: center;
+    justify-items: center;  /* centraliza cada botão na célula */
+    gap: 20px 50px;
+    margin-top: 0;          /* <<< deixa o gap da .main controlar o espaçamento */
+    padding: 10px 0;
+    align-content: start;   /* garante início no topo do espaço disponível */
+}
+
+/* CARD DO BOTÃO */
+.button {
+    display: flex;           /* mantém o layout interno */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;   /* remove sublinhado */
+    color: #fff;             /* mantém texto branco */
+
+    background: rgba(255, 255, 255, 0.25);
+    width: 280px;
+    height: 180px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    position: relative;
+}
+
+/* Imagem dentro do botão */
+.button img {
+    width: 80px;
+    height: 80px;
+    margin: 0.2rem;
+    transition: transform 0.25s ease;
+}
+
+/* Título do botão */
+.button h2 {
+    font-size: 25px;
+    line-height: 1.1;
+    margin: 0;
+    font-weight: 700;
+}
+
+/* Descrição do botão */
+.button p {
+    font-size: 12px;
+    line-height: 1.2;
+    margin: 0;
+    color: #e0e0e0;
+    max-width: 95%;
+    white-space: nowrap;     /* evita quebrar em múltiplas linhas */
+    overflow: hidden;
+    text-overflow: ellipsis; /* reticências se o texto for grande */
+}
+
+/* Efeito de brilho e hover */
+.button::before {
+    content: "";
+    position: absolute;
+    inset: -60%; /* cobre bem o botão */
+    background: linear-gradient(120deg, #4caf50, #81c784, #66bb6a);
+    transform: rotate(35deg);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    z-index: 0;
+}
+
+.button:hover::before { opacity: 0.35; }
+
+.button:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.button:hover img { transform: scale(1.08); }
+
+.button:active { transform: translateY(-2px) scale(0.98); }
+
+/* Acessibilidade: foco visível ao navegar por teclado */
+.button:focus-visible {
+    outline: 3px solid #c8e6c9;
+    outline-offset: 3px;
+}
+
+/* ===== BOTÃO DE AJUDA (canto superior direito) ===== */
+.help-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #ffffff, #e8f5e9);
+    color: #2e7d32;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border: 2px solid #2e7d32;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transition: all 0.3s ease;
+    text-align: center;
+    line-height: 45px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.help-button:hover {
+    background: linear-gradient(135deg, #c8e6c9, #ffffff);
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.help-wrapper {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+/* ===== MODAL ===== */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.modal-content {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    position: relative;
+    animation: fadeInModal 0.3s ease;
+}
+
+.modal-content h2 {
+    margin-bottom: 1rem;
+    color: #2e7d32;
+}
+
+.modal-content p {
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 2rem;
+    color: #333;
+    cursor: pointer;
+}
+
+@keyframes fadeInModal {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 900px) {
+    .container {
+        width: 92%;
+        height: auto;       /* evita corte quando a grade quebrar */
+        min-height: 68vh;
+    }
+
+    .button-container {
+        grid-template-columns: 1fr; /* empilha os botões */
+        gap: 18px;
+    }
+
+    .button {
+        width: min(92vw, 420px);
+    }
+}
+
+@media (max-width: 768px) {
+    .main {
+        padding: 1.5rem;
+        gap: 2rem; /* um pouco menos de espaço em telas pequenas */
+    }
+}
