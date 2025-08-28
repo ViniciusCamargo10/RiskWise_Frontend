@@ -24,25 +24,26 @@ body {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
     width: 80%;
     max-width: 900px;
-    height: 68vh; /* altura fixa como no report */
+    height: 68vh;/* altura fixa como no report */
     overflow: hidden;
 }
 
 /* ===== BOTÕES ATUALIZADOS ===== */
 .button-container {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     justify-content: center;
-    gap: 30px;
-    margin-top: 50px;
-    flex-wrap: wrap;
+    gap: 20px 50px; /* 40px vertical, 60px horizontal */
+    margin-top: 0px;
+    padding: 10px 0;
 }
 
 .button {
     position: relative;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.25);
     border-radius: 20px;
-    padding: 25px;
-    width: 220px;
+    padding: 18px;
+    width: 180px;
     cursor: pointer;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(10px);
@@ -56,13 +57,13 @@ body {
 .button img {
     width: 80px;
     height: 80px;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     transition: transform 0.4s ease;
 }
 
 .button h2 {
     font-size: 22px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     font-weight: 700;
 }
 
@@ -125,6 +126,13 @@ body {
     transform: scale(1.05);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
+
+.help-wrapper {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+}
+
 
 /* ===== MODAL ===== */
 .modal {
@@ -224,9 +232,13 @@ body {
 }
 
 .main {
+    position: relative;
     flex: 1;
     padding: 2rem;
     color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .main-header {
@@ -238,10 +250,13 @@ body {
 }
 
 .main h1 {
+    text-align: left;
+    align-self: flex-start;
     font-size: 2.4rem;
     font-weight: 800;
     text-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    margin-bottom: 8rem;
+    margin-bottom: 2rem;
+    margin-top: -20px;
 }
 
 @media (max-width: 768px) {
