@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RiskWise - Library</title>
+    <link rel="stylesheet" href="../../css/botoes.css/libraryGuidelines.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Botão de ajuda -->
+        <a href="mailto:vinicius.camargo@syngenta.com" class="help-button" aria-label="Ajuda">?</a>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+
+            <img src="../../imagens/riskwise_logo.png" alt="Logo RiskWise" class="sidebar-logo">
+
+            <div class="sidebar-icon" tabindex="0">
+                <!-- Home Icon -->
+                <a href="index.html" id="btn-home" class="sidebar-icon" aria-label="Voltar para a Home">
+                    <svg fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                    </svg>
+                </a>    
+            </div>
+            
+            <div class="sidebar-icon" tabindex="0">
+                <!-- calculator Icon -->
+                <a href="calculatorHome.html" id="btn-calculator" class="sidebar-icon" aria-label="Voltar para a calculadora">
+                    <svg fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm1 2a1 1 0 000 2h6a1 1 0 100-2H7zm6 7a1 1 0 112 0v3a1 1 0 11-2 0v-3zm-3 3a1 1 0 100 2h.01a1 1 0 100-2H10zm-4 1a1 1 0 011-1h.01a1 1 0 110 2H7a1 1 0 01-1-1zm1-4a1 1 0 100 2h.01a1 1 0 100-2H7zm2 1a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zm4-4a1 1 0 100 2h.01a1 1 0 100-2H13zM9 9a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zM7 8a1 1 0 000 2h.01a1 1 0 000-2H7z" clip-rule="evenodd"/>
+                    </svg>
+                </a>    
+            </div>
+            
+            <div class="sidebar-icon" tabindex="0">
+                <!-- Document with Lines Icon -->
+                <a href="report.html" id="btn-report" class="sidebar-icon" aria-label="Voltar para o Report">
+                    <svg fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
+                    </svg>
+                </a>    
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <h1 class="page-title">Guidelines</h1>
+            
+              <div class="button-container">
+                <a href="https://syngenta.sharepoint.com/:b:/r/sites/ps-latam/OCS%20%20Residue%20Science%20%202/Apoio/Normas/Brasil/RDC%20295_29_07_2019%20-%20com%20as%20figuras%20das%20f%C3%B3rmulas.pdf?csf=1&web=1&e=NNMMB5" class="button brasil" target="_blank" rel="noopener noreferrer">
+                    <img src="../imagens/warning.png" alt="logo acute">
+                    <h2>BR: RDC 295</h2>
+                    
+                </a>
+
+                <a href="https://syngenta.sharepoint.com/:b:/r/sites/ps-latam/OCS%20%20Residue%20Science%20%202/Apoio/Normas/Mexico/norma_oficial_mexicana_nom_082_sag-fito_ssa1_2017._limites_maximos_de_residuos._lineamientos_tecnicos_y_procedimiento_de_autorizacion_y_revision.pdf?csf=1&web=1&e=Efidbj" class="button brasil" target="_blank" rel="noopener noreferrer">
+                    <img src="../imagens/repeat.png" alt="logo Chronic">
+                    <h2>MX: NOM-082</h2>
+                    
+                </a>
+                
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Modal de contato -->
+    <div id="modalEmail" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModal()">&times;</span>
+            <h2>Contato do Responsável</h2>
+            <p>vinicius.camargo@syngenta.com</p>
+        </div>
+    </div>
+
+    <script src="../javascript/library.js"></script>
+</body>
+</html>

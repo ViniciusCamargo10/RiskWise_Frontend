@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RiskWise - Ferramenta de Cálculo</title>
+    <link rel="stylesheet" href="../css/libraryHome.css">
+</head>
+<body>
+    <div class="container">
+        
+        <!-- Modal de contato -->
+        <div id="modalEmail" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="fecharModal()">&times;</span>
+                <h2>Contato do Responsável</h2>
+                <p>vinicius.camargo@syngenta.com</p>
+            </div>
+        </div>
+
+        <!-- Menu Lateral -->
+        <div class="sidebar">
+            <img src="../imagens/riskwise_logo.png" alt="Logo RiskWise" class="sidebar-logo">
+
+            <!-- Ícone Home -->
+            <a href="index.html" id="btn-home" class="sidebar-icon" aria-label="Voltar para a Home">
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                </svg>
+            </a>
+
+            <!-- Você tinha ícones misturados com <div>. Deixe tudo como <a> -->
+            <a href="report.html" id="btn-report" class="sidebar-icon" aria-label="Ir para Report">
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
+                </svg>
+            </a>
+
+            <a href="library.html" id="btn-library" class="sidebar-icon" aria-label="Ir para Library">
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+                </svg>
+            </a>
+        </div>
+
+        <!-- Área Principal -->
+        <div class="main">
+            <div class="help-wrapper">
+                <a href="mailto:vinicius.camargo@syngenta.com" class="help-button" aria-label="Ajuda">?</a>
+            </div>
+
+            <h1>LIBRARY</h1>
+        
+            <!-- IMPORTANTE: todos os botões ficam dentro deste container -->
+            <div class="button-container">
+                <a href="../html/Botoes_html/libraryGuidelines.html" class="button mexico" aria-label="Abrir guidelines">
+                    <img src="../imagens/compliant.png" alt="logo guidelines">
+                    <h2>Guidelines</h2>
+                    <p>Guidelines by RiskWise.</p>
+                </a>
+
+                <a href="./HomeCropBR.html" class="button brasil" aria-label="Abrir dados pdf">
+                    <img src="../imagens/database-management.png" alt="database-management">
+                    <h2>DATA</h2>
+                    <p>Consumption Data by RiskWise.</p>
+                </a>
+
+                <a href="./HomeWater.html" class="button excel" aria-label="Abrir calculadoras no excel">
+                    <img src="../imagens/table.png" alt="Ícone table">
+                    <h2>EXCEL TABLES</h2>
+                    <p>Excels Tables by RiskWise.</p>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Se este JS não for necessário aqui, pode remover; ele não afeta a navegação via <a> -->
+    <script src="../javascript/Botoes.js/acute_crop.js" defer></script>
+</body>
+</html>

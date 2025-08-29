@@ -1,0 +1,396 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;800&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: url('fundo.jpg') no-repeat center center fixed;
+    background-size: cover;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.container {
+    position: relative;
+    background: linear-gradient(135deg, #2e7d32, #388e3c);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    width: 80%;
+    max-width: 900px;
+    height: 68vh;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: row; /* Sidebar + conteúdo lado a lado */
+    overflow: hidden;
+    animation: fadeIn 0.8s ease-in-out;
+}
+
+.help-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #ffffff, #e8f5e9);
+    color: #2e7d32;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border: 2px solid #2e7d32;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transition: all 0.3s ease;
+    text-align: center;
+    line-height: 45px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.help-button:hover {
+    background: linear-gradient(135deg, #c8e6c9, #ffffff);
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.modal {
+    display: none; /* escondido por padrão */
+    position: fixed;
+    z-index: 999;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.modal-content {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    position: relative;
+    animation: fadeInModal 0.3s ease;
+}
+
+.modal-content h2 {
+    margin-bottom: 1rem;
+    color: #2e7d32;
+}
+
+.modal-content p {
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 2rem;
+    color: #333;
+    cursor: pointer;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 80px;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    gap: 10px; /* Espaço entre logo e ícones */
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar-logo {
+    width: 80px;
+    height: auto;
+    display: block;
+    margin-bottom: 10px; /* Reduz espaço extra */
+}
+
+.sidebar-icon {
+    width: 50px;
+    height: 50px;
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+    position: relative;
+}
+
+.sidebar-icon:hover {
+    background: #e0e0e0;
+    transform: scale(1.1);
+}
+
+.sidebar-icon svg {
+    width: 24px;
+    height: 24px;
+    pointer-events: none;
+    fill: #000;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    padding: 1.5rem; /* Reduzido para diminuir espaço */
+    max-width: 1200px;
+}
+
+.page-title {
+    font-size: 2.2rem;
+    font-weight: 300;
+    color: #fff;
+    margin-bottom: 10px; /* Reduzido */
+    letter-spacing: 2px;
+}
+
+.button-container {
+    display: grid;
+    grid-template-columns: repeat(2, auto); /* usa a largura fixa do .button */
+    justify-content: center;
+    justify-items: center;  /* centraliza cada botão na célula */
+    gap: 20px 50px;
+    margin-top: 0;          /* <<< deixa o gap da .main controlar o espaçamento */
+    padding: 10px 0;
+    align-content: start;   /* garante início no topo do espaço disponível */
+}
+
+/* CARD DO BOTÃO */
+.button {
+    display: flex;           /* mantém o layout interno */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;   /* remove sublinhado */
+    color: #fff;             /* mantém texto branco */
+
+    background: rgba(255, 255, 255, 0.25);
+    width: 280px;
+    height: 180px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    position: relative;
+}
+
+/* Imagem dentro do botão */
+.button img {
+    width: 80px;
+    height: 80px;
+    margin: 0.2rem;
+    transition: transform 0.25s ease;
+}
+
+/* Título do botão */
+.button h2 {
+    font-size: 25px;
+    line-height: 1.1;
+    margin: 0;
+    font-weight: 700;
+}
+
+/* Descrição do botão */
+.button p {
+    font-size: 12px;
+    line-height: 1.2;
+    margin: 0;
+    color: #e0e0e0;
+    max-width: 95%;
+    white-space: nowrap;     /* evita quebrar em múltiplas linhas */
+    overflow: hidden;
+    text-overflow: ellipsis; /* reticências se o texto for grande */
+}
+
+/* Efeito de brilho e hover */
+.button::before {
+    content: "";
+    position: absolute;
+    inset: -60%; /* cobre bem o botão */
+    background: linear-gradient(120deg, #4caf50, #81c784, #66bb6a);
+    transform: rotate(35deg);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    z-index: 0;
+}
+
+.button:hover::before { opacity: 0.35; }
+
+.button:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.button:hover img { transform: scale(1.08); }
+
+.button:active { transform: translateY(-2px) scale(0.98); }
+
+/* Acessibilidade: foco visível ao navegar por teclado */
+.button:focus-visible {
+    outline: 3px solid #c8e6c9;
+    outline-offset: 3px;
+}
+
+.section {
+    background: white;
+    border-radius: 16px;
+    padding: 20px; /* Antes era 30px */
+    margin-bottom: 15px; /* Antes era 20px */
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.section:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+.section-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #2d5a27;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.access-button {
+    background: linear-gradient(135deg, #2e7d32, #4a7c59);
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.access-button:hover {
+    background: linear-gradient(135deg, #2e7d32, #2d5a27);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(45, 90, 39, 0.3);
+}
+
+.access-button:active {
+    transform: scale(0.98);
+}
+
+.raw-data-section {
+    background: linear-gradient(135deg, #f8f9fa, #ffffff);
+}
+
+.button-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.calculator-button {
+    background: linear-gradient(135deg, #2e7d32, #4a7c59);
+    border: 1px solid #e9ecef;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    display: block;
+}
+
+.calculator-button:hover {
+    background: linear-gradient(135deg, #2e7d32, #2d5a27);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(45, 90, 39, 0.3);
+}
+
+.calculator-button:active {
+    transform: scale(0.98);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        padding: 1rem; /* Reduz padding */
+    }
+    
+    .sidebar {
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        justify-content: center;
+        gap: 10px; /* Menos espaço entre logo e ícones */
+        padding: 10px 0;
+    }
+    
+    .sidebar-logo {
+        max-height: 50px; /* Ajusta logo para telas pequenas */
+        margin-bottom: 0;
+    }
+    
+    .sidebar-icon {
+        margin: 0 8px;
+    }
+    
+    .main-content {
+        padding: 1rem; /* Reduz padding interno */
+    }
+    
+    .page-title {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+    }
+    
+    .button-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Acessibilidade */
+.sidebar-icon:focus {
+    outline: 2px solid rgba(255,255,255,0.5);
+    outline-offset: 2px;
+}
+
+.access-button:focus,
+.calculator-button:focus {
+    outline: 2px solid #000;
+    outline-offset: 2px;
+}
