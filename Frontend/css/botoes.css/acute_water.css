@@ -202,26 +202,27 @@ body {
 }
 
 .logo-ag {
-    order: 2;
+    order: 1;
     width: 37px;
     height: auto;
     object-fit: contain;
-    margin-top: 2px;
+    margin-top: -20px;
 }
 
 .main-header h1 {
-    order: 1;
+    order: 2;
     font-size: 2rem;
     font-weight: 800;
     color: #fdfdfd;
     padding: 0.5rem;
     align-self: flex-start;
+    margin-bottom: 1rem;
 }
 
 .main h2 {
     color: #fff;
     font-size: 1.4rem;
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
     margin-right: auto;
     margin-left: 24px;
 }
@@ -305,7 +306,8 @@ body {
     justify-content: center;
     gap: 1rem;
     padding: 1rem;
-    margin-top: 1.5rem; 
+    position: relative;
+    top: -50px; 
 }
 
 .action-buttons button {
@@ -314,7 +316,7 @@ body {
     padding: 0.8rem 1.5rem;
     border-radius: 20px; /* Bordas meio circulares */
     cursor: pointer;
-    color: #fff;
+    color: #000;
     font-size: 1rem;
     transition: opacity 0.3s ease;
 }
@@ -325,7 +327,7 @@ body {
 
 /* Cores específicas */
 .btn-back {
-    background-color: #000000dc; /* Verde */
+    background-color: #f7f7f7; /* Verde */
 }
 
 

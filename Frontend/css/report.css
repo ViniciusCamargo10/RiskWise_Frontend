@@ -287,7 +287,7 @@ body {
     justify-content: center;
     gap: 1rem;
     padding: 1rem;
-    margin-top: 1.5rem; 
+    margin-top: 0.5rem; 
 }
 
 .action-buttons button {
@@ -296,7 +296,7 @@ body {
     padding: 0.8rem 1.5rem;
     border-radius: 20px; /* Bordas meio circulares */
     cursor: pointer;
-    color: #fff;
+    color: #000;
     font-size: 1rem;
     transition: opacity 0.3s ease;
 }
@@ -307,17 +307,38 @@ body {
 
 /* Cores específicas */
 .btn-excel {
-    background-color: #000000dc; /* Verde */
+    background-color: #f7f7f7; /* Verde */
 }
 
-.btn-pdf {
-    background-color: #000000dc; /* Azul */
+
+.tooltip-wrapper {
+  position: relative;
+  display: inline-block;
 }
 
-.btn-clear {
-    background-color: #000000dc; /* Vermelho */
+.tooltip-text {
+  visibility: hidden;
+  opacity: 0;
+  width: 200px;
+  background-color: #2e7d32;
+  color: #fff;
+  text-align: center;
+  border-radius: 8px;
+  padding: 0.6rem;
+  position: absolute;
+  bottom: 125%; /* aparece acima do botão */
+  left: 50%;
+  transform: translateX(-50%);
+  transition: opacity 0.3s ease;
+  font-size: 0.85rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  z-index: 10;
 }
 
+.tooltip-wrapper:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
 
 /* ===== Telas grandes ===== */
 @media (min-width: 1200px) {

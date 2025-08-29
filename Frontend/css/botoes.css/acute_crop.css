@@ -304,7 +304,7 @@ body {
     padding: 0.8rem 1.5rem;
     border-radius: 20px;
     cursor: pointer;
-    color: #fff;
+    color: #000;
     font-size: 1rem;
     transition: opacity 0.3s ease;
     max-width: 100%;
@@ -316,15 +316,11 @@ body {
 }
 
 .btn-back {
-    background-color: #000000dc;
-}
-
-.btn-pdf {
-    background-color: #000000dc;
+    background-color: #f7f7f7;
 }
 
 .btn-clear {
-    background-color: #000000dc;
+    background-color: #f7f7f7;
 }
 
 @media (min-width: 1200px) {
