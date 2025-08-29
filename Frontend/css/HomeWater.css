@@ -102,7 +102,7 @@ body {
 
 .logo-br {
     order: 1;
-    width: 60px;
+    width: 50px;
     height: auto;
     object-fit: contain;
 }
@@ -205,6 +205,33 @@ body {
 .button:focus-visible {
     outline: 3px solid #c8e6c9;
     outline-offset: 3px;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    margin-top: -2rem; 
+}
+
+.action-buttons button {
+    font-weight: bold;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 20px;
+    cursor: pointer;
+    color: #000;
+    font-size: 1rem;
+    transition: opacity 0.3s ease;
+}
+
+.action-buttons button:hover {
+    opacity: 0.85;
+}
+
+.btn-back {
+    background-color: #f7f7f7;
 }
 
 /* ===== BOTÃO DE AJUDA (canto superior direito) ===== */
