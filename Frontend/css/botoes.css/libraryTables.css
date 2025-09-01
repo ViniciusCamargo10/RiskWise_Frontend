@@ -161,17 +161,17 @@ body {
     font-size: 2.2rem;
     font-weight: 300;
     color: #fff;
-    margin-bottom: 75px; /* Reduzido */
+    margin-bottom: 70px; /* Reduzido */
     letter-spacing: 2px;
     font-weight: 700;
 }
 
 .button-container {
     display: grid;
-    grid-template-columns: repeat(2, auto); /* usa a largura fixa do .button */
+    grid-template-columns: repeat(3, auto); /* usa a largura fixa do .button */
     justify-content: center;
     justify-items: center;  /* centraliza cada botão na célula */
-    gap: 20px 50px;
+    gap: 20px 30px;
     margin-top: 0;          /* <<< deixa o gap da .main controlar o espaçamento */
     padding: 10px 0;
     align-content: start;   /* garante início no topo do espaço disponível */
@@ -187,8 +187,8 @@ body {
     color: #fff;             /* mantém texto branco */
 
     background: rgba(255, 255, 255, 0.25);
-    width: 280px;
-    height: 180px;
+    width: 240px;
+    height: 200px;
     padding: 12px 16px;
     border-radius: 12px;
     cursor: pointer;
@@ -202,15 +202,15 @@ body {
 
 /* Imagem dentro do botão */
 .button img {
-    width: 100px;
-    height: 100px;
+    width: 90px;
+    height: 90px;
     margin: 0.2rem;
     transition: transform 0.25s ease;
 }
 
 /* Título do botão */
 .button h2 {
-    font-size: 25px;
+    font-size: 22px;
     line-height: 1.1;
     margin: 0;
     font-weight: 700;

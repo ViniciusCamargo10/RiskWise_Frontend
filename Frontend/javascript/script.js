@@ -33,7 +33,7 @@ function handleCardClick(cardType, event) {
             window.location.href = 'report.html';
             break;
         case 'search':
-            window.location.href = 'library.html';
+            window.location.href = 'LibraryHome.html';
             break;
         default:
             alert('Ação não definida');
