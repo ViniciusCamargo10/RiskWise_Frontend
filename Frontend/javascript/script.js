@@ -24,7 +24,7 @@ function handleCardClick(cardType, event) {
 
     switch(cardType) {
         case 'home':
-            alert('Você já está na home');
+            window.location.href = 'login.html';
             break;
         case 'calculator':
             window.location.href = 'calculatorHome.html';
