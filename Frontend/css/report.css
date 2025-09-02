@@ -167,8 +167,8 @@ body {
     padding: 2rem;
     color: #fff;
     background-color: transparent;
-    height: 85vh;
-    max-height: 85vh;
+    height: auto;
+    max-height: none;
     overflow: hidden;
     width: 100%;
 }
@@ -207,6 +207,8 @@ body {
     color: #fff;
     margin-bottom: 2rem;
     text-align: left;
+    align-self: flex-start;
+    margin-top: -5px;
 }
 
 
@@ -337,39 +339,8 @@ body {
 }
 
 .tooltip-wrapper:hover .tooltip-text {
+    
   visibility: visible;
   opacity: 1;
-}
-
-/* ===== Telas grandes ===== */
-@media (min-width: 1200px) {
-  /* 1) Deixe o cartão menor também em altura */
-  .container {
-    width: 80%;
-    max-width: 900px;      /* ajuste a gosto */
-    max-height: 80vh;      /* limite de altura do cartão */
-    overflow: hidden;      /* só a área interna rola */
-    margin: 0 auto;
-  }
-
-  /* 2) Reduza a altura disponível para o conteúdo */
-  .main {
-    height: 65vh;          /* menor que 85vh */
-    max-height: 65vh;
-    padding: 1.5rem;
-  }
-
-  /* 3) Permita que a área rolável se ajuste ao novo espaço */
-  .main-scroll {
-    /* ESSENCIAL para flex: permite encolher dentro de .main */
-    min-height: 0;         
-    overflow-y: auto;
-  }
-
-  /* 4) Tipografia e respiros um pouco menores (opcional) */
-  h1 { font-size: 1.6rem; }
-  h2 { font-size: 1.2rem; }
-  .report-table { font-size: 0.8rem; }
-  .action-buttons { padding: 0.75rem; gap: 0.75rem; }
 }
 

@@ -125,11 +125,11 @@ body {
 }
 
 .sidebar-logo {
-    width: 80px;
+    width: 70px;
     height: auto;
     display: block;
     margin-left: 1px;
-    margin-top: -17px;
+    margin-top: -20px;
 }
 
 .sidebar-icon {
@@ -208,6 +208,7 @@ body {
     width: 33px; /* Bandeira pequena */
     height: auto;
     object-fit: contain;
+    margin-top: -12px;
 }
 
 .main-header h1 {
@@ -216,6 +217,7 @@ body {
     font-weight: 1800;
     color: #fff;
     margin: 0;
+    margin-top: -12px;
 }
 
 .main h2 {
