@@ -181,7 +181,7 @@ body {
 .logo-image {
     max-height: 100px;
     height: auto;
-    width: 70%;
+    width: 90%;
     object-fit: contain;
 }
 
@@ -243,9 +243,10 @@ body {
 }
 
 .logo-rk {
-    width: 65px;
+    width: 70px;
     height: auto;
     object-fit: contain;
+    margin-top: -6px;
 }
 
 /* ===== CABEÇALHO ===== */

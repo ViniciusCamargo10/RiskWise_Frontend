@@ -113,7 +113,7 @@ body {
 /* Sidebar atualizada */
 .sidebar {
     width: 80px;
-    background: #ffffff;
+    background: #087C28;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -125,10 +125,11 @@ body {
 }
 
 .sidebar-logo {
-    width: 80px;
+    width: 70px;
     height: auto;
     display: block;
     margin-left: 1px;
+    margin-top: -12px;
 }
 
 .sidebar-icon {
@@ -146,7 +147,7 @@ body {
 }
 
 .sidebar-icon:hover {
-    background: #e0e0e0;
+    background: #557258;
     transform: scale(1.1);
 }
 

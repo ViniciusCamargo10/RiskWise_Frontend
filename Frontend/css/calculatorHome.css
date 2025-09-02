@@ -19,7 +19,7 @@ body {
 
 .container {
     display: flex;
-    background: linear-gradient(135deg, #2e7d32, #388e3c);
+    background: linear-gradient(135deg, #087C28, #087C28);
     border-radius: 24px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
     width: 80%;
@@ -45,8 +45,8 @@ body {
     justify-content: center;
     align-items: center;
     text-decoration: none; /* remove sublinhado */
-    color: #fff; /* mantém texto branco */
-    background: rgba(255, 255, 255, 0.25);
+    color: #000; /* mantém texto branco */
+    background-color: #fff;
     width: 280px;
     height: 180px;
     padding: 12px 16px;
@@ -76,7 +76,7 @@ body {
 .button p {
     font-size: 12px;
     margin: 0;
-    color: #e0e0e0;
+    color: #000;
     max-width: 95%;
     white-space: nowrap;
     overflow: hidden;
@@ -188,7 +188,7 @@ body {
 /* ===== SIDEBAR ===== */
 .sidebar {
     width: 80px;
-    background: #ffffff;
+    background: #087C28;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -204,6 +204,7 @@ body {
     height: auto;
     display: block;
     margin-left: 1px;
+    margin-top: -20px;
 }
 
 .sidebar-icon {
@@ -220,7 +221,7 @@ body {
 }
 
 .sidebar-icon:hover {
-    background: #e0e0e0;
+    background: #557258;
     transform: scale(1.1);
 }
 

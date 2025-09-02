@@ -22,12 +22,12 @@ body {
 .container {
     position: relative;
     display: flex;
-    background: linear-gradient(135deg, #2e7d32, #388e3c);
+    background: linear-gradient(135deg, #087C28, #087C28);
     border-radius: 24px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
     width: 95%;
-    max-width: 1200px;
-    min-height: auto;
+    max-width: 900px;
+    height: 68vh;
     margin: 0 auto;
 }
 
@@ -111,7 +111,7 @@ body {
 /* Sidebar atualizada */
 .sidebar {
     width: 80px;
-    background: #ffffff;
+    background: #087C28;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -127,6 +127,7 @@ body {
     height: auto;
     display: block;
     margin-left: 1px;
+    margin-top: -12px;
 }
 
 .sidebar-icon {
@@ -144,7 +145,7 @@ body {
 }
 
 .sidebar-icon:hover {
-    background: #e0e0e0;
+    background: #557258;
     transform: scale(1.1);
 }
 
