@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
+from typing import List, Dict
+from fastapi import Body
+
 
 app = FastAPI()
 
@@ -11,7 +14,7 @@ app.add_middleware(
     allow_headers=["*"],  # Permite todos os cabeçalhos
 )
 
-df = pd.read_excel("DietaCronica_Calculadora.xlsx")
+df = pd.read_excel(r"C:\Users\s1337626\OneDrive - Syngenta\Área de Trabalho\Calculadoras\DietaCronica_Calculadora.xlsx", index=False)
 colunas_desejadas = ["Cultivo", "ANO_POF", "Região", "LMR (mg_kg)", "MREC_STMR (mg_kg)", "Market Share", "IDMT (Numerador)", "Contribuição Individual do Cultivo"]
 df = df[colunas_desejadas]
 
@@ -19,10 +22,10 @@ df = df[colunas_desejadas]
 def get_dados():
     return df.to_dict(orient="records")
 
+
 @app.post("/atualizar")
-def atualizar(dados: list):
+def atualizar(dados: List[Dict] = Body(...)):  # ← força JSON no body
     global df
     df = pd.DataFrame(dados)
-    df.to_excel("C:\\Users\\s1337626\\OneDrive - Syngenta\\Área de Trabalho\\Calculadoras\\DietaCronica_Calculadora.xlsx")
+    df.to_excel(r"C:\Users\s1337626\OneDrive - Syngenta\Área de Trabalho\Calculadoras\DietaCronica_Calculadora.xlsx", index=False)
     return {"status": "salvo"}
-
