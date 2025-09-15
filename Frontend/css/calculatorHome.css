@@ -262,7 +262,6 @@ body {
 
 .button.animal {
     background-color: #e0e0e0 !important; /* cinza claro mais visível */
-    
     cursor: not-allowed;
     pointer-events: none;
     box-shadow: none !important;
