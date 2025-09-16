@@ -1,91 +1,3 @@
-// calculator.js para home
-document.addEventListener("DOMContentLoaded", () => {
-  const homeBtn = document.getElementById("btn-home");
-  if (!homeBtn) {
-    console.warn("Botão Home (#btn-home) não encontrado na calculadora.");
-    return;
-  }
-
-  // Clique do mouse
-  homeBtn.addEventListener("click", () => {
-    window.location.href = "./index.html";
-  });
-
-  // Acessibilidade (Enter/Espaço)
-  homeBtn.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      window.location.href = "./index.html";
-    }
-  });
-});
-
-// library.js para calculadora
-document.addEventListener("DOMContentLoaded", () => {
-  const calculatorBtn = document.getElementById("btn-calculator");
-  if (!calculatorBtn) {
-    console.warn("Botão Calculator (#btn-calculator) não encontrado na calculadora.");
-    return;
-  }
-
-  // Clique do mouse
-  homeBtn.addEventListener("click", () => {
-    window.location.href = "./calculator.html";
-  });
-
-  // Acessibilidade (Enter/Espaço)
-  homeBtn.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      window.location.href = "./calculator.html";
-    }
-  });
-});
-
-// calculator.js para report 
-document.addEventListener("DOMContentLoaded", () => {
-  const reportBtn = document.getElementById("btn-report");
-  if (!reportBtn) {
-    console.warn("Botão report (#btn-report) não encontrado na calculadora.");
-    return;
-  }
-
-  // Clique do mouse
-  homeBtn.addEventListener("click", () => {
-    window.location.href = "./report.html";
-  });
-
-  // Acessibilidade (Enter/Espaço)
-  homeBtn.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      window.location.href = "./report.html";
-    }
-  });
-});
-
-// calculator.js para library 
-document.addEventListener("DOMContentLoaded", () => {
-  const libraryBtn = document.getElementById("btn-library");
-  if (!libraryBtn) {
-    console.warn("Botão library (#btn-library) não encontrado na calculadora.");
-    return;
-  }
-
-  // Clique do mouse
-  homeBtn.addEventListener("click", () => {
-    window.location.href = "./library.html";
-  });
-
-  // Acessibilidade (Enter/Espaço)
-  homeBtn.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      window.location.href = "./library.html";
-    }
-  });
-});
-
 function abrirModal() {
         document.getElementById('modalEmail').style.display = 'flex';
     }
@@ -101,3 +13,50 @@ function abrirModal() {
         }
     };
 
+// === Carregar dados da API e preencher tabela ===
+document.addEventListener("DOMContentLoaded", () => {
+    const API_URL = "http://localhost:8000/dados"; // ajuste se necessário
+    const tbody = document.getElementById("tabela-dados");
+
+    if (!tbody) {
+        console.warn("Elemento #tabela-dados não encontrado.");
+        return;
+    }
+
+    async function carregarTabela() {
+        try {
+            const response = await fetch(API_URL);
+            if (!response.ok) throw new Error("Erro ao buscar dados");
+            const data = await response.json();
+
+            tbody.innerHTML = ""; // limpa linhas antigas
+
+            data.forEach(item => {
+                const tr = document.createElement("tr");
+
+                const colunas = [
+                    "Cultivo",
+                    "ANO_POF",
+                    "Região",
+                    "LMR (mg_kg)",
+                    "MREC_STMR (mg_kg)",
+                    "Market Share",
+                    "IDMT (Numerador)",
+                    "Contribuição Individual do Cultivo"
+                ];
+
+                colunas.forEach(col => {
+                    const td = document.createElement("td");
+                    td.textContent = item[col] ?? "-";
+                    tr.appendChild(td);
+                });
+
+                tbody.appendChild(tr);
+            });
+        } catch (error) {
+            console.error("Erro ao carregar tabela:", error);
+        }
+    }
+
+    carregarTabela();
+});
