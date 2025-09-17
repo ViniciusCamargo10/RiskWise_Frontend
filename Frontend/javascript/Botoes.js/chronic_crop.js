@@ -1,21 +1,5 @@
-function abrirModal() {
-        document.getElementById('modalEmail').style.display = 'flex';
-    }
-
-    function fecharModal() {
-        document.getElementById('modalEmail').style.display = 'none';
-    }
-
-    window.onclick = function(event) {
-        const modal = document.getElementById('modalEmail');
-        if (event.target === modal) {
-            modal.style.display = 'none';
-        }
-    };
-
-// === Carregar dados da API e preencher tabela ===
 document.addEventListener("DOMContentLoaded", () => {
-    const API_URL = "http://localhost:8000/dados"; // ajuste se necessário
+    const API_URL = "http://localhost:8000/dados";
     const tbody = document.getElementById("tabela-dados");
 
     if (!tbody) {
@@ -45,9 +29,44 @@ document.addEventListener("DOMContentLoaded", () => {
                     "Contribuição Individual do Cultivo"
                 ];
 
-                colunas.forEach(col => {
+                
+                if (item["Região"]?.trim() === "Brasil") {
+                    tr.classList.add("linha-verde");
+                }
+
+
+                colunas.forEach((col, index) => {
                     const td = document.createElement("td");
-                    td.textContent = item[col] ?? "-";
+
+                    if (["LMR (mg_kg)", "MREC_STMR (mg_kg)", "Market Share"].includes(col)) {
+                        const input = document.createElement("input");
+                        input.type = "number"; // só aceita números
+                        input.value = item[col] ?? "";
+                        input.className = "editable-cell";
+                        input.step = "any"; // permite decimais
+
+                        // Evento para replicar valor para o mesmo cultivo
+                        input.addEventListener("input", () => {
+                            const cultivo = tr.querySelector("td").textContent;
+                            const allRows = document.querySelectorAll("#tabela-dados tr");
+
+                            allRows.forEach(row => {
+                                const cultivoCell = row.querySelector("td");
+                                if (cultivoCell && cultivoCell.textContent === cultivo) {
+                                    const targetInput = row.children[index].querySelector("input");
+                                    if (targetInput && targetInput !== input) {
+                                        targetInput.value = input.value;
+                                    }
+                                }
+                            });
+                        });
+
+                        td.appendChild(input);
+                    } else {
+                        td.textContent = item[col] ?? "-";
+ 
+                    }
+
                     tr.appendChild(td);
                 });
 

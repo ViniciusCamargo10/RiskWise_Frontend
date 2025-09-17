@@ -9,7 +9,7 @@ from typing import List, Dict
 from pathlib import Path
 
 # ==== Config ====
-EXCEL_PATH = Path(r"C:\Users\s1337626\OneDrive - Syngenta\Área de Trabalho\DietaCronicaL.xlsx")
+EXCEL_PATH = Path(r"C:\Users\s1337626\OneDrive - Syngenta\Área de Trabalho\DietaCronicaOf.xlsx")
 COLUNAS_DESEJADAS = [
     "Cultivo",
     "ANO_POF",

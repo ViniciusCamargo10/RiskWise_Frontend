@@ -8,7 +8,6 @@
 
 body {
     font-family: 'Poppins', sans-serif;
-    background: url('fundo.jpg') no-repeat center center fixed;
     background-size: cover;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -249,7 +248,8 @@ body {
 }
 
 .report-table {
-    width: 100%;
+    table-layout: fixed;
+    width: 120%;
     border-collapse: separate;
     border-spacing: 0;
     font-size: 0.85rem;
@@ -258,6 +258,31 @@ body {
     border-radius: 12px;
     overflow: hidden;
 }
+
+.col-cultivo {
+    width: 120px; /* ajuste conforme necessário */
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.editable-cell {
+    width: 100%;
+    padding: 4px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    text-align: center;
+    background-color: #fff;
+    color: #000;
+}
+
+.linha-verde td {
+    background-color: #e8f5e9 !important; /* verde clarinho */
+}
+
+
 
 .report-table th {
     background-color: #2e7d32;
