@@ -1,194 +1,161 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RiskWise - Ferramenta de Cálculo</title>
-    <link rel="stylesheet" href="../../css/botoes.css/chronic_crop.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RiskWise - Ferramenta de Cálculo</title>
+  <link rel="stylesheet" href="../../css/botoes.css/chronic_crop.css"/>
 </head>
 <body>
-    <div class="container">
-        <!-- Botão de ajuda -->
-        <a href="mailto:vinicius.camargo@syngenta.com" class="help-button" aria-label="Ajuda">?</a>
+  <div class="container">
+    <a href="mailto:vinicius.camargo@syngenta.com" class="help-button" aria-label="Ajuda">?</a>
 
-        <!-- Modal de contato -->
-        <div id="modalEmail" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="fecharModal()">&times;</span>
-                <h2>Contato do Responsável</h2>
-                <p>vinicius.camargo@syngenta.com</p>
-            </div>
-        </div>
-
-        <!-- Menu Lateral -->
-        <div class="sidebar">
-            <img src="../../imagens/LogoBrancoRisk.png" alt="Logo RiskWise" class="sidebar-logo">
-
-            <a href="../index.html" id="btn-home" class="sidebar-icon" aria-label="Voltar para a Home">
-                <svg fill="white" viewBox="0 0 20 20">
-                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
-                </svg>
-            </a>
-
-            <div class="sidebar-icon">
-                <a href="../report.html" id="btn-report" class="sidebar-icon" aria-label="Voltar para o report">
-                    <svg fill="white" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
-                    </svg>
-                </a>
-            </div>
-
-            <div class="sidebar-icon">
-                <a href="../LibraryHome.html" id="btn-library" class="sidebar-icon" aria-label="Voltar para a library">
-                    <svg fill="white" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
-                    </svg>
-                </a>
-            </div>
-        </div>
-
-        <!-- Área Principal -->
-        <div class="main">
-            <div class="main-header">
-                <img src="../../imagens/BandeiraBR.png" alt="Ícone do br" class="logo-br">
-                <h1>CROP</h1>
-            </div>
-            <div class="main-scroll">
-                <!-- Seções de tabelas -->
-                <!-- Acute Diet Calculator -->
-                <div class="section">
-                    <h2>Chronic DRA Calculator</h2>
-                    <div class="table-wrapper">
-                        <table class="report-table">
-                            <thead>
-                                <tr>
-                                    <th class="col-cultivo">Cultivo</th>
-                                    <th>ANO_POF</th>
-                                    <th>Região</th>
-                                    <th>LMR (mg_kg)</th>
-                                    <th>MREC_STMR (mg_kg)</th>
-                                    <th>Market Share</th>
-                                    <th>IDMT (Numerador)</th>
-                                    <th>Contribuição Individual do Cultivo</th>
-                                </tr>
-                            </thead>
-                                <tbody id="tabela-dados">
-
-                                </tbody>    
-                        </table>
-                    </div>
-                </div>
-
-                <!-- POF 2008 -->
-                <div class="section">
-                    <h2>POF 2008</h2>
-                    <div class="table-wrapper">
-                        <table class="report-table">
-                            <thead>
-                                <tr>
-                                    <th>Métrica</th>
-                                    <th>Brasil</th>
-                                    <th>Centro-Oeste</th>
-                                    <th>Nordeste</th>
-                                    <th>Norte</th>
-                                    <th>Sudeste</th>
-                                    <th>Sul</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>PC (Kg)</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                </tr>
-                                <tr>
-                                    <td>%IDA ANVISA</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                </tr>
-                                <tr>
-                                    <td>%IDA SYNGENTA</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- POF 2017 -->
-                <div class="section">
-                    <h2>POF 2017</h2>
-                    <div class="table-wrapper">
-                        <table class="report-table">
-                            <thead>
-                                <tr>
-                                    <th>Métrica</th>
-                                    <th>Brasil</th>
-                                    <th>Centro-Oeste</th>
-                                    <th>Nordeste</th>
-                                    <th>Norte</th>
-                                    <th>Sudeste</th>
-                                    <th>Sul</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>PC (Kg)</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                </tr>
-                                <tr>
-                                    <td>%IDA ANVISA</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                </tr>
-                                <tr>
-                                    <td>%IDA SYNGENTA</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="action-buttons">
-                <a href="../HomeCropBR.html">
-                    <button class="btn-back">Back to Calculator</button>
-                </a>
-                <button class="btn-clear">Clear Report</button>
-            </div>
-
-        </div>
+    <div id="modalEmail" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="fecharModal()">&times;</span>
+        <h2>Contato do Responsável</h2>
+        <p>vinicius.camargo@syngenta.com</p>
+      </div>
     </div>
 
-    <script src="../../javascript/Botoes.js/chronic_crop.js" defer></script>
+    <div class="sidebar">
+      <img src="../../imagens/LogoBrancoRisk.png" alt="Logo RiskWise" class="sidebar-logo"/>
+      <a href="../index.html" id="btn-home" class="sidebar-icon" aria-label="Voltar para a Home">
+        <svg fill="white" viewBox="0 0 20 20">
+          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+        </svg>
+      </a>
+      <div class="sidebar-icon">
+        <a href="../report.html" id="btn-report" class="sidebar-icon" aria-label="Voltar para o report">
+          <svg fill="white" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
+          </svg>
+        </a>
+      </div>
+      <div class="sidebar-icon">
+        <a href="../LibraryHome.html" id="btn-library" class="sidebar-icon" aria-label="Voltar para a library">
+          <svg fill="white" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="main-header">
+        <img src="../../imagens/BandeiraBR.png" alt="Ícone do br" class="logo-br"/>
+        <h1>CROP</h1>
+      </div>
+      <div class="main-scroll">
+
+        <!-- Chronic DRA Calculator com botão de filtro -->
+        <div class="section">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <h2 style="margin: 0;">Chronic DRA Calculator</h2>
+            <button id="btn-filtro" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; border: 1px solid #ccc; background-color: #f0f0f0; cursor: pointer;">
+              Filtros ▼
+            </button>
+          </div>
+
+          <div id="filtros-container" style="display: none; margin-top: 0.5rem;">
+            <label for="filtro-cultivo">Cultivo:</label>
+            <select id="filtro-cultivo" class="editable-cell" style="width: 150px; margin-right: 1rem;"></select>
+
+            <label for="filtro-ano">Ano POF:</label>
+            <select id="filtro-ano" class="editable-cell" style="width: 100px;"></select>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th class="col-cultivo">Cultivo</th>
+                  <th>ANO_POF</th>
+                  <th>Região</th>
+                  <th>LMR (mg_kg)</th>
+                  <th>MREC_STMR (mg_kg)</th>
+                  <th>Market Share</th>
+                  <th>IDMT (Numerador)</th>
+                  <th>Contribuição Individual do Cultivo</th>
+                </tr>
+              </thead>
+              <tbody id="tabela-dados"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- POF 2008 -->
+        <div class="section">
+          <h2>POF 2008</h2>
+          <div class="table-wrapper">
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>Métrica</th>
+                  <th>Brasil</th>
+                  <th>Centro-Oeste</th>
+                  <th>Nordeste</th>
+                  <th>Norte</th>
+                  <th>Sudeste</th>
+                  <th>Sul</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>PC (Kg)</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td></tr>
+                <tr><td>%IDA ANVISA</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td></tr>
+                <tr><td>%IDA SYNGENTA</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- POF 2017 -->
+        <div class="section">
+          <h2>POF 2017</h2>
+          <div class="table-wrapper">
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>Métrica</th>
+                  <th>Brasil</th>
+                  <th>Centro-Oeste</th>
+                  <th>Nordeste</th>
+                  <th>Norte</th>
+                  <th>Sudeste</th>
+                  <th>Sul</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>PC (Kg)</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td></tr>
+                <tr><td>%IDA ANVISA</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td></tr>
+                <tr><td>%IDA SYNGENTA</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td><td>0.0000</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <a href="../HomeCropBR.html">
+          <button class="btn-back">Back to Calculator</button>
+        </a>
+        <button class="btn-clear">Clear Report</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../javascript/Botoes.js/chronic_crop.js" defer></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const btnFiltro = document.getElementById("btn-filtro");
+      const container = document.getElementById("filtros-container");
+
+      btnFiltro.addEventListener("click", () => {
+        const isVisible = container.style.display === "block";
+        container.style.display = isVisible ? "none" : "block";
+        btnFiltro.textContent = isVisible ? "Filtros ▼" : "Filtros ▲";
+      });
+    });
+  </script>
 </body>
 </html>
-
