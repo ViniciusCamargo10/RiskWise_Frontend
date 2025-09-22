@@ -295,6 +295,35 @@ body {
     min-width: 100px;
 }
 
+
+/* Coluna LMR (mg_kg) (4ª) -> AUMENTAR */
+.report-table th:nth-child(4),
+.report-table td:nth-child(4) {
+  min-width: 100px; /* maior */
+}
+
+/* Coluna MREC_STMR (mg_kg) (5ª) */
+.report-table th:nth-child(5),
+.report-table td:nth-child(5) {
+  max-width: 95px;
+}
+
+/* Coluna Market Share (6ª) */
+.report-table th:nth-child(6),
+.report-table td:nth-child(6) {
+  min-width: 100px;
+}
+
+.report-table th:nth-child(7),
+.report-table td:nth-child(7) {
+  min-width: 100px;
+}
+
+.report-table th:nth-child(8),
+.report-table td:nth-child(8) {
+  min-width: 100px;
+}
+
 .linha-verde td {
     background-color: #e8f5e9 !important;
 }

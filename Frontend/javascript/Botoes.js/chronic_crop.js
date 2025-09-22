@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Cria input NUMÉRICO permitindo estados intermediários (., 10.)
-  function criarInputNumerico(valorInicial, onValidChange, placeholderText = "Use period") {
+  function criarInputNumerico(valorInicial, onValidChange, placeholderText = "-") {
     const input = document.createElement("input");
     input.type = "text";              // 'text' para controlar a entrada
     input.inputMode = "decimal";      // teclado decimal em mobile
