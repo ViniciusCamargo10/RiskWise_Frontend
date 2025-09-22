@@ -49,28 +49,23 @@
       <div class="main-scroll">
 
         <!-- Chronic DRA Calculator com botão de filtro -->
+         
         <div class="section">
           <div style="display: flex; align-items: center; justify-content: space-between;">
             <h2 style="margin: 0;">Chronic DRA Calculator</h2>
-            <button id="btn-filtro" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; border: 1px solid #ccc; background-color: #f0f0f0; cursor: pointer;">
-              Filtros ▼
-            </button>
-          </div>
-
-          <div id="filtros-container" style="display: none; margin-top: 0.5rem;">
-            <label for="filtro-cultivo">Cultivo:</label>
-            <select id="filtro-cultivo" class="editable-cell" style="width: 150px; margin-right: 1rem;"></select>
-
-            <label for="filtro-ano">Ano POF:</label>
-            <select id="filtro-ano" class="editable-cell" style="width: 100px;"></select>
+            
           </div>
 
           <div class="table-wrapper">
             <table class="report-table">
               <thead>
                 <tr>
-                  <th class="col-cultivo">Cultivo</th>
-                  <th>ANO_POF</th>
+                  <th class="coluna-filtro" data-coluna="Cultivo">
+                    Cultivo <span class="seta">&#9662;</span>
+                  </th>
+                  <th class="coluna-filtro" data-coluna="ANO_POF">
+                    ANO_POF <span class="seta">&#9662;</span>
+                  </th>
                   <th>Região</th>
                   <th>LMR (mg_kg)</th>
                   <th>MREC_STMR (mg_kg)</th>
@@ -145,17 +140,6 @@
   </div>
 
   <script src="../../javascript/Botoes.js/chronic_crop.js" defer></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const btnFiltro = document.getElementById("btn-filtro");
-      const container = document.getElementById("filtros-container");
-
-      btnFiltro.addEventListener("click", () => {
-        const isVisible = container.style.display === "block";
-        container.style.display = isVisible ? "none" : "block";
-        btnFiltro.textContent = isVisible ? "Filtros ▼" : "Filtros ▲";
-      });
-    });
-  </script>
+  
 </body>
 </html>
