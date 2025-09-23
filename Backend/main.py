@@ -19,6 +19,10 @@ COLUNAS_DESEJADAS = [
     "Market Share",
     "IDMT (Numerador)",
     "Contribuição Individual do Cultivo",
+    "Consumo diário per capita (g_dia_pessoa) C",
+    "Fator de Processamento FP",
+    "Fator de Conversão FC",
+    "PC (kg)",
 ]
 
 app = FastAPI(debug=True)
