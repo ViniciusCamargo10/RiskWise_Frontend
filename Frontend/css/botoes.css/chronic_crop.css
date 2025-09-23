@@ -364,6 +364,19 @@ body {
     background-color: #f7f7f7;
 }
 
+.titulo-com-botoes {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.titulo-com-botoes h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #fff;
+}
+
 /* Estilo para as setas e dropdown */
 .coluna-filtro {
     position: relative;
@@ -426,6 +439,52 @@ body {
   border-color: #2e7d32;
   box-shadow: 0 0 0 2px rgba(46,125,50,.15);
 }
+
+.editable-btn {
+    width: 70px;
+    height: 30px;
+    text-align: center;
+    font-size: 18px;
+    border: 2px solid #4CAF50;
+    border-radius: 8px;
+    background-color: white;
+    cursor: pointer;
+    outline: none;
+    transition: 0.3s;
+}
+
+.editable-btn:focus {
+    border-color: #2e7d32;
+    background-color: #e8f5e9;
+}
+
+.editable-btn:nth-of-type(1) {
+    order: 3; /* Botão Ext */
+    margin-left: 370px;
+}
+
+.editable-int {
+    width: 70px;
+    height: 30px;
+    text-align: center;
+    font-size: 18px;
+    border: 2px solid #4CAF50;
+    border-radius: 8px;
+    background-color: white;
+    cursor: pointer;
+    outline: none;
+    transition: 0.3s;
+}
+
+.editable-int:focus {
+    border-color: #2e7d32;
+    background-color: #e8f5e9;
+}
+
+.editable-int:nth-of-type(2) {
+    order: 4; /* Botão Int */
+}
+
 
 /* ===== Telas grandes ===== */
 @media (min-width: 1200px) {

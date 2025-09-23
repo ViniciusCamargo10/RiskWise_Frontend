@@ -332,3 +332,39 @@ document.addEventListener("DOMContentLoaded", () => {
   // ---------------- Start ----------------
   carregarTabela();
 });
+
+document.querySelectorAll('.editable-btn').forEach(input => {
+    input.addEventListener('focus', () => {
+        if (input.value === 'Ext') {
+            input.value = '';
+        }
+    });
+
+    input.addEventListener('blur', () => {
+        if (input.value.trim() === '') {
+            input.value = 'Ext';
+        }
+    });
+
+    input.addEventListener('input', () => {
+        input.value = input.value.replace(/[^0-9]/g, '');
+    });
+});
+
+document.querySelectorAll('.editable-int').forEach(input => {
+    input.addEventListener('focus', () => {
+        if (input.value === 'Int') {
+            input.value = '';
+        }
+    });
+
+    input.addEventListener('blur', () => {
+        if (input.value.trim() === '') {
+            input.value = 'Int';
+        }
+    });
+
+    input.addEventListener('input', () => {
+        input.value = input.value.replace(/[^0-9]/g, '');
+    });
+});
