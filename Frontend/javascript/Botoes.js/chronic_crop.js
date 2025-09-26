@@ -377,14 +377,35 @@ const intInput = document.querySelector('.editable-int');
 
 // Captura e valida o valor do botão Ext (IDA ANVISA)
 extInput.addEventListener('input', () => {
-  const valor = extInput.value.replace(/[^0-9.]/g, '');
+  let valor = extInput.value.replace(/[^0-9.]/g, ''); // Remove tudo que não for número ou ponto
+  const partes = valor.split('.');
+
+  if (partes.length > 2) {
+    // Se houver mais de um ponto, remove os extras
+    valor = partes[0] + '.' + partes.slice(1).join('');
+  }
+
+  if (valor.startsWith('.')) {
+    valor = '0' + valor; // Corrige caso comece com ponto
+  }
+
   extInput.value = valor;
   idaAnvisa = valor ? parseFloat(valor) : null;
 });
 
 // Captura e valida o valor do botão Int (IDA SYNGENTA)
 intInput.addEventListener('input', () => {
-  const valor = intInput.value.replace(/[^0-9.]/g, '');
+  let valor = intInput.value.replace(/[^0-9.]/g, '');
+  const partes = valor.split('.');
+
+  if (partes.length > 2) {
+    valor = partes[0] + '.' + partes.slice(1).join('');
+  }
+
+  if (valor.startsWith('.')) {
+    valor = '0' + valor;
+  }
+
   intInput.value = valor;
   idaSyngenta = valor ? parseFloat(valor) : null;
 });
