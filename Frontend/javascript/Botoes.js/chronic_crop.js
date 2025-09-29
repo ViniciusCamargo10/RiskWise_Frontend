@@ -49,8 +49,8 @@ document.addEventListener("DOMContentLoaded", () => {
     return (v === null || v === undefined || v === "") ? "-" : v;
   }
 
-  // Cria input NUMÉRICO permitindo estados intermediários (., 10.)
-  function criarInputNumerico(valorInicial, onValidChange, placeholderText = "-") {
+  // ---------------- Criação de Input Numérico com replicação (sem re-render) ----------------
+  function criarInputNumerico(valorInicial, onValidChange, placeholderText = "-", ano = null, cultivo = null, coluna = null) {
     const input = document.createElement("input");
     input.type = "text";              // 'text' para controlar a entrada
     input.inputMode = "decimal";      // teclado decimal em mobile
@@ -60,38 +60,29 @@ document.addEventListener("DOMContentLoaded", () => {
     input.className = "editable-cell";
     input.value = (valorInicial === "-" ? "" : (valorInicial ?? "")).toString();
 
-    // Tooltip de ajuda
     input.title = "Aceita números inteiros e decimais com ponto (.)";
 
-    // Estados válidos
-    const regexParcial = /^\d*\.?\d*$/;     // permite '', '.', '10.', '10.5'
-    const regexFinal   = /^\d+(\.\d+)?$/;   // aceita apenas '10' ou '10.5'
+    const regexParcial = /^\d*\.?\d*$/;
+    const regexFinal   = /^\d+(\.\d+)?$/;
 
-    // Guardar valor anterior para reverter quando necessário
     let prev = input.value;
 
-    // Bloqueia caracteres inválidos na digitação
     input.addEventListener("beforeinput", (e) => {
-      // Permitir deleção normalmente
       if (
         e.inputType === "deleteContentBackward" ||
         e.inputType === "deleteContentForward" ||
         e.inputType === "deleteByCut"
       ) return;
 
-      // Colagem será tratada em 'paste'
       if (e.inputType === "insertFromPaste") return;
 
-      // Inserção de caractere único
       const ch = e.data;
       if (typeof ch === "string") {
-        // Apenas dígitos ou ponto
         if (!/[\d.]/.test(ch)) {
           e.preventDefault();
           return;
         }
 
-        // Permite no máximo um ponto (respeitando seleção)
         const selStart = input.selectionStart ?? 0;
         const selEnd = input.selectionEnd ?? 0;
         const selection = input.value.slice(selStart, selEnd);
@@ -103,13 +94,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // Sanear colagem: apenas dígitos e no máximo um ponto
     input.addEventListener("paste", (e) => {
       e.preventDefault();
       const clipboard = (e.clipboardData || window.clipboardData).getData("text") ?? "";
-      let sanitized = clipboard.replace(/[^\d.]/g, ""); // remove tudo exceto dígitos e ponto
+      let sanitized = clipboard.replace(/[^\d.]/g, "");
 
-      // Construir valor final com no máximo um ponto
       const selStart = input.selectionStart ?? 0;
       const selEnd = input.selectionEnd ?? 0;
       const nextValue = input.value.slice(0, selStart) + sanitized + input.value.slice(selEnd);
@@ -124,16 +113,13 @@ document.addEventListener("DOMContentLoaded", () => {
         final += c;
       }
 
-      // Aceitar apenas se for um estado parcial válido
       if (regexParcial.test(final)) {
         input.value = final;
         prev = input.value;
         validarAtualizar();
       }
-      // se não for válido, simplesmente ignora a colagem
     });
 
-    // Valida a cada alteração (inclui digitação/colagem)
     input.addEventListener("input", () => {
       validarAtualizar();
     });
@@ -141,28 +127,84 @@ document.addEventListener("DOMContentLoaded", () => {
     function validarAtualizar() {
       const v = input.value;
 
-      // Se não bate com o padrão parcial, reverte imediatamente
+      // escaper para seletores CSS
+      const esc = (s) => window.CSS && CSS.escape ? CSS.escape(String(s)) : String(s).replace(/"/g, '\\"');
+
       if (!regexParcial.test(v)) {
-        // reverte mantendo o caret no fim
         input.value = prev;
         const caret = input.value.length;
         try { input.setSelectionRange(caret, caret); } catch {}
-        input.style.borderColor = "#e53935"; // feedback rápido
+        input.style.borderColor = "#e53935";
         return;
       }
 
-      // É parcial válido: manter
       input.style.borderColor = "#ccc";
       prev = v;
 
-      // Atualiza modelo somente quando for final válido (número completo)
       if (typeof onValidChange === "function") {
-        if (regexFinal.test(v)) {
-          onValidChange(Number(v));
-        } else if (v === "") {
+        // 🔹 Caso: o usuário APAGOU tudo (string vazia) -> limpar todos os irmãos
+        if (v === "") {
           onValidChange(null);
+
+          if (ano != null && cultivo != null && coluna) {
+            // 1) Atualiza o modelo de dados: zera/limpa todos do mesmo (ano,cultivo,coluna)
+            dadosOriginais.forEach(item => {
+              if (
+                String(getCampo(item, "ANO_POF")) === String(ano) &&
+                String(getCampo(item, "Cultivo")) === String(cultivo)
+              ) {
+                item[coluna] = null;
+              }
+            });
+
+            // 2) Atualiza o DOM visível: limpa os outros inputs correspondentes
+            const selector =
+              `.editable-cell[data-col="${esc(coluna)}"][data-ano="${esc(ano)}"][data-cultivo="${esc(cultivo)}"]`;
+
+            document.querySelectorAll(selector).forEach(el => {
+              if (el !== input) {
+                el.value = "";              // mostra placeholder
+                flashUpdate(el);            // opcional: destaque visual
+              }
+            });
+
+            flashUpdate(input);             // opcional
+          }
+          return; // evita cair no branch numérico
+        }
+
+        // 🔹 Caso: número válido -> replicar preenchimento
+        if (regexFinal.test(v)) {
+          const num = Number(v);
+          onValidChange(num);
+
+          // Replicar para linhas com MESMO ANO + MESMO CULTIVO na MESMA COLUNA (sem re-render)
+          if (ano != null && cultivo != null && coluna) {
+            // 1) Atualiza o modelo de dados
+            dadosOriginais.forEach(item => {
+              if (
+                String(getCampo(item, "ANO_POF")) === String(ano) &&
+                String(getCampo(item, "Cultivo")) === String(cultivo)
+              ) {
+                item[coluna] = num;
+              }
+            });
+
+            // 2) Atualiza o DOM visível (sem re-render)
+            const selector =
+              `.editable-cell[data-col="${esc(coluna)}"][data-ano="${esc(ano)}"][data-cultivo="${esc(cultivo)}"]`;
+
+            document.querySelectorAll(selector).forEach(el => {
+              if (el !== input) {
+                el.value = String(num);
+                flashUpdate(el); // opcional
+              }
+            });
+
+            flashUpdate(input); // opcional
+          }
         } else {
-          // estado intermediário ('.' ou '10.'): não atualiza número
+          // estados intermediários (ex.: '10.'), não replicamos, mas mantemos model atual como null
           onValidChange(null);
         }
       }
@@ -178,7 +220,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch(API_URL);
       if (!response.ok) throw new Error("Erro ao buscar dados");
       const data = await response.json();
-      dadosOriginais = Array.isArray(data) ? data : [];
+      dadosOriginais = Array.isArray(data.tabelaCompleta) ? data.tabelaCompleta : [];
 
       renderizarTabela(dadosOriginais);
       inicializarFiltros(dadosOriginais);
@@ -201,7 +243,6 @@ document.addEventListener("DOMContentLoaded", () => {
     data.forEach(item => {
       const tr = document.createElement("tr");
 
-      // Destaque de linha para "Brasil"
       const regiao = getCampo(item, "Região");
       if (typeof regiao === "string" && regiao.trim() === "Brasil") {
         tr.classList.add("linha-verde");
@@ -215,10 +256,24 @@ document.addEventListener("DOMContentLoaded", () => {
           td.title = "Aceita números inteiros e decimais com ponto (.)";
           td.setAttribute("aria-label", "Campo numérico. Aceita inteiros e decimais com ponto.");
 
-          const input = criarInputNumerico(valor, (novoValor) => {
-            // Atualiza o item com Number ou null apenas quando final válido
-            item[col] = novoValor;
-          });
+          const anoItem = getCampo(item, "ANO_POF");
+          const cultivoItem = getCampo(item, "Cultivo");
+          const regiaoItem = getCampo(item, "Região");
+
+          const input = criarInputNumerico(
+            valor,
+            (novoValor) => { item[col] = novoValor; },
+            "-",
+            anoItem,          // ano
+            cultivoItem,      // cultivo
+            col               // coluna atual
+          );
+
+          // Data-atributos para localizar inputs "irmãos" sem re-render
+          input.dataset.ano = String(anoItem);
+          input.dataset.cultivo = String(cultivoItem);
+          input.dataset.regiao = String(regiaoItem);
+          input.dataset.col = col;
 
           td.appendChild(input);
         } else {
@@ -329,84 +384,128 @@ document.addEventListener("DOMContentLoaded", () => {
     renderizarTabela(filtrados);
   }
 
-  // ---------------- Start ----------------
   carregarTabela();
 });
 
-document.querySelectorAll('.editable-btn').forEach(input => {
-    input.addEventListener('focus', () => {
-        if (input.value === 'Ext') {
-            input.value = '';
-        }
-    });
-
-    input.addEventListener('blur', () => {
-        if (input.value.trim() === '') {
-            input.value = 'Ext';
-        }
-    });
-
-    input.addEventListener('input', () => {
-        input.value = input.value.replace(/[^0-9]/g, '');
-    });
-});
-
-document.querySelectorAll('.editable-int').forEach(input => {
-    input.addEventListener('focus', () => {
-        if (input.value === 'Int') {
-            input.value = '';
-        }
-    });
-
-    input.addEventListener('blur', () => {
-        if (input.value.trim() === '') {
-            input.value = 'Int';
-        }
-    });
-
-    input.addEventListener('input', () => {
-        input.value = input.value.replace(/[^0-9]/g, '');
-    });
-});
+// ---------------- Inputs Ext e Int ----------------
 
 let idaAnvisa = null;
 let idaSyngenta = null;
 
-const extInput = document.querySelector('.editable-btn');
-const intInput = document.querySelector('.editable-int');
+function setupDecimalInput(selector, defaultText, onValidNumber) {
+  document.querySelectorAll(selector).forEach(input => {
+    input.type = 'text';
+    input.setAttribute('inputmode', 'decimal');
+    input.autocomplete = 'off';
+    input.spellcheck = false;
+    input.title = 'Aceita números inteiros e decimais com ponto (.)';
 
-// Captura e valida o valor do botão Ext (IDA ANVISA)
-extInput.addEventListener('input', () => {
-  let valor = extInput.value.replace(/[^0-9.]/g, ''); // Remove tudo que não for número ou ponto
-  const partes = valor.split('.');
+    input.addEventListener('focus', () => {
+      if (input.value === defaultText) input.value = '';
+    });
 
-  if (partes.length > 2) {
-    // Se houver mais de um ponto, remove os extras
-    valor = partes[0] + '.' + partes.slice(1).join('');
+    input.addEventListener('blur', () => {
+      if (input.value.trim() === '') input.value = defaultText;
+    });
+
+    input.addEventListener('input', () => {
+      let v = input.value.replace(/[^0-9.]/g, '');
+      const i = v.indexOf('.');
+      if (i !== -1) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '');
+      if (v.startsWith('.')) v = '0' + v;
+      input.value = v;
+
+      onValidNumber(/^\d+(\.\d+)?$/.test(v) ? parseFloat(v) : null);
+    });
+  });
+}
+
+setupDecimalInput('.editable-btn', 'Ext', n => { idaAnvisa = n; });
+setupDecimalInput('.editable-int', 'Int', n => { idaSyngenta = n; });
+
+// ---------------- (Opcional) Destaque visual ao replicar ----------------
+
+function flashUpdate(el) {
+  // Adiciona/remover uma classe que pode ter animação no CSS
+  el.classList.add('flash-update');
+  setTimeout(() => el.classList.remove('flash-update'), 600);
+}
+
+//------------------- POF 2008 --------------------------------------------
+carregarTabelaPOF2008();
+
+async function carregarTabelaPOF2008() {
+  try {
+    const response = await fetch("http://localhost:8000/dados");
+    if (!response.ok) throw new Error("Erro ao buscar dados da POF 2008");
+
+    const data = await response.json();
+    const pof = data.POF_2008;
+
+    const regioes = ["Brasil", "Centro_Oeste", "Nordeste", "Norte", "Sudeste", "Sul"];
+    const metricas = ["PC_Kg", "%IDA_ANVISA", "%IDA_SYNGENTA"];
+
+    const tbody = document.getElementById("tabela-pof-2008");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    metricas.forEach(metrica => {
+      const tr = document.createElement("tr");
+      const tdTitulo = document.createElement("td");
+      tdTitulo.textContent = metrica.replace("_", " ");
+      tr.appendChild(tdTitulo);
+
+      regioes.forEach(regiao => {
+        const td = document.createElement("td");
+        const valor = pof[metrica][regiao];
+        td.textContent = typeof valor === "number" ? valor.toFixed(4) : "—";
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    });
+  } catch (error) {
+    console.error("Erro ao carregar tabela POF 2008:", error);
   }
+}
+// ------------------------ POF 2017 --------------------------------
 
-  if (valor.startsWith('.')) {
-    valor = '0' + valor; // Corrige caso comece com ponto
+carregarTabelaPOF2017();
+
+async function carregarTabelaPOF2017() {
+  try {
+    const response = await fetch("http://localhost:8000/dados");
+    if (!response.ok) throw new Error("Erro ao buscar dados da POF 2017");
+
+    const data = await response.json();
+    const pof = data.POF_2017;
+
+    const regioes = ["Brasil", "Centro_Oeste", "Nordeste", "Norte", "Sudeste", "Sul"];
+    const metricas = ["PC_Kg", "%IDA_ANVISA", "%IDA_SYNGENTA"];
+
+    const tbody = document.getElementById("tabela-pof-2017");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    metricas.forEach(metrica => {
+      const tr = document.createElement("tr");
+      const tdTitulo = document.createElement("td");
+      tdTitulo.textContent = metrica.replace("_", " ");
+      tr.appendChild(tdTitulo);
+
+      regioes.forEach(regiao => {
+        const td = document.createElement("td");
+        const valor = pof[metrica][regiao];
+        td.textContent = typeof valor === "number" ? valor.toFixed(4) : "—";
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    });
+  } catch (error) {
+    console.error("Erro ao carregar tabela POF 2017:", error);
   }
-
-  extInput.value = valor;
-  idaAnvisa = valor ? parseFloat(valor) : null;
-});
-
-// Captura e valida o valor do botão Int (IDA SYNGENTA)
-intInput.addEventListener('input', () => {
-  let valor = intInput.value.replace(/[^0-9.]/g, '');
-  const partes = valor.split('.');
-
-  if (partes.length > 2) {
-    valor = partes[0] + '.' + partes.slice(1).join('');
-  }
-
-  if (valor.startsWith('.')) {
-    valor = '0' + valor;
-  }
-
-  intInput.value = valor;
-  idaSyngenta = valor ? parseFloat(valor) : null;
-});
+}
 

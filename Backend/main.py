@@ -54,14 +54,36 @@ def carregar_df() -> pd.DataFrame:
 
     return df_local
 
-# Carrega na inicialização (se preferir, pode carregar sob demanda no endpoint)
+# Carrega na inicialização
 df = carregar_df()
 
 @app.get("/dados")
 def get_dados():
     # Garante que tudo é JSON-serializable
-    data = jsonable_encoder(df.to_dict(orient="records"))
-    return JSONResponse(content=data)
+    registros = jsonable_encoder(df.to_dict(orient="records"))
+
+    # === Adição: estrutura POF 2008 ===
+    pof_2008 = {
+        "PC_Kg": {},
+        "%IDA_ANVISA": {},
+        "%IDA_SYNGENTA": {}
+    }
+
+    for linha in df.to_dict(orient="records"):
+        if linha["ANO_POF"] == 2008:
+            regiao = linha["Região"]
+            pc_kg = linha["PC (kg)"]
+            if regiao and pc_kg is not None:
+                pof_2008["PC_Kg"][regiao] = round(pc_kg, 4)
+                pof_2008["%IDA_ANVISA"][regiao] = None
+                pof_2008["%IDA_SYNGENTA"][regiao] = None
+
+    # Retorno combinado
+    return JSONResponse(content={
+        "tabelaCompleta": registros,
+        "POF_2008": pof_2008,
+        "POF_2017": pof_2017
+    })
 
 @app.post("/atualizar")
 def atualizar(dados: List[Dict] = Body(...)):
@@ -86,7 +108,6 @@ def atualizar(dados: List[Dict] = Body(...)):
     try:
         novo_df.to_excel(EXCEL_PATH, index=False)
     except PermissionError:
-        # O Excel provavelmente está aberto
         raise HTTPException(
             status_code=423,
             detail="Não foi possível salvar. Feche o arquivo do Excel (ele pode estar aberto) e tente novamente."
@@ -98,3 +119,21 @@ def atualizar(dados: List[Dict] = Body(...)):
     df = novo_df.copy()
 
     return {"status": "salvo"}
+
+# POF 2017
+
+# Adição: estrutura POF 2017
+pof_2017 = {
+    "PC_Kg": {},
+    "%IDA_ANVISA": {},
+    "%IDA_SYNGENTA": {}
+}
+
+for linha in df.to_dict(orient="records"):
+    if linha["ANO_POF"] == 2017:
+        regiao = linha["Região"]
+        pc_kg = linha["PC (kg)"]
+        if regiao and pc_kg is not None:
+            pof_2017["PC_Kg"][regiao] = round(pc_kg, 4)
+            pof_2017["%IDA_ANVISA"][regiao] = None
+            pof_2017["%IDA_SYNGENTA"][regiao] = None
