@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   'use strict';
 
   const API_URL = "http://localhost:8000/dados";
@@ -48,6 +48,73 @@ document.addEventListener("DOMContentLoaded", () => {
   function fmt(v) {
     return (v === null || v === undefined || v === "") ? "-" : v;
   }
+
+  // --------------------- Calcular IDMT E Contribuição individual ---------------------------
+
+function calcularIDMT(item) {
+  const consumo = toNumberSafe(getCampo(item, "Consumo diário per capita (g_dia_pessoa) C")) / 1000;
+  const fp = toNumberSafe(getCampo(item, "Fator de Processamento FP"));
+  const fc = toNumberSafe(getCampo(item, "Fator de Conversão FC"));
+  const lmr = toNumberSafe(getCampo(item, "LMR (mg_kg)"));
+  const mrec = toNumberSafe(getCampo(item, "MREC_STMR (mg_kg)"));
+
+  if (consumo && fp && fc && (lmr || mrec)) {
+    return (lmr || mrec) * consumo * fp * fc;
+  }
+  return 0;
+}
+
+function calcularContribuicaoIndividual(idmt, item) {
+  const pc = toNumberSafe(getCampo(item, "PC (kg)"));
+  const marketShare = toNumberSafe(getCampo(item, "Market Share")) || 1;
+  return pc ? (idmt / pc) * marketShare : 0;
+}
+
+
+// ------------- % POF -------------------------
+
+function atualizarPOF() {
+  const regioes = ["Brasil", "Centro_Oeste", "Nordeste", "Norte", "Sudeste", "Sul"];
+  const anos = ["2008", "2017"];
+
+  anos.forEach(ano => {
+    const resultado = {};
+    regioes.forEach(regiao => {
+      const idmtTotal = dadosOriginais
+        .filter(item =>
+          String(getCampo(item, "ANO_POF")) === ano &&
+          String(getCampo(item, "Região")) === regiao
+        )
+        .reduce((soma, item) => soma + calcularIDMT(item), 0);
+
+      const idaAnvisaPercent = idaAnvisa ? (idmtTotal / idaAnvisa) * 100 : null;
+      const idaSyngentaPercent = idaSyngenta ? (idmtTotal / idaSyngenta) * 100 : null;
+
+      resultado[regiao] = {
+        "%IDA_ANVISA": idaAnvisaPercent,
+        "%IDA_SYNGENTA": idaSyngentaPercent
+      };
+    });
+
+    atualizarTabelaPOF(resultado, ano === "2008" ? "tabela-pof-2008" : "tabela-pof-2017");
+  });
+}
+
+function atualizarTabelaPOF(resultados, tabelaId) {
+  const tbody = document.getElementById(tabelaId);
+  if (!tbody) return;
+
+  tbody.querySelectorAll("tr").forEach(tr => {
+    const metrica = tr.children[0].textContent.trim();
+    if (metrica === "%IDA ANVISA" || metrica === "%IDA SYNGENTA") {
+      const regioes = ["Brasil", "Centro_Oeste", "Nordeste", "Norte", "Sudeste", "Sul"];
+      regioes.forEach((regiao, i) => {
+        const valor = resultados[regiao][metrica];
+        tr.children[i + 1].textContent = typeof valor === "number" ? valor.toFixed(4) + "%" : "—";
+      });
+    }
+  });
+}
 
   // ---------------- Criação de Input Numérico com replicação (sem re-render) ----------------
   function criarInputNumerico(valorInicial, onValidChange, placeholderText = "-", ano = null, cultivo = null, coluna = null) {
@@ -187,6 +254,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 String(getCampo(item, "Cultivo")) === String(cultivo)
               ) {
                 item[coluna] = num;
+
+                const novoIDMT = calcularIDMT(item);
+                item["IDMT (Numerador)"] = novoIDMT;
+                item["Contribuição Individual do Cultivo"] = calcularContribuicaoIndividual(novoIDMT, item);
+                atualizarPOF();
+                renderizarTabela(dadosOriginais);
+
               }
             });
 
@@ -224,6 +298,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       renderizarTabela(dadosOriginais);
       inicializarFiltros(dadosOriginais);
+      atualizarPOF();
     } catch (error) {
       console.error("Erro ao carregar tabela:", error);
       tbody.innerHTML = `<tr><td class="no-data" colspan="${COLUNAS.length}">Falha ao carregar os dados.</td></tr>`;
@@ -231,61 +306,63 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ---------------- Renderização ----------------
+function renderizarTabela(data) {
+  tbody.innerHTML = "";
 
-  function renderizarTabela(data) {
-    tbody.innerHTML = "";
+  if (!data || data.length === 0) {
+    tbody.innerHTML = `<tr><td class="no-data" colspan="${COLUNAS.length}">Nenhum dado encontrado para os filtros aplicados.</td></tr>`;
+    return;
+  }
 
-    if (!data || data.length === 0) {
-      tbody.innerHTML = `<tr><td class="no-data" colspan="${COLUNAS.length}">Nenhum dado encontrado para os filtros aplicados.</td></tr>`;
-      return;
+  data.forEach(item => {
+    const tr = document.createElement("tr");
+
+    const regiao = getCampo(item, "Região");
+    if (typeof regiao === "string" && regiao.trim() === "Brasil") {
+      tr.classList.add("linha-verde");
     }
 
-    data.forEach(item => {
-      const tr = document.createElement("tr");
+    COLUNAS.forEach(col => {
+      const td = document.createElement("td");
+      const valor = fmt(getCampo(item, col));
 
-      const regiao = getCampo(item, "Região");
-      if (typeof regiao === "string" && regiao.trim() === "Brasil") {
-        tr.classList.add("linha-verde");
+      if (["LMR (mg_kg)", "MREC_STMR (mg_kg)", "Market Share"].includes(col)) {
+        td.title = "Aceita números inteiros e decimais com ponto (.)";
+        td.setAttribute("aria-label", "Campo numérico. Aceita inteiros e decimais com ponto.");
+
+        const anoItem = getCampo(item, "ANO_POF");
+        const cultivoItem = getCampo(item, "Cultivo");
+        const regiaoItem = getCampo(item, "Região");
+
+        const input = criarInputNumerico(
+          valor,
+          (novoValor) => { item[col] = novoValor; },
+          "-",
+          anoItem,
+          cultivoItem,
+          col
+        );
+
+        input.dataset.ano = String(anoItem);
+        input.dataset.cultivo = String(cultivoItem);
+        input.dataset.regiao = String(regiaoItem);
+        input.dataset.col = col;
+
+        td.appendChild(input);
+      } else if (["IDMT (Numerador)", "Contribuição Individual do Cultivo"].includes(col)) {
+        const num = toNumberSafe(getCampo(item, col));
+        td.textContent = num !== null ? num.toFixed(6) : "-";
+      } else {
+        td.textContent = valor;
       }
 
-      COLUNAS.forEach(col => {
-        const td = document.createElement("td");
-        const valor = fmt(getCampo(item, col));
-
-        if (["LMR (mg_kg)", "MREC_STMR (mg_kg)", "Market Share"].includes(col)) {
-          td.title = "Aceita números inteiros e decimais com ponto (.)";
-          td.setAttribute("aria-label", "Campo numérico. Aceita inteiros e decimais com ponto.");
-
-          const anoItem = getCampo(item, "ANO_POF");
-          const cultivoItem = getCampo(item, "Cultivo");
-          const regiaoItem = getCampo(item, "Região");
-
-          const input = criarInputNumerico(
-            valor,
-            (novoValor) => { item[col] = novoValor; },
-            "-",
-            anoItem,          // ano
-            cultivoItem,      // cultivo
-            col               // coluna atual
-          );
-
-          // Data-atributos para localizar inputs "irmãos" sem re-render
-          input.dataset.ano = String(anoItem);
-          input.dataset.cultivo = String(cultivoItem);
-          input.dataset.regiao = String(regiaoItem);
-          input.dataset.col = col;
-
-          td.appendChild(input);
-        } else {
-          td.textContent = valor;
-        }
-
-        tr.appendChild(td);
-      });
-
-      tbody.appendChild(tr);
+      tr.appendChild(td);
     });
-  }
+
+    tbody.appendChild(tr);
+  }); // fechamento do data.forEach
+
+} // fechamento da função renderizarTabela
 
   // ---------------- Filtros ----------------
 
@@ -384,7 +461,23 @@ document.addEventListener("DOMContentLoaded", () => {
     renderizarTabela(filtrados);
   }
 
-  carregarTabela();
+ 
+  await carregarTabelaPOF2008();
+  await carregarTabelaPOF2017();
+  carregarTabela(); // carrega dados principais
+  
+  setupDecimalInput('.editable-btn', 'Ext', n => { 
+    idaAnvisa = n;
+    atualizarPOF();
+  });
+
+  setupDecimalInput('.editable-int', 'Int', n => {
+    idaSyngenta = n;
+    atualizarPOF();
+  });
+
+  atualizarPOF(); // calcula e renderiza
+
 });
 
 // ---------------- Inputs Ext e Int ----------------
@@ -420,9 +513,6 @@ function setupDecimalInput(selector, defaultText, onValidNumber) {
   });
 }
 
-setupDecimalInput('.editable-btn', 'Ext', n => { idaAnvisa = n; });
-setupDecimalInput('.editable-int', 'Int', n => { idaSyngenta = n; });
-
 // ---------------- (Opcional) Destaque visual ao replicar ----------------
 
 function flashUpdate(el) {
@@ -432,7 +522,7 @@ function flashUpdate(el) {
 }
 
 //------------------- POF 2008 --------------------------------------------
-carregarTabelaPOF2008();
+let pof2008Dados = null;
 
 async function carregarTabelaPOF2008() {
   try {
@@ -453,7 +543,11 @@ async function carregarTabelaPOF2008() {
     metricas.forEach(metrica => {
       const tr = document.createElement("tr");
       const tdTitulo = document.createElement("td");
-      tdTitulo.textContent = metrica.replace("_", " ");
+      tdTitulo.textContent = metrica === "PC_Kg"
+        ? "PC Kg"
+        : metrica === "%IDA_ANVISA"
+        ? "%IDA ANVISA"
+        : "%IDA SYNGENTA";
       tr.appendChild(tdTitulo);
 
       regioes.forEach(regiao => {
@@ -470,8 +564,7 @@ async function carregarTabelaPOF2008() {
   }
 }
 // ------------------------ POF 2017 --------------------------------
-
-carregarTabelaPOF2017();
+let pof2017Dados = null;
 
 async function carregarTabelaPOF2017() {
   try {
@@ -492,7 +585,11 @@ async function carregarTabelaPOF2017() {
     metricas.forEach(metrica => {
       const tr = document.createElement("tr");
       const tdTitulo = document.createElement("td");
-      tdTitulo.textContent = metrica.replace("_", " ");
+      tdTitulo.textContent = metrica === "PC_Kg"
+        ? "PC Kg"
+        : metrica === "%IDA_ANVISA"
+        ? "%IDA ANVISA"
+        : "%IDA SYNGENTA";
       tr.appendChild(tdTitulo);
 
       regioes.forEach(regiao => {
@@ -508,4 +605,3 @@ async function carregarTabelaPOF2017() {
     console.error("Erro ao carregar tabela POF 2017:", error);
   }
 }
-
