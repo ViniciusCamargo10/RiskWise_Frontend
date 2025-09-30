@@ -494,6 +494,32 @@ document.addEventListener("DOMContentLoaded", async () => {
   await carregarTabelaPOF2017();
   carregarTabela(); // carrega dados principais
 
+
+
+document.querySelector(".btn-clear").addEventListener("click", () => {
+  // 1) Zera Ext e Int
+  document.querySelectorAll(".editable-btn, .editable-int").forEach(input => {
+    input.value = input.classList.contains("editable-btn") ? "Ext" : "Int";
+  });
+  idaAnvisa = null;
+  idaSyngenta = null;
+
+  // 2) Zera LMR/MREC e RECOMPUTA derivados no modelo
+  dadosOriginais = dadosOriginais.map(item => {
+    item["LMR (mg_kg)"] = null;
+    item["MREC_STMR (mg_kg)"] = null;
+
+    const novoIDMT = calcularIDMT(item);
+    item["IDMT (Numerador)"] = novoIDMT;
+    item["Contribuição Individual do Cultivo"] = calcularContribuicaoIndividual(novoIDMT, item);
+    return item;
+  });
+
+  // 3) Atualiza POF e re-renderiza
+  atualizarPOF();
+  renderizarTabela(dadosOriginais);
+});
+
   setupDecimalInput('.editable-btn', 'Ext', n => {
     idaAnvisa = n;
     atualizarPOF();
