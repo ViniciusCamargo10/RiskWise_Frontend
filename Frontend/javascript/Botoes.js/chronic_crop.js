@@ -74,6 +74,10 @@ function calcularContribuicaoIndividual(idmt, item) {
 // ------------- % POF -------------------------
 
 function atualizarPOF() {
+
+  console.log("Executando atualizarPOF...");
+  console.log("idaAnvisa:", idaAnvisa, "idaSyngenta:", idaSyngenta);
+
   const regioes = ["Brasil", "Centro_Oeste", "Nordeste", "Norte", "Sudeste", "Sul"];
   const anos = ["2008", "2017"];
 
@@ -86,9 +90,13 @@ function atualizarPOF() {
           String(getCampo(item, "Região")) === regiao
         )
         .reduce((soma, item) => soma + calcularIDMT(item), 0);
+      
+      console.log(`Ano ${ano}, Região ${regiao}, IDMT Total:`, idmtTotal);
 
       const idaAnvisaPercent = idaAnvisa ? (idmtTotal / idaAnvisa) * 100 : null;
       const idaSyngentaPercent = idaSyngenta ? (idmtTotal / idaSyngenta) * 100 : null;
+
+      console.log(`%IDA ANVISA: ${idaAnvisaPercent}, %IDA SYNGENTA: ${idaSyngentaPercent}`);
 
       resultado[regiao] = {
         "%IDA_ANVISA": idaAnvisaPercent,
@@ -105,11 +113,14 @@ function atualizarTabelaPOF(resultados, tabelaId) {
   if (!tbody) return;
 
   tbody.querySelectorAll("tr").forEach(tr => {
-    const metrica = tr.children[0].textContent.trim();
-    if (metrica === "%IDA ANVISA" || metrica === "%IDA SYNGENTA") {
+    const metrica = tr.children[0].textContent.trim(); // Ex: "%IDA_ANVISA"
+    console.log("Verificando linha:", metrica);
+
+    if (metrica === "%IDA_ANVISA" || metrica === "%IDA_SYNGENTA") {
       const regioes = ["Brasil", "Centro_Oeste", "Nordeste", "Norte", "Sudeste", "Sul"];
       regioes.forEach((regiao, i) => {
-        const valor = resultados[regiao][metrica];
+        const valor = resultados[regiao][metrica]; // usa a chave exata
+        console.log(`Atualizando ${metrica} para ${regiao}:`, valor);
         tr.children[i + 1].textContent = typeof valor === "number" ? valor.toFixed(4) + "%" : "—";
       });
     }
@@ -468,11 +479,13 @@ function renderizarTabela(data) {
   
   setupDecimalInput('.editable-btn', 'Ext', n => { 
     idaAnvisa = n;
+    console.log("Valor de idaAnvisa:", idaAnvisa);
     atualizarPOF();
   });
 
   setupDecimalInput('.editable-int', 'Int', n => {
     idaSyngenta = n;
+    console.log("Valor de idaSyngenta:", idaSyngenta);
     atualizarPOF();
   });
 
@@ -543,11 +556,7 @@ async function carregarTabelaPOF2008() {
     metricas.forEach(metrica => {
       const tr = document.createElement("tr");
       const tdTitulo = document.createElement("td");
-      tdTitulo.textContent = metrica === "PC_Kg"
-        ? "PC Kg"
-        : metrica === "%IDA_ANVISA"
-        ? "%IDA ANVISA"
-        : "%IDA SYNGENTA";
+      tdTitulo.textContent = metrica; // mantém exatamente como vem do backend
       tr.appendChild(tdTitulo);
 
       regioes.forEach(regiao => {
@@ -585,11 +594,7 @@ async function carregarTabelaPOF2017() {
     metricas.forEach(metrica => {
       const tr = document.createElement("tr");
       const tdTitulo = document.createElement("td");
-      tdTitulo.textContent = metrica === "PC_Kg"
-        ? "PC Kg"
-        : metrica === "%IDA_ANVISA"
-        ? "%IDA ANVISA"
-        : "%IDA SYNGENTA";
+      tdTitulo.textContent = metrica; // mantém exatamente como vem do backend
       tr.appendChild(tdTitulo);
 
       regioes.forEach(regiao => {
