@@ -49,88 +49,88 @@ document.addEventListener("DOMContentLoaded", async () => {
     return (v === null || v === undefined || v === "") ? "-" : v;
   }
 
+  // Escaper seguro para seletores CSS (fallback caso CSS.escape não exista)
+  const esc = (s) => (window.CSS && CSS.escape ? CSS.escape(String(s)) : String(s).replace(/"/g, '\\"'));
+
   // --------------------- Calcular IDMT E Contribuição individual ---------------------------
 
-function calcularIDMT(item) {
-  const consumo = toNumberSafe(getCampo(item, "Consumo diário per capita (g_dia_pessoa) C")) / 1000;
-  const fp = toNumberSafe(getCampo(item, "Fator de Processamento FP"));
-  const fc = toNumberSafe(getCampo(item, "Fator de Conversão FC"));
-  const lmr = toNumberSafe(getCampo(item, "LMR (mg_kg)"));
-  const mrec = toNumberSafe(getCampo(item, "MREC_STMR (mg_kg)"));
+  function calcularIDMT(item) {
+    const consumoRaw = toNumberSafe(getCampo(item, "Consumo diário per capita (g_dia_pessoa) C"));
+    const consumo = consumoRaw !== null ? consumoRaw / 1000 : null; // kg/dia/pessoa
 
-  const limite = (lmr !== null && lmr > 0) ? lmr : (mrec !== null && mrec > 0) ? mrec : null;
+    const fp = toNumberSafe(getCampo(item, "Fator de Processamento FP"));
+    const fc = toNumberSafe(getCampo(item, "Fator de Conversão FC"));
+    const lmr = toNumberSafe(getCampo(item, "LMR (mg_kg)"));
+    const mrec = toNumberSafe(getCampo(item, "MREC_STMR (mg_kg)"));
 
-  if (consumo && fp && fc && limite !== null) {
-    return limite * consumo * fp * fc;
+    const limite =
+      (lmr !== null && lmr > 0) ? lmr :
+      (mrec !== null && mrec > 0) ? mrec :
+      null;
+
+    // Checar explicitamente contra null (0 é válido)
+    if (consumo !== null && fp !== null && fc !== null && limite !== null) {
+      return limite * consumo * fp * fc;
+    }
+    return null;
   }
 
-  return null;
-}
+  function calcularContribuicaoIndividual(idmt, item) {
+    const pc = toNumberSafe(getCampo(item, "PC (kg)"));
+    const marketShare = toNumberSafe(getCampo(item, "Market Share")) || 1;
+    const idmtVal = (idmt ?? 0);
+    return pc ? (idmtVal / pc) * marketShare : 0;
+  }
 
-function calcularContribuicaoIndividual(idmt, item) {
-  const pc = toNumberSafe(getCampo(item, "PC (kg)"));
-  const marketShare = toNumberSafe(getCampo(item, "Market Share")) || 1;
-  return pc ? (idmt / pc) * marketShare : 0;
-}
+  // ------------- % POF -------------------------
 
+  function atualizarPOF() {
+    console.log("Executando atualizarPOF...");
+    console.log("idaAnvisa:", idaAnvisa, "idaSyngenta:", idaSyngenta);
 
-// ------------- % POF -------------------------
+    const regioes = ["Brasil", "Centro_Oeste", "Nordeste", "Norte", "Sudeste", "Sul"];
+    const anos = ["2008", "2017"];
 
-function atualizarPOF() {
+    anos.forEach(ano => {
+      const resultado = {};
+      regioes.forEach(regiao => {
+        const idmtTotal = dadosOriginais
+          .filter(item =>
+            String(getCampo(item, "ANO_POF")) === ano &&
+            String(getCampo(item, "Região")) === regiao
+          )
+          .reduce((soma, item) => soma + (calcularIDMT(item) ?? 0), 0); // null conta como 0
 
-  console.log("Executando atualizarPOF...");
-  console.log("idaAnvisa:", idaAnvisa, "idaSyngenta:", idaSyngenta);
+        const idaAnvisaPercent = idaAnvisa ? (idmtTotal / idaAnvisa) * 100 : null;
+        const idaSyngentaPercent = idaSyngenta ? (idmtTotal / idaSyngenta) * 100 : null;
 
-  const regioes = ["Brasil", "Centro_Oeste", "Nordeste", "Norte", "Sudeste", "Sul"];
-  const anos = ["2008", "2017"];
-
-  anos.forEach(ano => {
-    const resultado = {};
-    regioes.forEach(regiao => {
-      const idmtTotal = dadosOriginais
-        .filter(item =>
-          String(getCampo(item, "ANO_POF")) === ano &&
-          String(getCampo(item, "Região")) === regiao
-        )
-        .reduce((soma, item) => soma + calcularIDMT(item), 0);
-      
-      console.log(`Ano ${ano}, Região ${regiao}, IDMT Total:`, idmtTotal);
-
-      const idaAnvisaPercent = idaAnvisa ? (idmtTotal / idaAnvisa) * 100 : null;
-      const idaSyngentaPercent = idaSyngenta ? (idmtTotal / idaSyngenta) * 100 : null;
-
-      console.log(`%IDA ANVISA: ${idaAnvisaPercent}, %IDA SYNGENTA: ${idaSyngentaPercent}`);
-
-      resultado[regiao] = {
-        "%IDA_ANVISA": idaAnvisaPercent,
-        "%IDA_SYNGENTA": idaSyngentaPercent
-      };
-    });
-
-    atualizarTabelaPOF(resultado, ano === "2008" ? "tabela-pof-2008" : "tabela-pof-2017");
-  });
-}
-
-function atualizarTabelaPOF(resultados, tabelaId) {
-  const tbody = document.getElementById(tabelaId);
-  if (!tbody) return;
-
-  tbody.querySelectorAll("tr").forEach(tr => {
-    const metrica = tr.children[0].textContent.trim(); // Ex: "%IDA_ANVISA"
-    console.log("Verificando linha:", metrica);
-
-    if (metrica === "%IDA_ANVISA" || metrica === "%IDA_SYNGENTA") {
-      const regioes = ["Brasil", "Centro_Oeste", "Nordeste", "Norte", "Sudeste", "Sul"];
-      regioes.forEach((regiao, i) => {
-        const valor = resultados[regiao][metrica]; // usa a chave exata
-        console.log(`Atualizando ${metrica} para ${regiao}:`, valor);
-        tr.children[i + 1].textContent = typeof valor === "number" ? valor.toFixed(4) + "%" : "—";
+        resultado[regiao] = {
+          "%IDA_ANVISA": idaAnvisaPercent,
+          "%IDA_SYNGENTA": idaSyngentaPercent
+        };
       });
-    }
-  });
-}
 
-  // ---------------- Criação de Input Numérico com replicação (sem re-render) ----------------
+      atualizarTabelaPOF(resultado, ano === "2008" ? "tabela-pof-2008" : "tabela-pof-2017");
+    });
+  }
+
+  function atualizarTabelaPOF(resultados, tabelaId) {
+    const tbody = document.getElementById(tabelaId);
+    if (!tbody) return;
+
+    tbody.querySelectorAll("tr").forEach(tr => {
+      const metrica = tr.children[0].textContent.trim(); // Ex: "%IDA_ANVISA"
+      if (metrica === "%IDA_ANVISA" || metrica === "%IDA_SYNGENTA") {
+        const regioes = ["Brasil", "Centro_Oeste", "Nordeste", "Norte", "Sudeste", "Sul"];
+        regioes.forEach((regiao, i) => {
+          const valor = resultados[regiao][metrica]; // usa a chave exata
+          tr.children[i + 1].textContent = typeof valor === "number" ? valor.toFixed(4) + "%" : "—";
+        });
+      }
+    });
+  }
+
+  // ---------------- Criação de Input Numérico com replicação (com re-render global) ----------------
   function criarInputNumerico(valorInicial, onValidChange, placeholderText = "-", ano = null, cultivo = null, coluna = null) {
     const input = document.createElement("input");
     input.type = "text";              // 'text' para controlar a entrada
@@ -208,9 +208,6 @@ function atualizarTabelaPOF(resultados, tabelaId) {
     function validarAtualizar() {
       const v = input.value;
 
-      // escaper para seletores CSS
-      const esc = (s) => window.CSS && CSS.escape ? CSS.escape(String(s)) : String(s).replace(/"/g, '\\"');
-
       if (!regexParcial.test(v)) {
         input.value = prev;
         const caret = input.value.length;
@@ -222,84 +219,97 @@ function atualizarTabelaPOF(resultados, tabelaId) {
       input.style.borderColor = "#ccc";
       prev = v;
 
-      if (typeof onValidChange === "function") {
-        // 🔹 Caso: o usuário APAGOU tudo (string vazia) -> limpar todos os irmãos
-        if (v === "") {
-          onValidChange(null);
+      if (typeof onValidChange !== "function") return;
 
-          if (ano != null && cultivo != null && coluna) {
-            // 1) Atualiza o modelo de dados: zera/limpa todos do mesmo (ano,cultivo,coluna)
-            dadosOriginais.forEach(item => {
-              if (
-                String(getCampo(item, "ANO_POF")) === String(ano) &&
-                String(getCampo(item, "Cultivo")) === String(cultivo)
-              ) {
-                item[coluna] = null;
+      // 🔹 Caso: o usuário APAGOU tudo (string vazia)
+      if (v === "") {
+        onValidChange(null);
 
-                const novoIDMT = calcularIDMT(item);
-                item["IDMT (Numerador)"] = novoIDMT;
-                item["Contribuição Individual do Cultivo"] = calcularContribuicaoIndividual(novoIDMT, item);
-              }
-            });
+        if (ano != null && cultivo != null && coluna) {
+          // Atualiza o modelo de dados
+          dadosOriginais.forEach(item => {
+            if (
+              String(getCampo(item, "ANO_POF")) === String(ano) &&
+              String(getCampo(item, "Cultivo")) === String(cultivo)
+            ) {
+              item[coluna] = null;
 
-            // 2) Atualiza o DOM visível: limpa os outros inputs correspondentes
-            const selector =
-              `.editable-cell[data-col="${esc(coluna)}"][data-ano="${esc(ano)}"][data-cultivo="${esc(cultivo)}"]`;
+              const novoIDMT = calcularIDMT(item);
+              item["IDMT (Numerador)"] = novoIDMT;
+              item["Contribuição Individual do Cultivo"] = calcularContribuicaoIndividual(novoIDMT, item);
+            }
+          });
 
-            document.querySelectorAll(selector).forEach(el => {
-              if (el !== input) {
-                el.value = "";              // mostra placeholder
-                flashUpdate(el);            // opcional: destaque visual
-              }
-            });
+          // 🔒 Preservar foco antes de re-renderizar
+          const currentFocus = document.activeElement;
+          const currentAno = currentFocus?.dataset?.ano;
+          const currentCultivo = currentFocus?.dataset?.cultivo;
+          const currentColuna = currentFocus?.dataset?.col;
 
-            flashUpdate(input);             // opcional
+          // Recalcula e re-renderiza uma única vez
+          atualizarPOF();
+          renderizarTabela(dadosOriginais);
+
+          // 🔁 Restaurar foco no mesmo input
+          if (currentAno && currentCultivo && currentColuna) {
+            const selector = `.editable-cell[data-ano="${esc(currentAno)}"][data-cultivo="${esc(currentCultivo)}"][data-col="${esc(currentColuna)}"]`;
+            const newInput = document.querySelector(selector);
+            if (newInput) {
+              newInput.focus();
+              const len = newInput.value.length;
+              try { newInput.setSelectionRange(len, len); } catch {}
+            }
           }
-          return; // evita cair no branch numérico
         }
-
-        // 🔹 Caso: número válido -> replicar preenchimento
-        if (regexFinal.test(v)) {
-          const num = Number(v);
-          onValidChange(num);
-
-          // Replicar para linhas com MESMO ANO + MESMO CULTIVO na MESMA COLUNA (sem re-render)
-          if (ano != null && cultivo != null && coluna) {
-            // 1) Atualiza o modelo de dados
-            dadosOriginais.forEach(item => {
-              if (
-                String(getCampo(item, "ANO_POF")) === String(ano) &&
-                String(getCampo(item, "Cultivo")) === String(cultivo)
-              ) {
-                item[coluna] = num;
-
-                const novoIDMT = calcularIDMT(item);
-                item["IDMT (Numerador)"] = novoIDMT;
-                item["Contribuição Individual do Cultivo"] = calcularContribuicaoIndividual(novoIDMT, item);
-                atualizarPOF();
-                renderizarTabela(dadosOriginais);
-
-              }
-            });
-
-            // 2) Atualiza o DOM visível (sem re-render)
-            const selector =
-              `.editable-cell[data-col="${esc(coluna)}"][data-ano="${esc(ano)}"][data-cultivo="${esc(cultivo)}"]`;
-
-            document.querySelectorAll(selector).forEach(el => {
-              if (el !== input) {
-                el.value = String(num);
-                flashUpdate(el); // opcional
-              }
-            });
-
-            flashUpdate(input); // opcional
-          }
-        } else {
-          // estados intermediários (ex.: '10.'), não replicamos, mas mantemos model atual como null
-          onValidChange(null);
-        }
+        return; // evita cair no branch numérico
       }
+
+      // 🔹 Caso: número válido - replicar preenchimento
+      if (regexFinal.test(v)) {
+        const num = Number(v);
+        onValidChange(num);
+
+        if (ano != null && cultivo != null && coluna) {
+          // Atualiza o modelo de dados (sem re-render aqui)
+          dadosOriginais.forEach(item => {
+            if (
+              String(getCampo(item, "ANO_POF")) === String(ano) &&
+              String(getCampo(item, "Cultivo")) === String(cultivo)
+            ) {
+              item[coluna] = num;
+
+              const novoIDMT = calcularIDMT(item);
+              item["IDMT (Numerador)"] = novoIDMT;
+              item["Contribuição Individual do Cultivo"] = calcularContribuicaoIndividual(novoIDMT, item);
+            }
+          });
+
+          // 🔒 Preservar foco antes de re-renderizar
+          const currentFocus = document.activeElement;
+          const currentAno = currentFocus?.dataset?.ano;
+          const currentCultivo = currentFocus?.dataset?.cultivo;
+          const currentColuna = currentFocus?.dataset?.col;
+
+          // Agora sim, UMA vez só:
+          atualizarPOF();
+          renderizarTabela(dadosOriginais);
+
+          // 🔁 Restaurar foco no mesmo input
+          if (currentAno && currentCultivo && currentColuna) {
+            const selector = `.editable-cell[data-ano="${esc(currentAno)}"][data-cultivo="${esc(currentCultivo)}"][data-col="${esc(currentColuna)}"]`;
+            const newInput = document.querySelector(selector);
+            if (newInput) {
+              newInput.focus();
+              const len = newInput.value.length;
+              try { newInput.setSelectionRange(len, len); } catch {}
+            }
+          }
+        }
+        return;
+      }
+
+      // 🔹 Estados intermediários (ex.: '10.')
+      onValidChange(null);
     }
 
     return input;
@@ -324,63 +334,62 @@ function atualizarTabelaPOF(resultados, tabelaId) {
   }
 
   // ---------------- Renderização ----------------
-function renderizarTabela(data) {
-  tbody.innerHTML = "";
+  function renderizarTabela(data) {
+    tbody.innerHTML = "";
 
-  if (!data || data.length === 0) {
-    tbody.innerHTML = `<tr><td class="no-data" colspan="${COLUNAS.length}">Nenhum dado encontrado para os filtros aplicados.</td></tr>`;
-    return;
-  }
-
-  data.forEach(item => {
-    const tr = document.createElement("tr");
-
-    const regiao = getCampo(item, "Região");
-    if (typeof regiao === "string" && regiao.trim() === "Brasil") {
-      tr.classList.add("linha-verde");
+    if (!data || data.length === 0) {
+      tbody.innerHTML = `<tr><td class="no-data" colspan="${COLUNAS.length}">Nenhum dado encontrado para os filtros aplicados.</td></tr>`;
+      return;
     }
 
-    COLUNAS.forEach(col => {
-      const td = document.createElement("td");
-      const valor = fmt(getCampo(item, col));
+    data.forEach(item => {
+      const tr = document.createElement("tr");
 
-      if (["LMR (mg_kg)", "MREC_STMR (mg_kg)", "Market Share"].includes(col)) {
-        td.title = "Aceita números inteiros e decimais com ponto (.)";
-        td.setAttribute("aria-label", "Campo numérico. Aceita inteiros e decimais com ponto.");
-
-        const anoItem = getCampo(item, "ANO_POF");
-        const cultivoItem = getCampo(item, "Cultivo");
-        const regiaoItem = getCampo(item, "Região");
-
-        const input = criarInputNumerico(
-          valor,
-          (novoValor) => { item[col] = novoValor; },
-          "-",
-          anoItem,
-          cultivoItem,
-          col
-        );
-
-        input.dataset.ano = String(anoItem);
-        input.dataset.cultivo = String(cultivoItem);
-        input.dataset.regiao = String(regiaoItem);
-        input.dataset.col = col;
-
-        td.appendChild(input);
-      } else if (["IDMT (Numerador)", "Contribuição Individual do Cultivo"].includes(col)) {
-        const num = toNumberSafe(getCampo(item, col));
-        td.textContent = num !== null ? num.toFixed(6) : "-";
-      } else {
-        td.textContent = valor;
+      const regiao = getCampo(item, "Região");
+      if (typeof regiao === "string" && regiao.trim() === "Brasil") {
+        tr.classList.add("linha-verde");
       }
 
-      tr.appendChild(td);
-    });
+      COLUNAS.forEach(col => {
+        const td = document.createElement("td");
+        const valor = fmt(getCampo(item, col));
 
-    tbody.appendChild(tr);
-  }); // fechamento do data.forEach
+        if (["LMR (mg_kg)", "MREC_STMR (mg_kg)", "Market Share"].includes(col)) {
+          td.title = "Aceita números inteiros e decimais com ponto (.)";
+          td.setAttribute("aria-label", "Campo numérico. Aceita inteiros e decimais com ponto.");
 
-} // fechamento da função renderizarTabela
+          const anoItem = getCampo(item, "ANO_POF");
+          const cultivoItem = getCampo(item, "Cultivo");
+          const regiaoItem = getCampo(item, "Região");
+
+          const input = criarInputNumerico(
+            valor,
+            (novoValor) => { item[col] = novoValor; },
+            "-",
+            anoItem,
+            cultivoItem,
+            col
+          );
+
+          input.dataset.ano = String(anoItem);
+          input.dataset.cultivo = String(cultivoItem);
+          input.dataset.regiao = String(regiaoItem);
+          input.dataset.col = col;
+
+          td.appendChild(input);
+        } else if (["IDMT (Numerador)", "Contribuição Individual do Cultivo"].includes(col)) {
+          const num = toNumberSafe(getCampo(item, col));
+          td.textContent = num !== null ? num.toFixed(6) : "-";
+        } else {
+          td.textContent = valor;
+        }
+
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    }); // fechamento do data.forEach
+  } // fechamento da função renderizarTabela
 
   // ---------------- Filtros ----------------
 
@@ -403,7 +412,7 @@ function renderizarTabela(data) {
       return String(a).localeCompare(String(b), "pt-BR");
     });
 
-    document.querySelectorAll(".coluna-filtro").forEach(coluna => {
+    document.querySelectorAll(".coluna-filtro").forEach((coluna) => {
       coluna.addEventListener("click", (e) => {
         e.stopPropagation();
         const jaAtivo = coluna.classList.contains("ativo");
@@ -479,26 +488,25 @@ function renderizarTabela(data) {
     renderizarTabela(filtrados);
   }
 
- 
+  // ---------------- Inicialização ----------------
+
   await carregarTabelaPOF2008();
   await carregarTabelaPOF2017();
   carregarTabela(); // carrega dados principais
-  
-  setupDecimalInput('.editable-btn', 'Ext', n => { 
+
+  setupDecimalInput('.editable-btn', 'Ext', n => {
     idaAnvisa = n;
-    console.log("Valor de idaAnvisa:", idaAnvisa);
     atualizarPOF();
   });
 
   setupDecimalInput('.editable-int', 'Int', n => {
     idaSyngenta = n;
-    console.log("Valor de idaSyngenta:", idaSyngenta);
     atualizarPOF();
   });
 
   atualizarPOF(); // calcula e renderiza
 
-});
+}); // fim DOMContentLoaded
 
 // ---------------- Inputs Ext e Int ----------------
 
@@ -536,7 +544,6 @@ function setupDecimalInput(selector, defaultText, onValidNumber) {
 // ---------------- (Opcional) Destaque visual ao replicar ----------------
 
 function flashUpdate(el) {
-  // Adiciona/remover uma classe que pode ter animação no CSS
   el.classList.add('flash-update');
   setTimeout(() => el.classList.remove('flash-update'), 600);
 }
@@ -579,6 +586,7 @@ async function carregarTabelaPOF2008() {
     console.error("Erro ao carregar tabela POF 2008:", error);
   }
 }
+
 // ------------------------ POF 2017 --------------------------------
 let pof2017Dados = null;
 
