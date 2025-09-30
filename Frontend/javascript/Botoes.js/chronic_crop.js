@@ -58,10 +58,13 @@ function calcularIDMT(item) {
   const lmr = toNumberSafe(getCampo(item, "LMR (mg_kg)"));
   const mrec = toNumberSafe(getCampo(item, "MREC_STMR (mg_kg)"));
 
-  if (consumo && fp && fc && (lmr || mrec)) {
-    return (lmr || mrec) * consumo * fp * fc;
+  const limite = (lmr !== null && lmr > 0) ? lmr : (mrec !== null && mrec > 0) ? mrec : null;
+
+  if (consumo && fp && fc && limite !== null) {
+    return limite * consumo * fp * fc;
   }
-  return 0;
+
+  return null;
 }
 
 function calcularContribuicaoIndividual(idmt, item) {
@@ -232,6 +235,10 @@ function atualizarTabelaPOF(resultados, tabelaId) {
                 String(getCampo(item, "Cultivo")) === String(cultivo)
               ) {
                 item[coluna] = null;
+
+                const novoIDMT = calcularIDMT(item);
+                item["IDMT (Numerador)"] = novoIDMT;
+                item["Contribuição Individual do Cultivo"] = calcularContribuicaoIndividual(novoIDMT, item);
               }
             });
 
