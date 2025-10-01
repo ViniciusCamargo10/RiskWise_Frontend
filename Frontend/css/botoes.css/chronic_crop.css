@@ -441,13 +441,14 @@ body {
 }
 
 .editable-btn {
-    width: 70px;
+    width: 130px;
     height: 30px;
     text-align: center;
     font-size: 15px;
     border: 2px solid #4CAF50;
     border-radius: 8px;
     background-color: white;
+    color:#333333;
     cursor: pointer;
     outline: none;
     transition: 0.3s;
@@ -460,17 +461,18 @@ body {
 
 .editable-btn:nth-of-type(1) {
     order: 3; /* Botão Ext */
-    margin-left: 370px;
+    margin-left: 265px;
 }
 
 .editable-int {
-    width: 70px;
+    width: 130px;
     height: 30px;
     text-align: center;
     font-size: 16px;
     border: 2px solid #4CAF50;
     border-radius: 8px;
     background-color: white;
+    color:#333333;
     cursor: pointer;
     outline: none;
     transition: 0.3s;

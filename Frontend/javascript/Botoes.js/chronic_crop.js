@@ -1,3 +1,20 @@
+// === Mapa central de labels (somente exibição) ===
+const LABELS = {
+  buttons: { Ext: "IDA_EXTERNA", Int: "IDA_INTERNA" },
+  metrics: { "%IDA_ANVISA": "%IDA_EXTERNA", "%IDA_SYNGENTA": "%IDA_INTERNA" }
+};
+
+function displayButtonLabel(valueKey) {
+  return LABELS.buttons[valueKey] ?? "";
+}
+function displayMetricLabel(metricKey) {
+  return LABELS.metrics[metricKey] ?? metricKey;
+}
+function toBackendMetric(displayText) {
+  const found = Object.entries(LABELS.metrics).find(([k, v]) => v === displayText);
+  return found ? found[0] : displayText;
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   'use strict';
 
@@ -85,9 +102,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ------------- % POF -------------------------
 
   function atualizarPOF() {
-    console.log("Executando atualizarPOF...");
-    console.log("idaAnvisa:", idaAnvisa, "idaSyngenta:", idaSyngenta);
-
     const regioes = ["Brasil", "Centro_Oeste", "Nordeste", "Norte", "Sudeste", "Sul"];
     const anos = ["2008", "2017"];
 
@@ -119,14 +133,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!tbody) return;
 
     tbody.querySelectorAll("tr").forEach(tr => {
-      const metrica = tr.children[0].textContent.trim(); // Ex: "%IDA_ANVISA"
-      if (metrica === "%IDA_ANVISA" || metrica === "%IDA_SYNGENTA") {
-        const regioes = ["Brasil", "Centro_Oeste", "Nordeste", "Norte", "Sudeste", "Sul"];
-        regioes.forEach((regiao, i) => {
-          const valor = resultados[regiao][metrica]; // usa a chave exata
-          tr.children[i + 1].textContent = typeof valor === "number" ? valor.toFixed(4) + "%" : "—";
-        });
-      }
+      // Pegue a chave original direto do dataset (não do texto visível)
+      const metrica = tr.dataset.metrica || toBackendMetric(tr.children[0].textContent.trim());
+
+      // Atualiza somente as métricas calculadas (%IDA_*)
+      if (!["%IDA_ANVISA", "%IDA_SYNGENTA"].includes(metrica)) return;
+
+      const regioes = ["Brasil", "Centro_Oeste", "Nordeste", "Norte", "Sudeste", "Sul"];
+      regioes.forEach((regiao, i) => {
+        const valor = resultados[regiao][metrica]; // usa a chave backend
+        tr.children[i + 1].textContent =
+          typeof valor === "number" ? valor.toFixed(4) + "%" : "—";
+      });
     });
   }
 
@@ -490,44 +508,55 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ---------------- Inicialização ----------------
 
+  // 1) Ajusta inputs visuais (sem mudar HTML): converte "Ext"/"Int" -> labels de exibição
+  const extInput = document.querySelector('.editable-btn');
+  if (extInput) {
+    extInput.dataset.sentinel = extInput.dataset.sentinel || 'Ext';
+    extInput.dataset.default = extInput.dataset.default || displayButtonLabel('Ext'); // "IDA_EXTERNA"
+    if (extInput.value === 'Ext' || extInput.value.trim() === '') {
+      extInput.value = extInput.dataset.default;
+    }
+  }
+  const intInput = document.querySelector('.editable-int');
+  if (intInput) {
+    intInput.dataset.sentinel = intInput.dataset.sentinel || 'Int';
+    intInput.dataset.default = intInput.dataset.default || displayButtonLabel('Int'); // "IDA_INTERNA"
+    if (intInput.value === 'Int' || intInput.value.trim() === '') {
+      intInput.value = intInput.dataset.default;
+    }
+  }
+
+  // 2) Liga a lógica numérica (digitável) e recálculo da POF
+  setupDecimalInput('.editable-btn', n => { idaAnvisa = n; atualizarPOF(); });
+  setupDecimalInput('.editable-int', n => { idaSyngenta = n; atualizarPOF(); });
+
+  // 3) Carrega dados e POF
   await carregarTabelaPOF2008();
   await carregarTabelaPOF2017();
-  carregarTabela(); // carrega dados principais
+  await carregarTabela(); // carrega dados principais
 
+  // 4) Clear: volta rótulos visuais e zera lógicas
+  document.querySelector(".btn-clear").addEventListener("click", () => {
+    document.querySelectorAll(".editable-btn, .editable-int").forEach(input => {
+      const defaultText = input.dataset.default || input.value;
+      input.value = defaultText; // exibe "IDA_EXTERNA/IDA_INTERNA"
+    });
+    idaAnvisa = null;
+    idaSyngenta = null;
 
+    // Zera LMR/MREC e recomputa derivados
+    dadosOriginais = dadosOriginais.map(item => {
+      item["LMR (mg_kg)"] = null;
+      item["MREC_STMR (mg_kg)"] = null;
 
-document.querySelector(".btn-clear").addEventListener("click", () => {
-  // 1) Zera Ext e Int
-  document.querySelectorAll(".editable-btn, .editable-int").forEach(input => {
-    input.value = input.classList.contains("editable-btn") ? "Ext" : "Int";
-  });
-  idaAnvisa = null;
-  idaSyngenta = null;
+      const novoIDMT = calcularIDMT(item);
+      item["IDMT (Numerador)"] = novoIDMT;
+      item["Contribuição Individual do Cultivo"] = calcularContribuicaoIndividual(novoIDMT, item);
+      return item;
+    });
 
-  // 2) Zera LMR/MREC e RECOMPUTA derivados no modelo
-  dadosOriginais = dadosOriginais.map(item => {
-    item["LMR (mg_kg)"] = null;
-    item["MREC_STMR (mg_kg)"] = null;
-
-    const novoIDMT = calcularIDMT(item);
-    item["IDMT (Numerador)"] = novoIDMT;
-    item["Contribuição Individual do Cultivo"] = calcularContribuicaoIndividual(novoIDMT, item);
-    return item;
-  });
-
-  // 3) Atualiza POF e re-renderiza
-  atualizarPOF();
-  renderizarTabela(dadosOriginais);
-});
-
-  setupDecimalInput('.editable-btn', 'Ext', n => {
-    idaAnvisa = n;
     atualizarPOF();
-  });
-
-  setupDecimalInput('.editable-int', 'Int', n => {
-    idaSyngenta = n;
-    atualizarPOF();
+    renderizarTabela(dadosOriginais);
   });
 
   atualizarPOF(); // calcula e renderiza
@@ -539,29 +568,39 @@ document.querySelector(".btn-clear").addEventListener("click", () => {
 let idaAnvisa = null;
 let idaSyngenta = null;
 
-function setupDecimalInput(selector, defaultText, onValidNumber) {
+function setupDecimalInput(selector, onValidNumber) {
   document.querySelectorAll(selector).forEach(input => {
+    const defaultText = input.dataset.default || input.value; // "IDA_EXTERNA"/"IDA_INTERNA"
     input.type = 'text';
     input.setAttribute('inputmode', 'decimal');
     input.autocomplete = 'off';
     input.spellcheck = false;
     input.title = 'Aceita números inteiros e decimais com ponto (.)';
 
+    // Mostra o rótulo “bonito” no começo, se não houver valor
+    if (!input.value) input.value = defaultText;
+
     input.addEventListener('focus', () => {
       if (input.value === defaultText) input.value = '';
     });
 
     input.addEventListener('blur', () => {
-      if (input.value.trim() === '') input.value = defaultText;
+      // Se ficou vazio, zera o valor lógico e restaura o rótulo visual
+      if (input.value.trim() === '') {
+        onValidNumber(null);           // 🔴 dispara recalcular como nulo
+        input.value = defaultText;     // 🔵 restaura o rótulo visual
+      }
     });
 
     input.addEventListener('input', () => {
+      // Sanitiza: só dígitos e um ponto
       let v = input.value.replace(/[^0-9.]/g, '');
       const i = v.indexOf('.');
       if (i !== -1) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '');
       if (v.startsWith('.')) v = '0' + v;
       input.value = v;
 
+      // Notifica número válido ou null (inclusive quando usuário apaga tudo)
       onValidNumber(/^\d+(\.\d+)?$/.test(v) ? parseFloat(v) : null);
     });
   });
@@ -595,8 +634,11 @@ async function carregarTabelaPOF2008() {
 
     metricas.forEach(metrica => {
       const tr = document.createElement("tr");
+      tr.dataset.metrica = metrica; // guarda a chave original
+
       const tdTitulo = document.createElement("td");
-      tdTitulo.textContent = metrica; // mantém exatamente como vem do backend
+      tdTitulo.textContent = displayMetricLabel(metrica); // exibe label
+      tdTitulo.dataset.metrica = metrica;
       tr.appendChild(tdTitulo);
 
       regioes.forEach(regiao => {
@@ -634,8 +676,11 @@ async function carregarTabelaPOF2017() {
 
     metricas.forEach(metrica => {
       const tr = document.createElement("tr");
+      tr.dataset.metrica = metrica; // guarda a chave original
+
       const tdTitulo = document.createElement("td");
-      tdTitulo.textContent = metrica; // mantém exatamente como vem do backend
+      tdTitulo.textContent = displayMetricLabel(metrica); // exibe label
+      tdTitulo.dataset.metrica = metrica;
       tr.appendChild(tdTitulo);
 
       regioes.forEach(regiao => {
