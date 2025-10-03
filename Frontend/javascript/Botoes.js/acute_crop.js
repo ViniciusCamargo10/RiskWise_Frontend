@@ -15,7 +15,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     "LMR (mg/kg)",
     "HR/MCR (mg/kg)",
     "MREC/STMR (mg/kg)",
-    "IMEA (mg/kg p.c./dia)",
     "%DRFA ANVISA",
     "%DRFA SYNGENTA"
   ];
