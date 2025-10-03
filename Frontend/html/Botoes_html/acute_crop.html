@@ -59,88 +59,24 @@
                 <div class="section">
                     <h2>Acute DRA Calculator </h2>
                     <div class="table-wrapper">
-                        <table class="report-table">
-                            <thead>
-                                <tr>
-                                        <th>Cultivo</th>
-                                        <th>Ano Pof</th>
-                                        <th>Região</th>
-                                        <th>Caso Fórmula</th>
-                                        <th>LMR (mg/kg)</th>
-                                        <th>HR/MCR (mg/kg)</th>
-                                        <th>MREC/STMR (mg/kg)</th>
-                                        <th>IMEA (mg/kg p.c./dia)</th>
-                                        <th>%DRFA ANVISA</th>
-                                        <TH>%DRFA SYNGENTA</TH>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                        <td>-</td>
-                                    </tr>
-                            </thead>
-                        </table>
+                    <table class="report-table">
+                        <thead>
+                        <tr>
+                            <th class="coluna-filtro" data-coluna="Cultivo/ Matriz Animal">Cultivo</th>
+                            <th class="coluna-filtro" data-coluna="ANO POF">Ano POF</th>
+                            <th>Região</th>
+                            <th>Caso Fórmula</th>
+                            <th>LMR (mg/kg)</th>
+                            <th>HR/MCR (mg/kg)</th>
+                            <th>MREC/STMR (mg/kg)</th>
+                            <th>%DRFA ANVISA</th>
+                            <th>%DRFA SYNGENTA</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tabela-dados">
+                        <!-- Linhas serão inseridas via JS -->
+                        </tbody>
+                    </table>
                     </div>
                 </div>
             </div>
@@ -155,7 +91,7 @@
         </div>
     </div>
 
-    <script src="../javascript/calculator.js" defer></script>
+    <script src="../../javascript/Botoes.js/acute_crop.js"defer></script>
 </body>
 </html>
 
