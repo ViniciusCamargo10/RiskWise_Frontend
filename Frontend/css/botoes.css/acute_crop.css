@@ -197,6 +197,7 @@ body {
     align-items: center;
     width: 100%;
     padding-left: 18px;
+    gap: 8px;
 }
 
 .logo-br {
@@ -341,7 +342,7 @@ body {
 .report-table td:nth-child(3) { width: 100px; }
 
 .report-table th:nth-child(4),
-.report-table td:nth-child(4) { width: 100px; }
+.report-table td:nth-child(4) { width: 110px; }
 
 .report-table th:nth-child(5),
 .report-table td:nth-child(5) { width: 100px; }
