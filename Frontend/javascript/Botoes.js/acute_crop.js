@@ -34,6 +34,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     "%DRFA SYNGENTA"
   ];
 
+    // Mapa para exibir nomes amigáveis no cabeçalho
+  const LABELS = {
+    "%DRFA ANVISA": "%DRFA EXTERNA",
+    "%DRFA SYNGENTA": "%DRFA INTERNA"
+  };
+
+  function displayLabel(col) {
+    return LABELS[col] || col;
+  }
+
   // ---------- Utilitários ----------
   const canon = (s) =>
     String(s)
