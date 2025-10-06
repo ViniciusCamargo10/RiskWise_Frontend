@@ -13,11 +13,21 @@ EXCEL_PATH = Path(r"C:\Users\s1337626\OneDrive - Syngenta\Área de Trabalho\Diet
 
 # Colunas esperadas
 COLUNAS_DESEJADAS = [
-    "Cultivo/ Matriz Animal", "ANO POF", "Região", "Caso Fórmula", "Caso Mapeado",
+    "Cultivo/ Matriz Animal", "ANO POF", "Região",
+    "Caso Fórmula", "Caso Mapeado",
     "LMR (mg/kg)", "HR/MCR (mg/kg)", "MREC/STMR (mg/kg)",
-    "Consumo (g/dia/pessoa) Percentil 97,5", "Peso corpóreo da região (kg)",
-    "Maior porção MP (g/dia/pessoa)", "Peso Corpóreo médio dos consumidores PC (kg)",
-    "%DRFA ANVISA", "%DRFA SYNGENTA"
+    # --------- CAMPOS NECESSÁRIOS PARA AS FÓRMULAS ---------
+    "Fator de Processamento FP",
+    "Fator de Conversão FC",
+    "Peso Unitário da Parte Comestível Uc (g)",
+    "Fator de variabilidade v",
+    "Maior porção MP (g/dia/pessoa)",
+    "Peso Corpóreo médio dos consumidores PC (kg)",
+    # (Se o seu Excel usa algum outro campo de peso corporal/região, mantenha também)
+    # -------------------------------------------------------
+    "Consumo (g/dia/pessoa) Percentil 97,5",  # se quiser manter no dataset
+    "Peso corpóreo da região (kg)",           # se quiser manter no dataset
+    "%DRFA ANVISA", "%DRFA SYNGENTA"          # podem vir vazios; calcularemos no front
 ]
 
 # Carrega DataFrame inicial
