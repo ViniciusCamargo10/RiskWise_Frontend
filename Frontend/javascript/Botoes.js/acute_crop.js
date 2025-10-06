@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const API_URL = "http://localhost:8000/acute/dados";
   const tbody = document.getElementById("tabela-dados");
+
   // Estado dos filtros
   const estadoFiltros = { Cultivo: "Todos", ANO_POF: "Todos" };
 
@@ -20,6 +21,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   ];
 
   let dadosOriginais = [];
+  let idaExterna = null;
+  let idaInterna = null;
 
   // ---------------- Utilitários ----------------
   const canon = (s) =>
@@ -48,7 +51,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return (v === null || v === undefined || v === "") ? "-" : v;
   }
 
-  // ---------------- Criação de Input Numérico ----------------
+  // ---------------- Criação de Input Numérico para tabela ----------------
   function criarInputNumerico(valorInicial, onValidChange) {
     const input = document.createElement("input");
     input.type = "text";
@@ -75,6 +78,39 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     return input;
+  }
+
+  // ---------------- Função para inputs principais (IDA_EXTERNA / IDA_INTERNA) ----------------
+  function setupDecimalInput(selector, onValidNumber) {
+    document.querySelectorAll(selector).forEach(input => {
+      const defaultText = input.dataset.default || input.value;
+      input.type = 'text';
+      input.setAttribute('inputmode', 'decimal');
+      input.autocomplete = 'off';
+      input.spellcheck = false;
+
+      if (!input.value) input.value = defaultText;
+
+      input.addEventListener('focus', () => {
+        if (input.value === defaultText) input.value = '';
+      });
+
+      input.addEventListener('blur', () => {
+        if (input.value.trim() === '') {
+          onValidNumber(null);
+          input.value = defaultText;
+        }
+      });
+
+      input.addEventListener('input', () => {
+        let v = input.value.replace(/[^0-9.]/g, '');
+        const i = v.indexOf('.');
+        if (i !== -1) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '');
+        if (v.startsWith('.')) v = '0' + v;
+        input.value = v;
+        onValidNumber(/^\d+(\.\d+)?$/.test(v) ? parseFloat(v) : null);
+      });
+    });
   }
 
   // ---------------- Carregar dados ----------------
@@ -131,14 +167,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     const cultivos = [...new Set(data.map(i => getCampo(i, "Cultivo/ Matriz Animal")))].filter(Boolean);
     const anos = [...new Set(data.map(i => getCampo(i, "ANO POF")))].filter(Boolean);
 
-    // Aqui você pode criar dropdowns para filtros (igual ao crônico)
-    // Por enquanto, apenas console.log:
     console.log("Cultivos:", cultivos);
     console.log("Anos:", anos);
   }
 
   // ---------------- Inicialização ----------------
   await carregarTabela();
+
+  // Inicializa inputs principais com lógica visual + numérica
+  setupDecimalInput('.editable-btn', n => { idaExterna = n; /* lógica futura */ });
+  setupDecimalInput('.editable-int', n => { idaInterna = n; /* lógica futura */ });
 
   // Botão Clear
   document.querySelector(".btn-clear").addEventListener("click", () => {
@@ -148,5 +186,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       item["MREC/STMR (mg/kg)"] = null;
     });
     renderizarTabela(dadosOriginais);
+
+    // Restaura rótulos visuais nos inputs principais
+    document.querySelectorAll(".editable-btn, .editable-int").forEach(input => {
+      const defaultText = input.dataset.default || input.value;
+      input.value = defaultText;
+    });
+
+    idaExterna = null;
+    idaInterna = null;
   });
 });

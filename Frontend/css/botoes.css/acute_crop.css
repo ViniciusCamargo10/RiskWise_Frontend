@@ -296,7 +296,7 @@ body {
 
 .report-table {
     width: 100%;
-    table-layout: fixed;
+    table-layout: auto;
     border-collapse: separate;
     border-spacing: 0;
     font-size: 0.85rem;
@@ -309,7 +309,8 @@ body {
 .report-table th,
 .report-table td {
     display: table-cell;
-    white-space: nowrap;
+    white-space: normal;
+    word-wrap:break-word;
     padding: 0.6rem;
     text-align: center;
     border-bottom: 1px solid #ccc;
