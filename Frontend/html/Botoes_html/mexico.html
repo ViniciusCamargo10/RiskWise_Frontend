@@ -59,7 +59,7 @@
                 <!-- Fixed Concentration Values -->
                 <div class="section">
                     <div class="table-wrapper">
-                        <table class="report-table">
+                        <table class="report-table" id="tblMexico">
                             <thead>
                                 <tr>
                                     <th>Crop</th>
@@ -70,10 +70,8 @@
                                     <th>(LMR or R)*C</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr>
-                                    <td colspan="6" class="no-data">Nenhum dado disponível</td>
-                                </tr>
+                            <tbody id="tbodyMexico">
+                               <!-- Será preenchido via JS -->
                             </tbody>
                         </table>
                     </div>
@@ -86,17 +84,18 @@
                             <thead>
                                 <tr>
                                     <th>BW (kg)</th>
+                                    <th>ADI Interno (mg/kg bw/dia)</th>
                                     <th>IDMT</th>
-                                    <th>%ADI</th>
+                                    <th>%ADI Interno</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>70</td>
-                                    <td>-</td>
-                                    <td>-</td>
+                                    <td id="outBw">-</td>
+                                    <td id="outAdi">-</td>
+                                    <td id="outIdmt">-</td>
+                                    <td id="outPercentAdi">-</td>
                                 </tr>
-                                
                             </tbody>
                         </table>
                     </div>

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import chronic, acute
+from routes import chronic, acute, mexico
 
 app = FastAPI(debug=True)
 
@@ -14,3 +14,4 @@ app.add_middleware(
 # Inclui as rotas mantendo os mesmos endpoints
 app.include_router(chronic.router, tags=["Dieta Crônica"])
 app.include_router(acute.router, prefix="/acute", tags=["Nova Planilha"])
+app.include_router(acute.router, prefix="/mexico", tags=["Mexico Planilha"])
