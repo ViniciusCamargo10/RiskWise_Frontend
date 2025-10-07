@@ -4,6 +4,7 @@ from fastapi.encoders import jsonable_encoder
 from pathlib import Path
 from typing import Dict
 import pandas as pd
+import numpy as np
 
 router = APIRouter()
 
@@ -12,8 +13,18 @@ EXCEL_PATH = Path(r"C:\Users\s1337626\OneDrive - Syngenta\Área de Trabalho\Diet
 
 # Colunas esperadas na tabela principal
 COLUNAS_DESEJADAS = [
-    "Crop", "Cultivo", "LMR(mg/kg)", "R(mg/kg)", "C (kg/person/day)", "(LMR or R)*C"
+    "Crop", "Cultivo", "LMR (mg/kg)", "R (mg/kg)", "C (Kg/person/day)", "(LMR or R)*C"
 ]
+
+# Função para garantir que não haja NaN/Infinito no JSON
+def safe_json(obj):
+    if isinstance(obj, float) and (np.isnan(obj) or np.isinf(obj)):
+        return None
+    if isinstance(obj, dict):
+        return {k: safe_json(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [safe_json(v) for v in obj]
+    return obj
 
 # -------------------- Função para ler metadados e tabela --------------------
 def carregar_dados():
@@ -37,7 +48,7 @@ def carregar_dados():
             raise HTTPException(status_code=500, detail=f"Colunas ausentes na planilha: {faltando}")
 
         # Substituir NaN por None
-        df = df[COLUNAS_DESEJADAS].replace({pd.NA: None})
+        df = df[COLUNAS_DESEJADAS].replace({pd.NA: None, np.nan: None, np.inf: None, -np.inf: None})
 
         return {
             "meta": {"bw": bw, "adi_interno": adi_interno},
@@ -52,6 +63,7 @@ def carregar_dados():
 @router.get("/dados")
 def get_dados():
     dados = carregar_dados()
+    dados = safe_json(dados)
     return JSONResponse(content=dados)
 
 # -------------------- Endpoint POST --------------------
@@ -70,7 +82,7 @@ def atualizar(payload: Dict = Body(...)):
         raise HTTPException(status_code=400, detail=f"Faltam colunas: {faltando}")
 
     # Substituir NaN por None
-    novo_df = novo_df[COLUNAS_DESEJADAS].replace({pd.NA: None})
+    novo_df = novo_df[COLUNAS_DESEJADAS].replace({pd.NA: None, np.nan: None, np.inf: None, -np.inf: None})
 
     try:
         # Reescrever Excel mantendo metadados

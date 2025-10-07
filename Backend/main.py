@@ -14,4 +14,4 @@ app.add_middleware(
 # Inclui as rotas mantendo os mesmos endpoints
 app.include_router(chronic.router, tags=["Dieta Crônica"])
 app.include_router(acute.router, prefix="/acute", tags=["Nova Planilha"])
-app.include_router(acute.router, prefix="/mexico", tags=["Mexico Planilha"])
+app.include_router(mexico.router, prefix="/mexico", tags=["Mexico Planilha"])

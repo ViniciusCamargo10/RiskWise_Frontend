@@ -1,5 +1,5 @@
-const API = "/mexico";
-
+const API_URL = "http://127.0.0.1:8000/mexico/dados";
+const tbody = document.getElementById("tabela-dados");
 // Estado global
 let state = {
   meta: { bw: 70, adi_interno: 0.05 },
@@ -57,16 +57,16 @@ function render() {
     const cols = [
       "Crop",
       "Cultivo",
-      "LMR(mg/kg)",
-      "R(mg/kg)",
-      "C (kg/person/day)",
+      "LMR (mg/kg)",
+      "R (mg/kg)",
+      "C (Kg/person/day)",
       "(LMR or R)*C"
     ];
 
     cols.forEach((col) => {
       const td = document.createElement("td");
 
-      if (["LMR(mg/kg)", "R(mg/kg)", "C (kg/person/day)"].includes(col)) {
+      if (["LMR (mg/kg)", "R (mg/kg)", "C (Kg/person/day)"].includes(col)) {
         // Campos editáveis
         const inp = document.createElement("input");
         inp.type = "text";
@@ -113,9 +113,9 @@ async function saveData() {
 // -------------------- Limpar relatório --------------------
 function clearReport() {
   state.rows.forEach((row) => {
-    row["LMR(mg/kg)"] = "";
-    row["R(mg/kg)"] = "";
-    row["C (kg/person/day)"] = "";
+    row["LMR (mg/kg)"] = "";
+    row["R (mg/kg)"] = "";
+    row["C (Kg/person/day)"] = "";
     row["(LMR or R)*C"] = "";
   });
   render();
