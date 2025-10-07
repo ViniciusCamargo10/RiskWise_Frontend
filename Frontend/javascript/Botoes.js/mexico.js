@@ -29,10 +29,19 @@ async function loadData() {
 // -------------------- Renderizar tabela e resultados --------------------
 function render() {
   // Atualiza valores fixos no bloco Results Output
-  document.querySelector("#outBw").textContent = state.meta.bw;
-  document.querySelector("#outAdi").textContent = state.meta.adi_interno;
-  document.querySelector("#outIdmt").textContent = "-"; // será calculado depois
-  document.querySelector("#outPercentAdi").textContent = "-"; // será calculado depois
+  document.querySelector("#outBw").textContent = state.meta.bw ?? "-";
+  document.querySelector("#outAdi").textContent = state.meta.adi_interno ?? "-";
+
+  // Atualiza resultados vindos do Excel (totals)
+  document.querySelector("#outIdmt").textContent =
+    state.totals.idmt !== null && state.totals.idmt !== undefined
+      ? state.totals.idmt
+      : "-";
+
+  document.querySelector("#outPercentAdi").textContent =
+    state.totals["%ADI_interno"] !== null && state.totals["%ADI_interno"] !== undefined
+      ? state.totals["%ADI_interno"]
+      : "-";
 
   // Renderiza linhas da tabela principal
   const tbody = document.querySelector("#tbodyMexico");
@@ -43,14 +52,21 @@ function render() {
     return;
   }
 
-  state.rows.forEach((row, index) => {
+  state.rows.forEach((row) => {
     const tr = document.createElement("tr");
-    const cols = ["Crop", "Cultivo", "LMR (mg/kg)", "R (mg/kg)", "C (Kg/person/day)", "(LMR or R)*C"];
+    const cols = [
+      "Crop",
+      "Cultivo",
+      "LMR(mg/kg)",
+      "R(mg/kg)",
+      "C (kg/person/day)",
+      "(LMR or R)*C"
+    ];
 
-    cols.forEach(col => {
+    cols.forEach((col) => {
       const td = document.createElement("td");
 
-      if (["LMR (mg/kg)", "R (mg/kg)", "C (Kg/person/day)"].includes(col)) {
+      if (["LMR(mg/kg)", "R(mg/kg)", "C (kg/person/day)"].includes(col)) {
         // Campos editáveis
         const inp = document.createElement("input");
         inp.type = "text";
@@ -96,23 +112,12 @@ async function saveData() {
 
 // -------------------- Limpar relatório --------------------
 function clearReport() {
-  state.rows.forEach(row => {
-    row["LMR (mg/kg)"] = "";
-    row["R (mg/kg)"] = "";
-    row["C (Kg/person/day)"] = "";
+  state.rows.forEach((row) => {
+    row["LMR(mg/kg)"] = "";
+    row["R(mg/kg)"] = "";
+    row["C (kg/person/day)"] = "";
     row["(LMR or R)*C"] = "";
-    row["IDMT"] = "";
-    row["%ADI"] = "";
   });
   render();
 }
 
-// -------------------- Eventos --------------------
-document.addEventListener("DOMContentLoaded", () => {
-  loadData();
-  document.querySelector("#btnSave").addEventListener("click", saveData);
-  document.querySelector("#btnClear").addEventListener("click", clearReport);
-  document.querySelector("#btnRecalc").addEventListener("click", () => {
-    alert("Cálculo será implementado na próxima fase!");
-  });
-});

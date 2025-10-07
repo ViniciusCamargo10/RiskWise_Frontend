@@ -2,51 +2,66 @@ from fastapi import APIRouter, HTTPException, Body
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict
 import pandas as pd
-from utils.excel_loader import carregar_excel
 
 router = APIRouter()
 
-# Caminho fixo (seu caminho atual)
+# Caminho fixo do Excel
 EXCEL_PATH = Path(r"C:\Users\s1337626\OneDrive - Syngenta\Área de Trabalho\Dieta cronica Mexico_V01 STL_OF.xlsx")
 
-# Colunas esperadas
+# Colunas esperadas na tabela principal
 COLUNAS_DESEJADAS = [
-    "Crop", "Cultivo", "LMR (mg/kg)", "R (mg/kg)", "C (Kg/person/day)",
-    "(LMR or R)*C", "ADI (mg/kg bw/day)", "bw (kg)", "IDMT", "%ADI"
+    "Crop", "Cultivo", "LMR(mg/kg)", "R(mg/kg)", "C (kg/person/day)", "(LMR or R)*C"
 ]
 
-# Carrega DataFrame inicial
-df = carregar_excel(EXCEL_PATH, COLUNAS_DESEJADAS)
+# -------------------- Função para ler metadados e tabela --------------------
+def carregar_dados():
+    try:
+        # Ler metadados (linhas 1 a 5)
+        meta_df = pd.read_excel(EXCEL_PATH, nrows=5, header=None)
+        meta_dict = {str(meta_df.iloc[i, 0]).strip(): meta_df.iloc[i, 1] for i in range(len(meta_df))}
 
+        # Extrair valores fixos
+        adi_interno = float(meta_dict.get("ADI (mg/kg bw/day)", 0.05))
+        bw = float(meta_dict.get("bw (kg)", 70))
+        idmt = meta_dict.get("IDMT", None)
+        percent_adi = meta_dict.get("%ADI", None)
+
+        # Ler tabela principal (a partir da linha 7)
+        df = pd.read_excel(EXCEL_PATH, skiprows=6)
+
+        # Validar colunas
+        faltando = [c for c in COLUNAS_DESEJADAS if c not in df.columns]
+        if faltando:
+            raise HTTPException(status_code=500, detail=f"Colunas ausentes na planilha: {faltando}")
+
+        # Substituir NaN por None
+        df = df[COLUNAS_DESEJADAS].replace({pd.NA: None})
+
+        return {
+            "meta": {"bw": bw, "adi_interno": adi_interno},
+            "rows": jsonable_encoder(df.to_dict(orient="records")),
+            "totals": {"idmt": idmt, "%ADI_interno": percent_adi}
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao ler Excel: {e}")
+
+# -------------------- Endpoint GET --------------------
 @router.get("/dados")
 def get_dados():
-    global df
-    registros = jsonable_encoder(df.to_dict(orient="records"))
-    payload = {
-        "meta": {
-            "bw": 70,
-            "adi_interno": 0.05  # ✅ fixo por enquanto
-        },
-        "rows": registros,
-        "totals": {
-            "sumLC": None,
-            "idmt": None,
-            "%ADI_interno": None
-        }
-    }
-    return JSONResponse(content=payload)
+    dados = carregar_dados()
+    return JSONResponse(content=dados)
 
+# -------------------- Endpoint POST --------------------
 @router.post("/atualizar")
 def atualizar(payload: Dict = Body(...)):
-    global df
     if "rows" not in payload:
         raise HTTPException(status_code=400, detail="Campo 'rows' é obrigatório.")
-    rows = payload["rows"]
 
     try:
-        novo_df = pd.DataFrame(rows)
+        novo_df = pd.DataFrame(payload["rows"])
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"JSON inválido: {e}")
 
@@ -54,12 +69,16 @@ def atualizar(payload: Dict = Body(...)):
     if faltando:
         raise HTTPException(status_code=400, detail=f"Faltam colunas: {faltando}")
 
+    # Substituir NaN por None
     novo_df = novo_df[COLUNAS_DESEJADAS].replace({pd.NA: None})
 
     try:
-        novo_df.to_excel(EXCEL_PATH, index=False)
+        # Reescrever Excel mantendo metadados
+        meta_df = pd.read_excel(EXCEL_PATH, nrows=5, header=None)
+        with pd.ExcelWriter(EXCEL_PATH, engine="openpyxl") as writer:
+            meta_df.to_excel(writer, index=False, header=False)
+            novo_df.to_excel(writer, index=False, startrow=6)
     except PermissionError:
         raise HTTPException(status_code=423, detail="Feche o arquivo Excel e tente novamente.")
 
-    df = novo_df.copy()
     return {"status": "salvo"}
