@@ -1,5 +1,5 @@
-const API_URL = "http://127.0.0.1:8000/mexico/dados";
-const tbody = document.getElementById("tabela-dados");
+const API = "http://127.0.0.1:8000/mexico";
+
 // Estado global
 let state = {
   meta: { bw: 70, adi_interno: 0.05 },
@@ -7,7 +7,7 @@ let state = {
   totals: {}
 };
 
-// -------------------- Carregar dados do backend --------------------
+// Carregar dados do backend
 async function loadData() {
   try {
     const res = await fetch(`${API}/dados`);
@@ -26,7 +26,7 @@ async function loadData() {
   }
 }
 
-// -------------------- Renderizar tabela e resultados --------------------
+// Renderizar tabela e resultados
 function render() {
   // Atualiza valores fixos no bloco Results Output
   document.querySelector("#outBw").textContent = state.meta.bw ?? "-";
@@ -88,36 +88,7 @@ function render() {
   });
 }
 
-// -------------------- Salvar alterações no backend --------------------
-async function saveData() {
-  try {
-    const payload = { meta: state.meta, rows: state.rows };
-    const res = await fetch(`${API}/atualizar`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-
-    if (!res.ok) {
-      const err = await res.json();
-      alert(`Erro ao salvar: ${err.detail || res.statusText}`);
-    } else {
-      alert("Dados salvos com sucesso!");
-    }
-  } catch (err) {
-    console.error("Erro ao salvar:", err);
-    alert("Falha ao salvar dados.");
-  }
-}
-
-// -------------------- Limpar relatório --------------------
-function clearReport() {
-  state.rows.forEach((row) => {
-    row["LMR (mg/kg)"] = "";
-    row["R (mg/kg)"] = "";
-    row["C (Kg/person/day)"] = "";
-    row["(LMR or R)*C"] = "";
-  });
-  render();
-}
-
+// Inicialização
+document.addEventListener("DOMContentLoaded", () => {
+  loadData();
+});
