@@ -52,6 +52,8 @@
             <div class="main-header">
                 <img src="../../imagens/water.png" alt="Ícone da agua" class="logo-ag">
                 <h1>WATER</h1>
+                <input type="text" class="editable-btn" value="DRFA_EXTERNO" data-default="DRFA_EXTERNA" data-key="Ext" />
+                <input type="text" class="editable-int" value="DRFA_INTERNO" data-default="DRFA_INTERNA" data-key="Int" />
             </div>
             <h2>ACUTE DRA CALCULATOR</h2>
             <div class="main-scroll">
@@ -63,15 +65,23 @@
                             <thead>
                                 <tr>
                                     <th>Concentração água(mg/L)</th>
-                                    <th>%DRFA Syngenta (65 kg)</th>
-                                    <th>%DRFA ANVISA (65 kg)</th>
-                                    <th>%DRFA Syngenta (10 kg)</th>
-                                    <th>%DRFA ANVISA (10 kg)</th>
+                                    <th>Peso Adulto (kg)</th>
+                                    <th>Peso Criança (kg)</th>
+                                    <th>%DRFA EXTERNO Adulto (kg)</th>
+                                    <th>%DRFA INTERNO Adulto (kg)</th>
+                                    <th>%DRFA EXTERNO Criança (kg)</th>
+                                    <th>%DRFA INTERNO Criança (kg)</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td colspan="8" class="no-data">Nenhum dado disponível</td>
+                                    <td><input type="number" id="inputConc" class="editable-cell" value="" step="0.01"></td>
+                                    <td><input type="number" id="inputAdulto" class="editable-cell" value="" step="0.1"></td>
+                                    <td><input type="number" id="inputCrianca" class="editable-cell" value="" step="0.1"></td>
+                                    <td id="outExtAdulto">-</td>
+                                    <td id="outIntAdulto">-</td>
+                                    <td id="outExtCrianca">-</td>
+                                    <td id="outIntCrianca">-</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -82,11 +92,12 @@
                 <a href="../HomeWater.html">
                     <button class="btn-back">Back to Calculator</button>
                 </a>
+                <button class="btn-clear">Clear Report</button>
             </div>
         </div>
     </div>
 
-    <script src="../javascript/calculator.js" defer></script>
+    <script src="../../javascript/Botoes.js/acute_water.js" defer></script>
 </body>
 </html>
 
