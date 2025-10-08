@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let idaAnvisa = null;
     let idaSyngenta = null;
 
-    // Carregar valores salvos
+    // ---------------- Carregar valores salvos ----------------
     concInput.value = localStorage.getItem(LS_KEYS.conc) || "";
     adultoInput.value = localStorage.getItem(LS_KEYS.adulto) || "";
     criancaInput.value = localStorage.getItem(LS_KEYS.crianca) || "";
@@ -33,24 +33,37 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // ---------------- Utilitário de cursor ----------------
+    function setCaretToEnd(el) {
+        try {
+            const len = el.value.length;
+            el.setSelectionRange(len, len);
+        } catch {}
+    }
+
+    // ---------------- Função de input decimal (só ponto) + auto ponto após 0 ----------------
     function setupDecimalInput(selector, onValidNumber) {
         document.querySelectorAll(selector).forEach(input => {
-            const defaultText = input.dataset.default || input.value;
+            const defaultText = input.dataset?.default ?? input.value ?? "";
             input.type = 'text';
             input.setAttribute('inputmode', 'decimal');
             input.autocomplete = 'off';
             input.spellcheck = false;
+            input.title = 'Aceita números inteiros e decimais com ponto (.)';
 
-            if (!input.value) input.value = defaultText;
+            // Se não houver valor, mantém como está (para .editable-* pode mostrar rótulo via dataset.default)
+            if (!input.value && defaultText) input.value = defaultText;
 
             input.addEventListener('focus', () => {
-                if (input.value === defaultText) input.value = '';
+                // Para .editable-*, se estiver mostrando o rótulo "bonito", limpa para digitar
+                if (defaultText && input.value === defaultText) input.value = '';
             });
 
             input.addEventListener('blur', () => {
+                // Se ficar vazio ao sair do foco: zera o valor lógico e restaura rótulo (se houver)
                 if (input.value.trim() === '') {
-                    onValidNumber(null);
-                    input.value = defaultText;
+                    onValidNumber?.(null);
+                    if (defaultText) input.value = defaultText;
                     atualizarCalculo();
                 }
             });
@@ -62,27 +75,27 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Remove tudo que não for número ou ponto
                 v = v.replace(/[^0-9.]/g, '');
 
-                // Se começar com ponto, adiciona zero antes
-                if (v.startsWith('.')) {
-                    v = '0' + v;
-                }
-
                 // Permite apenas um ponto
                 const firstDot = v.indexOf('.');
                 if (firstDot !== -1) {
-                    v = v.slice(0, firstDot + 1) + v.slice(firstDot + 1).replace(/\./g, '');
+                        v = v.slice(0, firstDot + 1) + v.slice(firstDot + 1).replace(/\./g, '');
                 }
 
                 input.value = v;
+                setCaretToEnd(input);
 
-                const n = /^\d+(\.\d+)?$/.test(v) ? parseFloat(v) : null;
+                const isValidFinal = /^\d+(\.\d+)?$/.test(v);
+                const n = isValidFinal ? parseFloat(v) : null;
+
                 onValidNumber(n);
                 atualizarCalculo();
             });
 
+
         });
     }
 
+    // ---------------- Cálculo ----------------
     function atualizarCalculo() {
         const conc = parseFloat(concInput.value);
         const pesoAdulto = parseFloat(adultoInput.value);
@@ -101,37 +114,37 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("outIntCrianca").textContent = calc(1, pesoCrianca, idaSyngenta);
     }
 
-    // Botão Clear Report
-document.querySelector(".btn-clear").addEventListener("click", () => {
-    // Limpar inputs principais
-    concInput.value = "";
-    adultoInput.value = "";
-    criancaInput.value = "";
+    // ---------------- Botão Clear ----------------
+    document.querySelector(".btn-clear").addEventListener("click", () => {
+        // Limpar inputs principais
+        concInput.value = "";
+        adultoInput.value = "";
+        criancaInput.value = "";
 
-    // Limpar inputs DRFA
-    document.querySelectorAll(".editable-btn").forEach(input => {
-        input.value = input.dataset.default || "DRFA_EXTERNA";
+        // Limpar inputs DRFA
+        document.querySelectorAll(".editable-btn").forEach(input => {
+            input.value = input.dataset.default || "DRFA_EXTERNA";
+        });
+        document.querySelectorAll(".editable-int").forEach(input => {
+            input.value = input.dataset.default || "DRFA_INTERNA";
+        });
+
+        // Resetar variáveis
+        idaAnvisa = null;
+        idaSyngenta = null;
+
+        // Remover do localStorage
+        localStorage.removeItem(LS_KEYS.conc);
+        localStorage.removeItem(LS_KEYS.adulto);
+        localStorage.removeItem(LS_KEYS.crianca);
+        localStorage.removeItem(LS_KEYS.idaAnvisa);
+        localStorage.removeItem(LS_KEYS.idaSyngenta);
+
+        // Atualizar a tabela (colocar "-" nos resultados)
+        atualizarCalculo();
     });
-    document.querySelectorAll(".editable-int").forEach(input => {
-        input.value = input.dataset.default || "DRFA_INTERNA";
-    });
 
-    // Resetar variáveis
-    idaAnvisa = null;
-    idaSyngenta = null;
-
-    // Remover do localStorage
-    localStorage.removeItem(LS_KEYS.conc);
-    localStorage.removeItem(LS_KEYS.adulto);
-    localStorage.removeItem(LS_KEYS.crianca);
-    localStorage.removeItem(LS_KEYS.idaAnvisa);
-    localStorage.removeItem(LS_KEYS.idaSyngenta);
-
-    // Atualizar a tabela (colocar "-" nos resultados)
-    atualizarCalculo();
-});
-
-    // Salvar valores sempre que mudar
+    // ---------------- Salvar valores sempre que mudar (preserva até estados parciais como '0.') ----------------
     [concInput, adultoInput, criancaInput].forEach(input => {
         input.addEventListener("input", () => {
             localStorage.setItem(LS_KEYS.conc, concInput.value);
@@ -141,9 +154,26 @@ document.querySelector(".btn-clear").addEventListener("click", () => {
         });
     });
 
+    // ---------------- Inicialização ----------------
     carregarIDAsDeLocalStorage();
     atualizarCalculo();
 
+    // Aplicar lógica aos inputs principais e salvar valores "bons" quando existirem
+    setupDecimalInput('#inputConc', n => {
+        // Armazena o número parseado quando completo; o listener acima já salva o texto parcial
+        if (n !== null) localStorage.setItem(LS_KEYS.conc, String(n));
+        atualizarCalculo();
+    });
+    setupDecimalInput('#inputAdulto', n => {
+        if (n !== null) localStorage.setItem(LS_KEYS.adulto, String(n));
+        atualizarCalculo();
+    });
+    setupDecimalInput('#inputCrianca', n => {
+        if (n !== null) localStorage.setItem(LS_KEYS.crianca, String(n));
+        atualizarCalculo();
+    });
+
+    // Aplicar lógica aos inputs de DRFA (editable)
     setupDecimalInput('.editable-btn', n => {
         idaAnvisa = (n === null ? null : n);
         if (n === null) localStorage.removeItem(LS_KEYS.idaAnvisa);
@@ -158,4 +188,3 @@ document.querySelector(".btn-clear").addEventListener("click", () => {
         atualizarCalculo();
     });
 });
-
