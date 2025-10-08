@@ -1,18 +1,11 @@
 const API = "http://127.0.0.1:8000/mexico";
 
-// Estado global
 let state = {
   meta: { bw: 70, adi_interno: 0.05 },
   rows: [],
-  totals: {} // { sumLC, idmt, "%ADI_interno" }
+  totals: {}
 };
 
-/* ================================
- * Utilitário: forçar decimal com ponto (sem vírgula)
- * - Permite apenas dígitos e um único '.'.
- * - Bloqueia ',' e quaisquer caracteres não numéricos.
- * - Trata paste para manter só 0-9 e no máximo um '.'.
- * ================================ */
 function wireDecimalOnly(input) {
   let prev = input.value ?? "";
 
@@ -27,13 +20,11 @@ function wireDecimalOnly(input) {
     const ch = e.data;
     if (typeof ch !== "string") return;
 
-    // Bloqueia vírgula e quaisquer não [0-9.]
     if (!/[\d.]/.test(ch)) {
       e.preventDefault();
       return;
     }
 
-    // Permitir apenas um único '.'
     if (ch === ".") {
       const selStart = input.selectionStart ?? 0;
       const selEnd = input.selectionEnd ?? 0;
@@ -89,9 +80,6 @@ function wireDecimalOnly(input) {
   });
 }
 
-/* ================================
- * Helpers numéricos e formatação
- * ================================ */
 function toNumOrNull(v) {
   if (v === null || v === undefined) return null;
   const s = String(v).trim();
@@ -102,11 +90,6 @@ function toNumOrNull(v) {
 function fmt6(n) { return Number(n).toFixed(6); }
 function fmt2(n) { return Number(n).toFixed(2); }
 
-/* ================================
- * Cálculo de uma linha e do total
- * - Atualiza state.rows[i]["(LMR or R)*C"]
- * - Atualiza DOM da coluna calculada da linha
- * ================================ */
 function calcRowAndPaint(i) {
   const row = state.rows[i];
   let lmr = toNumOrNull(row["LMR (mg/kg)"]);
@@ -116,7 +99,6 @@ function calcRowAndPaint(i) {
   const limite = (r !== null) ? r : (lmr !== null ? lmr : null);
   const val = (limite !== null && c !== null) ? limite * c : null;
 
-  // Atualiza o modelo
   if (val !== null) {
     const v6 = Number(fmt6(val));
     row["(LMR or R)*C"] = v6;
@@ -124,20 +106,15 @@ function calcRowAndPaint(i) {
     row["(LMR or R)*C"] = "";
   }
 
-  // Atualiza a célula da linha no DOM (sem rerenderizar tudo)
   const cell = document.querySelector(`tr[data-idx="${i}"] td.col-lc`);
-  if (cell) {
-    cell.textContent = (val !== null) ? fmt6(val) : "-";
-  }
+  if (cell) cell.textContent = (val !== null) ? fmt6(val) : "-";
 }
 
 function calcularTudo() {
-  // 1) Atualiza todas as linhas calculadas
   for (let i = 0; i < state.rows.length; i++) {
     calcRowAndPaint(i);
   }
 
-  // 2) Soma (SUM) e IDMT
   let sumLC = 0;
   state.rows.forEach(r => {
     const v = toNumOrNull(r["(LMR or R)*C"]);
@@ -149,9 +126,7 @@ function calcularTudo() {
   const adi = toNumOrNull(state.meta.adi_interno);
 
   let idmt = null;
-  if (bw !== null && bw > 0) {
-    idmt = Number(fmt6(sumLC / bw));
-  }
+  if (bw !== null && bw > 0) idmt = Number(fmt6(sumLC / bw));
 
   let percent = null;
   if (adi !== null && adi > 0 && idmt !== null) {
@@ -159,21 +134,17 @@ function calcularTudo() {
   }
 
   state.totals = {
-    sumLC: sumLC,
-    idmt: idmt,
+    sumLC,
+    idmt,
     "%ADI_interno": percent
   };
 
-  // 3) Pinta o bloco de resultados
   const outIdmt = document.querySelector("#outIdmt");
   const outPercentAdi = document.querySelector("#outPercentAdi");
   if (outIdmt) outIdmt.textContent = (idmt !== null) ? fmt6(idmt) : "-";
   if (outPercentAdi) outPercentAdi.textContent = (percent !== null) ? fmt2(percent) : "-";
 }
 
-/* ================================
- * Carregar dados do backend
- * ================================ */
 async function loadData() {
   try {
     const res = await fetch(`${API}/dados`);
@@ -181,10 +152,16 @@ async function loadData() {
     const data = await res.json();
 
     state.meta = data.meta;
-    state.rows = data.rows;
+
+    // Converte C (Kg/person/day) para número
+    state.rows = data.rows.map(row => ({
+      ...row,
+      "C (Kg/person/day)": toNumOrNull(row["C (Kg/person/day)"])
+    }));
+
     state.totals = data.totals ?? {};
 
-    render(true); // primeiro render: constrói tabela e calcula tudo
+    render(true);
   } catch (err) {
     console.error("Falha ao carregar dados:", err);
     const tbody = document.querySelector("#tbodyMexico");
@@ -194,22 +171,62 @@ async function loadData() {
   }
 }
 
-/* ================================
- * Renderizar tabela e resultados
- * - firstPaint = true: constrói linhas e liga eventos
- * ================================ */
 function render(firstPaint = false) {
-  // Cabeçalhos fixos
   const outBw = document.querySelector("#outBw");
   const outAdi = document.querySelector("#outAdi");
-  if (outBw)  outBw.textContent  = state.meta.bw ?? "-";
-  if (outAdi) outAdi.textContent = state.meta.adi_interno ?? "-";
+
+  if (outBw) outBw.textContent = state.meta.bw ?? "-";
+
+  if (outAdi) {
+  const inpAdi = document.createElement("input");
+  inpAdi.type = "text";
+  inpAdi.value = state.meta.adi_interno ?? "";
+  inpAdi.className = "editable-cell";
+  inpAdi.style.width = "80px";
+  wireDecimalOnly(inpAdi);
+
+ inpAdi.addEventListener("input", (e) => {
+  let val = inpAdi.value;
+
+  // Se o usuário está apagando, não força nada
+  if (e.inputType === "deleteContentBackward") {
+    state.meta.adi_interno = val;
+    calcularTudo();
+    return;
+  }
+
+  // Se começar com "0" e não tiver ponto, apenas mantém 0
+  if (val === "0") {
+    state.meta.adi_interno = val;
+    calcularTudo();
+    return;
+  }
+
+  // Se o valor começa com "0" e o próximo caractere não é ponto, insere ponto automaticamente
+  if (val.length === 2 && val.startsWith("0") && val[1] !== ".") {
+    val = "0." + val[1];
+  }
+
+  // Remove pontos extras (mantém apenas o primeiro)
+  const parts = val.split(".");
+  if (parts.length > 2) {
+    val = parts[0] + "." + parts.slice(1).join("").replace(/\./g, "");
+  }
+
+  inpAdi.value = val;
+  state.meta.adi_interno = val;
+  calcularTudo();
+});
+
+
+  outAdi.innerHTML = "";
+  outAdi.appendChild(inpAdi);
+}
 
   const tbody = document.querySelector("#tbodyMexico");
   if (!tbody) return;
 
   if (firstPaint) {
-    // Monta a tabela do zero apenas no primeiro paint
     tbody.innerHTML = "";
 
     if (!state.rows.length) {
@@ -219,7 +236,6 @@ function render(firstPaint = false) {
         const tr = document.createElement("tr");
         tr.dataset.idx = String(i);
 
-        // Colunas em ordem
         const cols = [
           "Crop",
           "Cultivo",
@@ -232,7 +248,7 @@ function render(firstPaint = false) {
         cols.forEach((col) => {
           const td = document.createElement("td");
 
-          if (["LMR (mg/kg)", "R (mg/kg)", "C (Kg/person/day)"].includes(col)) {
+          if (["LMR (mg/kg)", "R (mg/kg)"].includes(col)) {
             const inp = document.createElement("input");
             inp.type = "text";
             inp.value = row[col] ?? "";
@@ -240,33 +256,12 @@ function render(firstPaint = false) {
             inp.style.width = "100%";
             wireDecimalOnly(inp);
 
-            // Recalcular a cada digitação (inclui apagar)
             inp.addEventListener("input", () => {
-              row[col] = inp.value;   // mantém no estado como string/número coerente
-              // Recalcula apenas o necessário e resultados
+              row[col] = inp.value;
               calcRowAndPaint(i);
-              // Recalcula totais e pinta bloco de resultados
-              // (mais leve que re-renderizar toda a tabela)
-              let sumLC = 0;
-              state.rows.forEach(r => {
-                const v = toNumOrNull(r["(LMR or R)*C"]);
-                if (v !== null) sumLC += v;
-              });
-              sumLC = Number(fmt6(sumLC));
-              const bw = toNumOrNull(state.meta.bw);
-              const adi = toNumOrNull(state.meta.adi_interno);
-              let idmt = (bw !== null && bw > 0) ? Number(fmt6(sumLC / bw)) : null;
-              let percent = (adi !== null && adi > 0 && idmt !== null) ? Number(fmt2((idmt / adi) * 100)) : null;
-
-              state.totals = { sumLC, idmt, "%ADI_interno": percent };
-
-              const outIdmt = document.querySelector("#outIdmt");
-              const outPercentAdi = document.querySelector("#outPercentAdi");
-              if (outIdmt) outIdmt.textContent = (idmt !== null) ? fmt6(idmt) : "-";
-              if (outPercentAdi) outPercentAdi.textContent = (percent !== null) ? fmt2(percent) : "-";
+              calcularTudo();
             });
 
-            // Normaliza no blur (opcional)
             inp.addEventListener("blur", () => {
               const n = toNumOrNull(inp.value);
               inp.value = (n !== null) ? String(n) : "";
@@ -274,8 +269,13 @@ function render(firstPaint = false) {
             });
 
             td.appendChild(inp);
+          } else if (col === "C (Kg/person/day)") {
+            td.textContent = row[col] ?? "-";
+          } else if (col === "Cultivo") {
+            const valor = row[col] ?? "-";
+            td.innerHTML = valor.replace(/(\d+)$/, "<sup>$1</sup>");
           } else if (col === "(LMR or R)*C") {
-            td.classList.add("col-lc");  // marcador para atualização rápida
+            td.classList.add("col-lc");
             td.textContent = row[col] ?? "-";
           } else {
             td.textContent = row[col] ?? "-";
@@ -289,45 +289,46 @@ function render(firstPaint = false) {
     }
   }
 
-  // Calcula tudo e pinta resultados/coluna calculada
   calcularTudo();
 }
 
-/* ================================
- * Clear Report (frontend apenas)
- * ================================ */
 function clearReport() {
   state.rows.forEach((row, i) => {
     row["LMR (mg/kg)"] = "";
     row["R (mg/kg)"] = "";
-    row["C (Kg/person/day)"] = "";
     row["(LMR or R)*C"] = "";
-    // Atualiza inputs visualmente (sem reconstruir tabela)
+
     const tr = document.querySelector(`tr[data-idx="${i}"]`);
     if (tr) {
-      const inputs = tr.querySelectorAll("input.editable-cell");
-      inputs.forEach(inp => inp.value = "");
+      tr.querySelectorAll("input.editable-cell").forEach(inp => inp.value = "");
       const lcCell = tr.querySelector("td.col-lc");
       if (lcCell) lcCell.textContent = "-";
     }
   });
+
+  state.meta.adi_interno = "";
+  const outAdi = document.querySelector("#outAdi");
+  if (outAdi) {
+    const inpAdi = outAdi.querySelector("input");
+    if (inpAdi) inpAdi.value = "";
+  }
 
   state.totals = {};
   const outIdmt = document.querySelector("#outIdmt");
   const outPercentAdi = document.querySelector("#outPercentAdi");
   if (outIdmt) outIdmt.textContent = "-";
   if (outPercentAdi) outPercentAdi.textContent = "-";
+
+  // ✅ Recalcula tudo após limpar
+  calcularTudo();
 }
 
-/* ================================
- * Inicialização
- * ================================ */
 document.addEventListener("DOMContentLoaded", () => {
   loadData();
 
-  // Botão Clear (por id ou classe)
   const btnClearById = document.querySelector("#btnClear");
   const btnClearByClass = document.querySelector(".btn-clear");
   const btnClear = btnClearById || btnClearByClass;
   if (btnClear) btnClear.addEventListener("click", clearReport);
 });
+
