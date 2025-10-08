@@ -71,6 +71,7 @@ function render() {
         const inp = document.createElement("input");
         inp.type = "text";
         inp.value = row[col] ?? "";
+        inp.className = "editable-cell";
         inp.style.width = "100%";
         inp.addEventListener("change", () => {
           row[col] = inp.value;
