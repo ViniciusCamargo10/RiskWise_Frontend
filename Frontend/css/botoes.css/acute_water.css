@@ -420,3 +420,31 @@ input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
+
+/* Contêiner para os botões IDA */
+.ida-buttons {
+    position: absolute;
+    left: 340px;       /* Mantém no canto direito */
+    top: 100px;         /* Ajuste para alinhar com o H2 */
+    display: flex;
+    gap: 10px;
+}
+
+.ida-buttons input {
+    width: 130px;
+    height: 30px;
+    text-align: center;
+    font-size: 15px;
+    border: 2px solid #4CAF50;
+    border-radius: 8px;
+    background-color: white;
+    color: #333333;
+    cursor: pointer;
+    outline: none;
+    transition: 0.3s;
+}
+
+.ida-buttons input:focus {
+    border-color: #2e7d32;
+    background-color: #e8f5e9;
+}
