@@ -157,4 +157,26 @@ document.addEventListener("DOMContentLoaded", () => {
         else localStorage.setItem(LS_KEYS.idaSyngenta, String(n));
         atualizarCalculo();
     });
+
+    const modal = document.getElementById("info-buttonC");
+    const btn = document.querySelector(".info-buttonC");
+    const span = modal.querySelector(".close"); // pega o X dentro do modal
+    
+    if (btn && modal && span) {
+    btn.addEventListener("click", () => {
+        modal.style.display = "flex";
+    });
+
+    span.addEventListener("click", () => {
+        modal.style.display = "none";
+    });
+
+    window.addEventListener("click", (event) => {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+}
+
+
 });
