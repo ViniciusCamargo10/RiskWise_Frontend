@@ -72,81 +72,81 @@ document.addEventListener("DOMContentLoaded", async () => {
   // --------------------- Calcular IDMT E Contribuição individual ---------------------------
 
   function calcularIDMT(item) {
-    const consumoRaw = toNumberSafe(getCampo(item, "Consumo diário per capita (g_dia_pessoa) C"));
-    const consumo = consumoRaw !== null ? consumoRaw / 1000 : null; // kg/dia/pessoa
+  const consumoRaw = toNumberSafe(getCampo(item, "Consumo diário per capita (g_dia_pessoa) C"));
+  const consumo = consumoRaw !== null ? consumoRaw / 1000 : null; // kg/dia/pessoa
 
-    const fp = toNumberSafe(getCampo(item, "Fator de Processamento FP"));
-    const fc = toNumberSafe(getCampo(item, "Fator de Conversão FC"));
-    const lmr = toNumberSafe(getCampo(item, "LMR (mg_kg)"));
-    const mrec = toNumberSafe(getCampo(item, "MREC_STMR (mg_kg)"));
+  const fp = toNumberSafe(getCampo(item, "Fator de Processamento FP"));
+  const fc = toNumberSafe(getCampo(item, "Fator de Conversão FC"));
+  const lmr = toNumberSafe(getCampo(item, "LMR (mg_kg)"));
+  const mrec = toNumberSafe(getCampo(item, "MREC_STMR (mg_kg)"));
+  const pc = toNumberSafe(getCampo(item, "PC (kg)")); // 🔹 precisa para dividir
 
-    const limite =
-      (lmr !== null && lmr > 0) ? lmr :
-      (mrec !== null && mrec > 0) ? mrec :
-      null;
+  const limite =
+    (lmr !== null && lmr > 0) ? lmr :
+    (mrec !== null && mrec > 0) ? mrec :
+    null;
 
-    // Checar explicitamente contra null (0 é válido)
-    if (consumo !== null && fp !== null && fc !== null && limite !== null) {
-      return limite * consumo * fp * fc;
-    }
-    return null;
+  if (consumo !== null && fp !== null && fc !== null && limite !== null && pc !== null && pc > 0) {
+    return (limite * consumo * fp * fc) / pc; // ✅ divide pelo PC
   }
+  return null;
+}
 
   function calcularContribuicaoIndividual(idmt, item) {
     const pc = toNumberSafe(getCampo(item, "PC (kg)"));
     const marketShare = toNumberSafe(getCampo(item, "Market Share")) || 1;
     const idmtVal = (idmt ?? 0);
+
     return pc ? (idmtVal / pc) * marketShare : 0;
   }
 
   // ------------- % POF -------------------------
 
   function atualizarPOF() {
-    const regioes = ["Brasil", "Centro_Oeste", "Nordeste", "Norte", "Sudeste", "Sul"];
-    const anos = ["2008", "2017"];
+  const regioes = ["Brasil", "Centro_Oeste", "Nordeste", "Norte", "Sudeste", "Sul"];
+  const anos = ["2008", "2017"];
 
-    anos.forEach(ano => {
-      const resultado = {};
-      regioes.forEach(regiao => {
-        const idmtTotal = dadosOriginais
-          .filter(item =>
-            String(getCampo(item, "ANO_POF")) === ano &&
-            String(getCampo(item, "Região")) === regiao
-          )
-          .reduce((soma, item) => soma + (calcularIDMT(item) ?? 0), 0); // null conta como 0
+  anos.forEach(ano => {
+    const resultado = {};
 
-        const idaAnvisaPercent = idaAnvisa ? (idmtTotal / idaAnvisa) * 100 : null;
-        const idaSyngentaPercent = idaSyngenta ? (idmtTotal / idaSyngenta) * 100 : null;
+    regioes.forEach(regiao => {
+      // 🔹 Soma IDMTs apenas da região e ano corretos
+      const idmtTotal = dadosOriginais
+        .filter(item =>
+          String(getCampo(item, "ANO_POF")) === ano &&
+          String(getCampo(item, "Região")) === regiao
+        )
+        .reduce((soma, item) => soma + (calcularIDMT(item) ?? 0), 0);
 
-        resultado[regiao] = {
-          "%IDA_ANVISA": idaAnvisaPercent,
-          "%IDA_SYNGENTA": idaSyngentaPercent
-        };
-      });
-
-      atualizarTabelaPOF(resultado, ano === "2008" ? "tabela-pof-2008" : "tabela-pof-2017");
+      // 🔹 Calcula %IDA externa e interna
+      resultado[regiao] = {
+        "%IDA_ANVISA": idaAnvisa ? (idmtTotal * 100) / idaAnvisa : null,
+        "%IDA_SYNGENTA": idaSyngenta ? (idmtTotal * 100) / idaSyngenta : null
+      };
     });
-  }
+
+    // 🔹 Atualiza tabela correspondente
+    atualizarTabelaPOF(resultado, ano === "2008" ? "tabela-pof-2008" : "tabela-pof-2017");
+  });
+}
 
   function atualizarTabelaPOF(resultados, tabelaId) {
-    const tbody = document.getElementById(tabelaId);
-    if (!tbody) return;
+  const tbody = document.getElementById(tabelaId);
+  if (!tbody) return;
 
-    tbody.querySelectorAll("tr").forEach(tr => {
-      // Pegue a chave original direto do dataset (não do texto visível)
-      const metrica = tr.dataset.metrica || toBackendMetric(tr.children[0].textContent.trim());
+  tbody.querySelectorAll("tr").forEach(tr => {
+    const metrica = tr.dataset.metrica || toBackendMetric(tr.children[0].textContent.trim());
 
-      // Atualiza somente as métricas calculadas (%IDA_*)
-      if (!["%IDA_ANVISA", "%IDA_SYNGENTA"].includes(metrica)) return;
+    if (!["%IDA_ANVISA", "%IDA_SYNGENTA"].includes(metrica)) return;
 
-      const regioes = ["Brasil", "Centro_Oeste", "Nordeste", "Norte", "Sudeste", "Sul"];
-      regioes.forEach((regiao, i) => {
-        const valor = resultados[regiao][metrica]; // usa a chave backend
-        tr.children[i + 1].textContent =
-          typeof valor === "number" ? valor.toFixed(4) + "%" : "—";
-      });
+    const regioes = ["Brasil", "Centro_Oeste", "Nordeste", "Norte", "Sudeste", "Sul"];
+    regioes.forEach((regiao, i) => {
+      const valor = resultados[regiao][metrica];
+      tr.children[i + 1].textContent =
+        typeof valor === "number" ? valor.toFixed(4) + "%" : "—";
     });
-  }
+  });
+}
 
   // ---------------- Criação de Input Numérico com replicação (com re-render global) ----------------
   function criarInputNumerico(valorInicial, onValidChange, placeholderText = "-", ano = null, cultivo = null, coluna = null) {
@@ -397,7 +397,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           td.appendChild(input);
         } else if (["IDMT (Numerador)", "Contribuição Individual do Cultivo"].includes(col)) {
           const num = toNumberSafe(getCampo(item, col));
-          td.textContent = num !== null ? num.toFixed(6) : "-";
+          td.textContent = num !== null ? num.toFixed(8) : "-";
         } else {
           td.textContent = valor;
         }
