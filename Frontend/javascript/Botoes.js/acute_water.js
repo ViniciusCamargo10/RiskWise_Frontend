@@ -188,3 +188,25 @@ document.addEventListener("DOMContentLoaded", () => {
         atualizarCalculo();
     });
 });
+
+
+    const modal = document.getElementById("info-button");
+    const btn = document.querySelector(".info-button");
+    const span = document.querySelector(".close");
+
+    if (btn && modal && span) {
+        btn.addEventListener("click", () => {
+            modal.style.display = "flex";
+        });
+
+        span.addEventListener("click", () => {
+            modal.style.display = "none";
+        });
+
+        window.addEventListener("click", (event) => {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        });
+    }
+
