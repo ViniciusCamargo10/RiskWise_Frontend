@@ -7,8 +7,8 @@ document.addEventListener("DOMContentLoaded", () => {
         conc: "conc",
         adulto: "adulto",
         crianca: "crianca",
-        idaAnvisa: "IDA_ANVISA_VAL",
-        idaSyngenta: "IDA_SYNGENTA_VAL"
+        idaAnvisa: "AGUDO_IDA_ANVISA_VAL",
+        idaSyngenta: "AGUDO_IDA_SYNGENTA_VAL"
     };
 
     let idaAnvisa = null;

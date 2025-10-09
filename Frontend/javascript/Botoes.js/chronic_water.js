@@ -7,11 +7,11 @@ document.addEventListener("DOMContentLoaded", () => {
         conc: "conc",
         adulto: "adulto",
         crianca: "crianca",
-        idaAnvisa: "IDA_ANVISA_VAL",
-        idaSyngenta: "IDA_SYNGENTA_VAL"
+        idaAnvisa: "CRONICO_IDA_ANVISA_VAL",
+        idaSyngenta: "CRONICO_IDA_SYNGENTA_VAL"
     };
 
-    let idaAnvisa = null; 
+    let idaAnvisa = null;
     let idaSyngenta = null;
 
     // ---------------- Carregar valores salvos ----------------
@@ -26,72 +26,50 @@ document.addEventListener("DOMContentLoaded", () => {
         idaSyngenta = int ? Number(int) : null;
 
         document.querySelectorAll('.editable-btn').forEach(inp => {
-            if (idaAnvisa !== null && Number.isFinite(idaAnvisa)) inp.value = String(idaAnvisa);
+            inp.value = (idaAnvisa !== null && Number.isFinite(idaAnvisa))
+                ? String(idaAnvisa)
+                : (inp.dataset.default || "IDA_EXTERNA");
         });
         document.querySelectorAll('.editable-int').forEach(inp => {
-            if (idaSyngenta !== null && Number.isFinite(idaSyngenta)) inp.value = String(idaSyngenta);
+            inp.value = (idaSyngenta !== null && Number.isFinite(idaSyngenta))
+                ? String(idaSyngenta)
+                : (inp.dataset.default || "IDA_INTERNA");
         });
     }
 
-    // ---------------- Utilitário de cursor ----------------
-    function setCaretToEnd(el) {
-        try {
-            const len = el.value.length;
-            el.setSelectionRange(len, len);
-        } catch {}
-    }
-
-    // ---------------- Função de input decimal (só ponto) + auto ponto após 0 ----------------
+    // ---------------- Função para inputs decimais ----------------
     function setupDecimalInput(selector, onValidNumber) {
         document.querySelectorAll(selector).forEach(input => {
-            const defaultText = input.dataset?.default ?? input.value ?? "";
+            const defaultText = input.dataset.default || input.value;
             input.type = 'text';
             input.setAttribute('inputmode', 'decimal');
             input.autocomplete = 'off';
             input.spellcheck = false;
             input.title = 'Aceita números inteiros e decimais com ponto (.)';
 
-            // Se não houver valor, mantém como está (para .editable-* pode mostrar rótulo via dataset.default)
-            if (!input.value && defaultText) input.value = defaultText;
+            // Mostra rótulo inicial se vazio
+            if (!input.value) input.value = defaultText;
 
             input.addEventListener('focus', () => {
-                // Para .editable-*, se estiver mostrando o rótulo "bonito", limpa para digitar
-                if (defaultText && input.value === defaultText) input.value = '';
+                if (input.value === defaultText) input.value = '';
             });
 
             input.addEventListener('blur', () => {
-                // Se ficar vazio ao sair do foco: zera o valor lógico e restaura rótulo (se houver)
                 if (input.value.trim() === '') {
-                    onValidNumber?.(null);
-                    if (defaultText) input.value = defaultText;
-                    atualizarCalculo();
+                    onValidNumber(null);
+                    input.value = defaultText;
                 }
             });
 
-            
             input.addEventListener('input', () => {
-                let v = input.value;
-
-                // Remove tudo que não for número ou ponto
-                v = v.replace(/[^0-9.]/g, '');
-
-                // Permite apenas um ponto
-                const firstDot = v.indexOf('.');
-                if (firstDot !== -1) {
-                        v = v.slice(0, firstDot + 1) + v.slice(firstDot + 1).replace(/\./g, '');
-                }
-
+                let v = input.value.replace(/[^0-9.]/g, '');
+                const i = v.indexOf('.');
+                if (i !== -1) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '');
+                if (v.startsWith('.')) v = '0' + v;
                 input.value = v;
-                setCaretToEnd(input);
 
-                const isValidFinal = /^\d+(\.\d+)?$/.test(v);
-                const n = isValidFinal ? parseFloat(v) : null;
-
-                onValidNumber(n);
-                atualizarCalculo();
+                onValidNumber(/^\d+(\.\d+)?$/.test(v) ? parseFloat(v) : null);
             });
-
-
         });
     }
 
@@ -116,12 +94,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ---------------- Botão Clear ----------------
     document.querySelector(".btn-clear").addEventListener("click", () => {
-        // Limpar inputs principais
         concInput.value = "";
         adultoInput.value = "";
         criancaInput.value = "";
 
-        // Limpar inputs DRFA
         document.querySelectorAll(".editable-btn").forEach(input => {
             input.value = input.dataset.default || "IDA_EXTERNA";
         });
@@ -129,22 +105,19 @@ document.addEventListener("DOMContentLoaded", () => {
             input.value = input.dataset.default || "IDA_INTERNA";
         });
 
-        // Resetar variáveis
         idaAnvisa = null;
         idaSyngenta = null;
 
-        // Remover do localStorage
         localStorage.removeItem(LS_KEYS.conc);
         localStorage.removeItem(LS_KEYS.adulto);
         localStorage.removeItem(LS_KEYS.crianca);
         localStorage.removeItem(LS_KEYS.idaAnvisa);
         localStorage.removeItem(LS_KEYS.idaSyngenta);
 
-        // Atualizar a tabela (colocar "-" nos resultados)
         atualizarCalculo();
     });
 
-    // ---------------- Salvar valores sempre que mudar (preserva até estados parciais como '0.') ----------------
+    // ---------------- Salvar valores ----------------
     [concInput, adultoInput, criancaInput].forEach(input => {
         input.addEventListener("input", () => {
             localStorage.setItem(LS_KEYS.conc, concInput.value);
@@ -158,9 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
     carregarIDAsDeLocalStorage();
     atualizarCalculo();
 
-    // Aplicar lógica aos inputs principais e salvar valores "bons" quando existirem
     setupDecimalInput('#inputConc', n => {
-        // Armazena o número parseado quando completo; o listener acima já salva o texto parcial
         if (n !== null) localStorage.setItem(LS_KEYS.conc, String(n));
         atualizarCalculo();
     });
@@ -173,16 +144,15 @@ document.addEventListener("DOMContentLoaded", () => {
         atualizarCalculo();
     });
 
-    // Aplicar lógica aos inputs de DRFA (editable)
     setupDecimalInput('.editable-btn', n => {
-        idaAnvisa = (n === null ? null : n);
+        idaAnvisa = n;
         if (n === null) localStorage.removeItem(LS_KEYS.idaAnvisa);
         else localStorage.setItem(LS_KEYS.idaAnvisa, String(n));
         atualizarCalculo();
     });
 
     setupDecimalInput('.editable-int', n => {
-        idaSyngenta = (n === null ? null : n);
+        idaSyngenta = n;
         if (n === null) localStorage.removeItem(LS_KEYS.idaSyngenta);
         else localStorage.setItem(LS_KEYS.idaSyngenta, String(n));
         atualizarCalculo();
