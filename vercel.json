@@ -8,7 +8,10 @@
   "functions": {
     "Backend/main.py": {
       "maxDuration": 10,
-      "includeFiles": "Backend/data/**"
+      "includeFiles": [
+        "Backend/data/**",
+        "Frontend/**"
+      ]
     }
   }
 }

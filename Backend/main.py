@@ -3,6 +3,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 # Ajusta o path para permitir imports do Backend
 sys.path.append(os.path.dirname(__file__))
@@ -28,3 +29,8 @@ app.include_router(mexico.router, prefix="/mexico", tags=["México Planilha"])
 # Exemplo: Frontend/html/index.html -> https://seuprojeto.vercel.app/html/index.html
 FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "Frontend")
 app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
+
+# ✅ Rota para favicon
+@app.get("/favicon.ico")
+async def favicon():
+    return FileResponse(os.path.join(FRONTEND_DIR, "favicon.ico"))
