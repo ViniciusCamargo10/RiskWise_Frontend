@@ -1,4 +1,4 @@
-const API = "http://127.0.0.1:8000/mexico";
+const API = `${window.location.origin}/mexico`;
 
 let state = {
   meta: { bw: 70, adi_interno: 0.05 },

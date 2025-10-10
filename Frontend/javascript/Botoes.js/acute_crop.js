@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
   'use strict';
 
-  const API_URL = "http://localhost:8000/acute/dados";
+  const API_URL = `${window.location.origin}/acute/dados`;
   const tbody = document.getElementById("tabela-dados");
 
   // ---------- Estado global ----------

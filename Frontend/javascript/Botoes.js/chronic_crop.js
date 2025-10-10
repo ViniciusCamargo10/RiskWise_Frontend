@@ -18,7 +18,7 @@ function toBackendMetric(displayText) {
 document.addEventListener("DOMContentLoaded", async () => {
   'use strict';
 
-  const API_URL = "http://localhost:8000/dados";
+  const API_URL = `${window.location.origin}/dados`;
   const tbody = document.getElementById("tabela-dados");
 
   // Estado dos filtros (cumulativos)
@@ -618,7 +618,7 @@ let pof2008Dados = null;
 
 async function carregarTabelaPOF2008() {
   try {
-    const response = await fetch("http://localhost:8000/dados");
+    const response = await fetch(`${window.location.origin}/dados`);
     if (!response.ok) throw new Error("Erro ao buscar dados da POF 2008");
 
     const data = await response.json();
@@ -660,7 +660,7 @@ let pof2017Dados = null;
 
 async function carregarTabelaPOF2017() {
   try {
-    const response = await fetch("http://localhost:8000/dados");
+    const response = await fetch(`${window.location.origin}/dados`);
     if (!response.ok) throw new Error("Erro ao buscar dados da POF 2017");
 
     const data = await response.json();
