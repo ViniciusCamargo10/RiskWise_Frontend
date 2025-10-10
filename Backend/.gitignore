@@ -1,0 +1,23 @@
+# Ambientes virtuais
+venv/
+
+# Cache do Python
+__pycache__/
+*.pyc
+
+# Variáveis de ambiente
+*.env
+
+# Dependências do Node
+node_modules/
+
+# Pastas de build
+dist/
+build/
+
+# Código legado
+legacy/
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
