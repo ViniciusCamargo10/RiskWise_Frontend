@@ -4,5 +4,11 @@
   ],
   "routes": [
     { "src": "/(.*)", "dest": "Backend/main.py" }
-  ]
+  ],
+  "functions": {
+    "Backend/main.py": {
+      "maxDuration": 10,
+      "includeFiles": "Backend/data/**"
+    }
+  }
 }
