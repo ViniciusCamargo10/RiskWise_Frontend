@@ -2,45 +2,49 @@ from fastapi import APIRouter, HTTPException, Body
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from typing import List, Dict
-from pathlib import Path
 import pandas as pd
+import os
 from utils.excel_loader import carregar_excel
 
 router = APIRouter()
 
-# Caminho do Excel
-EXCEL_PATH = Path(r"C:\Users\s1337626\OneDrive - Syngenta\Área de Trabalho\DietaAgudaOf.xlsx")
+# ✅ Caminho relativo para o arquivo dentro do projeto
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))  # volta para Backend
+EXCEL_PATH = os.path.join(BASE_DIR, "data", "DietaAgudaOf.xlsx")
 
 # Colunas esperadas
 COLUNAS_DESEJADAS = [
     "Cultivo/ Matriz Animal", "ANO POF", "Região",
     "Caso Fórmula", "Caso Mapeado",
     "LMR (mg/kg)", "HR/MCR (mg/kg)", "MREC/STMR (mg/kg)",
-    # --------- CAMPOS NECESSÁRIOS PARA AS FÓRMULAS ---------
     "Fator de Processamento FP",
     "Fator de Conversão FC",
     "Peso Unitário da Parte Comestível Uc (g)",
     "Fator de variabilidade v",
     "Maior porção MP (g/dia/pessoa)",
     "Peso Corpóreo médio dos consumidores PC (kg)",
-    # (Se o seu Excel usa algum outro campo de peso corporal/região, mantenha também)
-    # -------------------------------------------------------
-    "Consumo (g/dia/pessoa) Percentil 97,5",  # se quiser manter no dataset
-    "Peso corpóreo da região (kg)",           # se quiser manter no dataset
-    "%DRFA ANVISA", "%DRFA SYNGENTA"          # podem vir vazios; calcularemos no front
+    "Consumo (g/dia/pessoa) Percentil 97,5",
+    "Peso corpóreo da região (kg)",
+    "%DRFA ANVISA", "%DRFA SYNGENTA"
 ]
 
-# Carrega DataFrame inicial
-df = carregar_excel(EXCEL_PATH, COLUNAS_DESEJADAS)
+# ✅ Não carregue o Excel no import
+# df = carregar_excel(EXCEL_PATH, COLUNAS_DESEJADAS)
 
 @router.get("/dados")
 def get_dados():
+    if not os.path.exists(EXCEL_PATH):
+        raise HTTPException(status_code=500, detail=f"Arquivo não encontrado: {EXCEL_PATH}")
+
+    df = carregar_excel(EXCEL_PATH, COLUNAS_DESEJADAS)
     registros = jsonable_encoder(df.to_dict(orient="records"))
     return JSONResponse(content={"tabelaCompleta": registros})
 
 @router.post("/atualizar")
 def atualizar(dados: List[Dict] = Body(...)):
-    global df
+    if not os.path.exists(EXCEL_PATH):
+        raise HTTPException(status_code=500, detail=f"Arquivo não encontrado: {EXCEL_PATH}")
+
     try:
         novo_df = pd.DataFrame(dados)
     except Exception as e:
@@ -57,5 +61,4 @@ def atualizar(dados: List[Dict] = Body(...)):
     except PermissionError:
         raise HTTPException(status_code=423, detail="Feche o arquivo Excel e tente novamente.")
 
-    df = novo_df.copy()
     return {"status": "salvo"}

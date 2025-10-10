@@ -5,11 +5,13 @@ from pathlib import Path
 from typing import Dict
 import pandas as pd
 import numpy as np
+import os
 
 router = APIRouter()
 
-# Caminho fixo do Excel
-EXCEL_PATH = Path(r"C:\Users\s1337626\OneDrive - Syngenta\Área de Trabalho\Dieta cronica Mexico_V01 STL_OF.xlsx")
+# ✅ Caminho relativo para o arquivo dentro do projeto
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))  # volta para Backend
+EXCEL_PATH = os.path.join(BASE_DIR, "data", "DietaCronicaMexico.xlsx")
 
 # Colunas esperadas na tabela principal
 COLUNAS_DESEJADAS = [
@@ -28,6 +30,9 @@ def safe_json(obj):
 
 # -------------------- Função para ler metadados e tabela --------------------
 def carregar_dados():
+    if not os.path.exists(EXCEL_PATH):
+        raise HTTPException(status_code=500, detail=f"Arquivo não encontrado: {EXCEL_PATH}")
+
     try:
         # Ler metadados (linhas 1 a 5)
         meta_df = pd.read_excel(EXCEL_PATH, nrows=5, header=None)
