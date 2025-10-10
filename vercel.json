@@ -1,14 +1,12 @@
 {
-  "builds": [
-    { "src": "Backend/main.py", "use": "@vercel/python" }
-  ],
-  "routes": [
-    { "src": "/(.*)", "dest": "Backend/main.py" }
-  ],
   "functions": {
-    "Backend/main.py": {
+    "api/index.py": {
+      "runtime": "python3.11",
       "maxDuration": 10,
       "includeFiles": "{Backend/data/**,Frontend/**}"
     }
-  }
+  },
+  "routes": [
+    { "src": "/(.*)", "dest": "api/index.py" }
+  ]
 }
