@@ -20,21 +20,20 @@ app.add_middleware(
 )
 
 # Importa e inclui as rotas da API
-from Backend.routes import chronic, acute, mexico
+from .routes import chronic, acute, mexico
 app.include_router(chronic.router, tags=["Dieta Crônica"])
 app.include_router(acute.router, prefix="/acute", tags=["Nova Planilha"])
 app.include_router(mexico.router, prefix="/mexico", tags=["México Planilha"])
 
-# ✅ Diretórios do Frontend
 FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "Frontend")
 FRONTEND_HTML_DIR = os.path.join(FRONTEND_DIR, "html")
 
-# ✅ Servir arquivos estáticos (CSS, JS, imagens)
+# Servir CSS, JS e imagens
 app.mount("/css", StaticFiles(directory=os.path.join(FRONTEND_DIR, "css")), name="css")
 app.mount("/javascript", StaticFiles(directory=os.path.join(FRONTEND_DIR, "javascript")), name="javascript")
 app.mount("/imagens", StaticFiles(directory=os.path.join(FRONTEND_DIR, "imagens")), name="imagens")
 
-# ✅ Servir todas as páginas HTML
+# Servir HTML
 app.mount("/", StaticFiles(directory=FRONTEND_HTML_DIR, html=True), name="frontend")
 
 # ✅ Rota para favicon

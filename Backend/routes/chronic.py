@@ -2,9 +2,8 @@ from fastapi import APIRouter, HTTPException, Body
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from typing import List, Dict
-from pathlib import Path
 import pandas as pd
-from utils.excel_loader import carregar_excel
+import numpy as np
 import os
 
 router = APIRouter()
@@ -13,7 +12,7 @@ router = APIRouter()
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))  # volta para Backend
 EXCEL_PATH = os.path.join(BASE_DIR, "data", "DietaCronicaOf.xlsx")
 
-COLUNAS_DESEJADAS = [
+REQUIRED_COLS = [
     "Cultivo", "ANO_POF", "Região", "LMR (mg_kg)",
     "MREC_STMR (mg_kg)", "Market Share", "IDMT (Numerador)",
     "Contribuição Individual do Cultivo",
@@ -21,64 +20,107 @@ COLUNAS_DESEJADAS = [
     "Fator de Processamento FP", "Fator de Conversão FC", "PC (kg)"
 ]
 
-# ✅ NÃO carregue o Excel no import! (isso quebra no Vercel)
-# df = carregar_excel(EXCEL_PATH, COLUNAS_DESEJADAS)
+def _normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+    df.columns = [str(c).strip() for c in df.columns]
+    return df
 
-# Estruturas POF (serão preenchidas sob demanda)
-pof_2008 = {"PC_Kg": {}, "%IDA_ANVISA": {}, "%IDA_SYNGENTA": {}}
-pof_2017 = {"PC_Kg": {}, "%IDA_ANVISA": {}, "%IDA_SYNGENTA": {}}
+def _read_excel_validated(path: str) -> pd.DataFrame:
+    if not os.path.exists(path):
+        raise HTTPException(status_code=500, detail=f"Arquivo não encontrado: {path}")
+
+    try:
+        df = pd.read_excel(path)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao ler Excel: {e}")
+
+    df = _normalize_columns(df)
+    missing = [c for c in REQUIRED_COLS if c not in df.columns]
+    if missing:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Colunas ausentes na planilha: {missing}. Colunas disponíveis: {list(df.columns)}"
+        )
+
+    df = df[REQUIRED_COLS]
+    df = df.replace({pd.NA: None, np.nan: None, np.inf: None, -np.inf: None})
+
+    return df
 
 @router.get("/dados")
 def get_dados():
-    # ✅ Carrega o Excel sob demanda
-    if not os.path.exists(EXCEL_PATH):
-        raise HTTPException(status_code=500, detail=f"Arquivo não encontrado: {EXCEL_PATH}")
+    try:
+        df = _read_excel_validated(EXCEL_PATH)
 
-    df = carregar_excel(EXCEL_PATH, COLUNAS_DESEJADAS)
+        # Monta POF dinamicamente
+        pof_2008 = {"PC_Kg": {}, "%IDA_ANVISA": {}, "%IDA_SYNGENTA": {}}
+        pof_2017 = {"PC_Kg": {}, "%IDA_ANVISA": {}, "%IDA_SYNGENTA": {}}
 
-    # Monta POF dinamicamente
-    pof_2008 = {"PC_Kg": {}, "%IDA_ANVISA": {}, "%IDA_SYNGENTA": {}}
-    pof_2017 = {"PC_Kg": {}, "%IDA_ANVISA": {}, "%IDA_SYNGENTA": {}}
+        for linha in df.to_dict(orient="records"):
+            try:
+                if linha["ANO_POF"] == 2008:
+                    regiao = linha["Região"]
+                    pc_kg = linha["PC (kg)"]
+                    if regiao and pc_kg is not None:
+                        pof_2008["PC_Kg"][regiao] = round(float(pc_kg), 4)
+                        pof_2008["%IDA_ANVISA"][regiao] = None
+                        pof_2008["%IDA_SYNGENTA"][regiao] = None
+                if linha["ANO_POF"] == 2017:
+                    regiao = linha["Região"]
+                    pc_kg = linha["PC (kg)"]
+                    if regiao and pc_kg is not None:
+                        pof_2017["PC_Kg"][regiao] = round(float(pc_kg), 4)
+                        pof_2017["%IDA_ANVISA"][regiao] = None
+                        pof_2017["%IDA_SYNGENTA"][regiao] = None
+            except Exception:
+                # Se alguma linha vier malformada, continua sem derrubar tudo
+                continue
 
-    for linha in df.to_dict(orient="records"):
-        if linha["ANO_POF"] == 2008:
-            regiao = linha["Região"]
-            pc_kg = linha["PC (kg)"]
-            if regiao and pc_kg is not None:
-                pof_2008["PC_Kg"][regiao] = round(pc_kg, 4)
-                pof_2008["%IDA_ANVISA"][regiao] = None
-                pof_2008["%IDA_SYNGENTA"][regiao] = None
-        if linha["ANO_POF"] == 2017:
-            regiao = linha["Região"]
-            pc_kg = linha["PC (kg)"]
-            if regiao and pc_kg is not None:
-                pof_2017["PC_Kg"][regiao] = round(pc_kg, 4)
-                pof_2017["%IDA_ANVISA"][regiao] = None
-                pof_2017["%IDA_SYNGENTA"][regiao] = None
-
-    registros = jsonable_encoder(df.to_dict(orient="records"))
-    return JSONResponse(content={
-        "tabelaCompleta": registros,
-        "POF_2008": pof_2008,
-        "POF_2017": pof_2017
-    })
+        registros = jsonable_encoder(df.to_dict(orient="records"))
+        meta = {
+            "file": os.path.basename(EXCEL_PATH),
+            "total_registros": len(registros),
+            "colunas": list(df.columns),
+        }
+        return JSONResponse(content={
+            "tabelaCompleta": registros,
+            "POF_2008": pof_2008,
+            "POF_2017": pof_2017,
+            "meta": meta
+        })
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao processar dados: {e}")
 
 @router.post("/atualizar")
 def atualizar(dados: List[Dict] = Body(...)):
+    # Ambiente de deploy (ex.: Vercel) é read-only
+    if os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV"):
+        raise HTTPException(
+            status_code=501,
+            detail="Escrita desabilitada no ambiente de deploy (filesystem read-only)."
+        )
+
     try:
         novo_df = pd.DataFrame(dados)
+        novo_df = _normalize_columns(novo_df)
+
+        missing = [c for c in REQUIRED_COLS if c not in novo_df.columns]
+        if missing:
+            raise HTTPException(status_code=400, detail=f"Faltam colunas obrigatórias no payload: {missing}")
+
+        novo_df = novo_df[REQUIRED_COLS].replace({pd.NA: None, np.nan: None})
+
+        try:
+            novo_df.to_excel(EXCEL_PATH, index=False)
+        except PermissionError:
+            raise HTTPException(status_code=423, detail="Feche o arquivo Excel e tente novamente.")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Erro ao salvar Excel: {e}")
+
+        return {"status": "salvo", "linhas": len(novo_df), "arquivo": os.path.basename(EXCEL_PATH)}
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"JSON inválido: {e}")
-
-    faltando = [c for c in COLUNAS_DESEJADAS if c not in novo_df.columns]
-    if faltando:
-        raise HTTPException(status_code=400, detail=f"Faltam colunas: {faltando}")
-
-    novo_df = novo_df[COLUNAS_DESEJADAS].replace({pd.NA: None})
-
-    try:
-        novo_df.to_excel(EXCEL_PATH, index=False)
-    except PermissionError:
-        raise HTTPException(status_code=423, detail="Feche o arquivo Excel e tente novamente.")
-
-    return {"status": "salvo"}
+        raise HTTPException(status_code=500, detail=f"Erro ao processar atualização: {e}")

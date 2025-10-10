@@ -8,7 +8,7 @@
 
 body {
     font-family: 'Poppins', sans-serif;
-    background: url("/imagens/fundo.jpg") no-repeat center center fixed;
+    background: url('fundo.jpg') no-repeat center center fixed;
     background-size: cover;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -60,7 +60,7 @@ body {
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
 
-.info-buttonC {
+.info-button {
     background: linear-gradient(135deg, #ffffff, #e8f5e9);
     color: #2e7d32;
     font-size: 1.5rem;
@@ -78,11 +78,12 @@ body {
     display: inline-block;
 }
 
-.info-buttonC:hover {
+.info-button:hover {
     background: linear-gradient(135deg, #c8e6c9, #ffffff);
     transform: scale(1.05);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
+
 
 .modal {
     display: none;
@@ -221,7 +222,7 @@ body {
 .main-header {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 10px;
     width: 100%;
     justify-content: flex-start;
     padding-left: 18px;
@@ -244,6 +245,7 @@ body {
     align-self: flex-start;
     margin-bottom: 1rem;
 }
+
 .main h2 {
     color: #fff;
     font-size: 1.4rem;

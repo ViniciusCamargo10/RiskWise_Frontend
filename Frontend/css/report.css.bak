@@ -8,7 +8,7 @@
 
 body {
     font-family: 'Poppins', sans-serif;
-    background: url("/imagens/fundo.jpg") no-repeat center center fixed;
+    background: url('fundo.jpg') no-repeat center center fixed;
     background-size: cover;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -60,30 +60,6 @@ body {
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
 
-.info-buttonC {
-    background: linear-gradient(135deg, #ffffff, #e8f5e9);
-    color: #2e7d32;
-    font-size: 1.5rem;
-    font-weight: bold;
-    border: 2px solid #2e7d32;
-    border-radius: 55%;
-    width: 47px;
-    height: 45px;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    transition: all 0.3s ease;
-    text-align: center;
-    line-height: 45px;
-    text-decoration: none;
-    display: inline-block;
-}
-
-.info-buttonC:hover {
-    background: linear-gradient(135deg, #c8e6c9, #ffffff);
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
-}
-
 .modal {
     display: none;
     position: fixed;
@@ -116,7 +92,6 @@ body {
 }
 
 .modal-content p {
-    margin-right: 13px;
     font-size: 1.2rem;
     color: #333;
 }
@@ -154,7 +129,7 @@ body {
     height: auto;
     display: block;
     margin-left: 1px;
-    margin-top: -10px;
+    margin-top: -12px;
 }
 
 .sidebar-icon {
@@ -192,8 +167,8 @@ body {
     padding: 2rem;
     color: #fff;
     background-color: transparent;
-    height: 85vh;
-    max-height: 85vh;
+    height: auto;
+    max-height: none;
     overflow: hidden;
     width: 100%;
 }
@@ -220,36 +195,20 @@ body {
 
 .main-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 5px;
+    margin-bottom: 20px;
     width: 100%;
-    justify-content: flex-start;
-    padding-left: 18px;
 }
 
-.logo-ag {
-    order: 1;
-    width: 37px;
-    height: auto;
-    object-fit: contain;
-    margin-top: -20px;
-}
-
-.main-header h1 {
-    order: 2;
+.main h1 {
     font-size: 2rem;
     font-weight: 800;
-    color: #fdfdfd;
-    padding: 0.5rem;
-    align-self: flex-start;
-    margin-bottom: 1rem;
-}
-.main h2 {
     color: #fff;
-    font-size: 1.4rem;
     margin-bottom: 2rem;
-    margin-right: auto;
-    margin-left: 24px;
+    text-align: left;
+    align-self: flex-start;
+    margin-top: -5px;
 }
 
 
@@ -257,7 +216,7 @@ body {
     margin-bottom: 2rem;
 }
 
-.section h3 {
+.section h2 {
     color: #fff;
     font-size: 1.4rem;
     margin-bottom: 1rem;
@@ -331,8 +290,7 @@ body {
     justify-content: center;
     gap: 1rem;
     padding: 1rem;
-    position: relative;
-    top: -50px; 
+    margin-top: 0.5rem; 
 }
 
 .action-buttons button {
@@ -351,124 +309,38 @@ body {
 }
 
 /* Cores específicas */
-.btn-back {
+.btn-excel {
     background-color: #f7f7f7; /* Verde */
 }
 
 
-/* ===== Telas grandes ===== */
-@media (min-width: 1200px) {
-  /* 1) Deixe o cartão menor também em altura */
-  .container {
-    width: 80%;
-    max-width: 900px;      /* ajuste a gosto */
-    max-height: 80vh;      /* limite de altura do cartão */
-    overflow: hidden;      /* só a área interna rola */
-    margin: 0 auto;
-  }
-
-  /* 2) Reduza a altura disponível para o conteúdo */
-  .main {
-    height: 65vh;          /* menor que 85vh */
-    max-height: 65vh;
-    padding: 1.5rem;
-  }
-
-  /* 3) Permita que a área rolável se ajuste ao novo espaço */
-  .main-scroll {
-    /* ESSENCIAL para flex: permite encolher dentro de .main */
-    min-height: 0;         
-    overflow-y: auto;
-  }
-
-  /* 4) Tipografia e respiros um pouco menores (opcional) */
-  h1 { font-size: 1.6rem; }
-  h2 { font-size: 1.2rem; }
-  .report-table { font-size: 0.8rem; }
-  .action-buttons { padding: 0.75rem; gap: 0.75rem; }
+.tooltip-wrapper {
+  position: relative;
+  display: inline-block;
 }
 
-.editable-cell {
-  width: 100%;
-  padding: 3px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 0.8rem;
+.tooltip-text {
+  visibility: hidden;
+  opacity: 0;
+  width: 200px;
+  background-color: #2e7d32;
+  color: #fff;
   text-align: center;
-  background-color: #fff;
-  color: #000;
-}
-.editable-cell:focus {
-  outline: none;
-  border-color: #2e7d32;
-  box-shadow: 0 0 0 2px rgba(46,125,50,.15);
-}
-
-.editable-btn:nth-of-type(1) {
-    order: 3;
-    margin-left: 230px; /* igual ao Chronic */
+  border-radius: 8px;
+  padding: 0.6rem;
+  position: absolute;
+  bottom: 125%; /* aparece acima do botão */
+  left: 50%;
+  transform: translateX(-50%);
+  transition: opacity 0.3s ease;
+  font-size: 0.85rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  z-index: 10;
 }
 
-.editable-int:nth-of-type(2) {
-    order: 4;
+.tooltip-wrapper:hover .tooltip-text {
+    
+  visibility: visible;
+  opacity: 1;
 }
 
-/* Inputs estilo Chronic */
-.editable-btn, .editable-int {
-    width: 130px;
-    height: 30px;
-    text-align: center;
-    font-size: 15px;
-    border: 2px solid #4CAF50;
-    border-radius: 8px;
-    background-color: white;
-    color:#333333;
-    cursor: pointer;
-    outline: none;
-    transition: 0.3s;
-}
-
-.editable-btn:focus, .editable-int:focus {
-    border-color: #2e7d32;
-    background-color: #e8f5e9;
-}
-
-/* Remove as setas dos inputs numéricos (Chrome, Safari, Edge, Firefox) */
-input[type=number] {
-    -webkit-appearance: none; /* Chrome, Safari */
-    -moz-appearance: textfield; /* Firefox */
-    appearance: none; /* Padrão */
-}
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-/* Contêiner para os botões IDA */
-.ida-buttons {
-    position: absolute;
-    left: 340px;       /* Mantém no canto direito */
-    top: 100px;         /* Ajuste para alinhar com o H2 */
-    display: flex;
-    gap: 10px;
-}
-
-.ida-buttons input {
-    width: 130px;
-    height: 30px;
-    text-align: center;
-    font-size: 15px;
-    border: 2px solid #4CAF50;
-    border-radius: 8px;
-    background-color: white;
-    color: #333333;
-    cursor: pointer;
-    outline: none;
-    transition: 0.3s;
-}
-
-.ida-buttons input:focus {
-    border-color: #2e7d32;
-    background-color: #e8f5e9;
-}

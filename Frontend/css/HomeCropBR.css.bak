@@ -10,7 +10,7 @@
 /* BODY / FUNDO */
 body {
     font-family: 'Poppins', sans-serif;
-    background: url("/imagens/fundo.jpg") no-repeat center center fixed;
+    background: url('fundo.jpg') no-repeat center center fixed;
     background-size: cover;
     display: flex;
     justify-content: center;
@@ -50,7 +50,7 @@ body {
     height: auto;
     display: block;
     margin-left: 1px;
-    margin-top: -20px;
+    margin-top: -20px
 }
 
 .sidebar-icon {
@@ -67,7 +67,7 @@ body {
 }
 
 .sidebar-icon:hover {
-    background: #557258;
+    background: #e0e0e0;
     transform: scale(1.1);
 }
 
@@ -103,7 +103,7 @@ body {
 
 .logo-br {
     order: 1;
-    width: 50px;
+    width: 60px;
     height: auto;
     object-fit: contain;
     margin-top: -22px;
