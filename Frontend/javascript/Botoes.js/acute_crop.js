@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function fmtCell(v, opts = {}) {
     const { digits, suffix } = opts;
-    if (v === null || v === undefined || Number.isNaN(v)) return '-';
+    if (v === null || v === undefined || Number.isNaN(v)) return '';
     const out = (typeof digits === 'number') ? Number(v).toFixed(digits) : String(v);
     return suffix ? `${out}${suffix}` : out;
   }
