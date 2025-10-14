@@ -441,7 +441,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           const disableST = (caso === "Caso 1" || caso === "Caso 2a" || caso === "Caso 2b") && isST;
           const disabled  = disableHR || disableST;
 
-          const placeholder = disabled ? "NA" : "-";
+          const placeholder = disabled ? "" : "";
           const raw = getCampo(item, col);
           const valorInicial = (raw === null || raw === undefined) ? "" : raw;
 
