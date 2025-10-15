@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
+
 # Ajusta o path para permitir imports do Backend
 sys.path.append(os.path.dirname(__file__))
 
@@ -33,6 +34,10 @@ FRONTEND_HTML_DIR = os.path.join(FRONTEND_DIR, "html")
 app.mount("/css", StaticFiles(directory=os.path.join(FRONTEND_DIR, "css")), name="css")
 app.mount("/javascript", StaticFiles(directory=os.path.join(FRONTEND_DIR, "javascript")), name="javascript")
 app.mount("/imagens", StaticFiles(directory=os.path.join(FRONTEND_DIR, "imagens")), name="imagens")
+
+app.get("/")
+async def custom_home():
+    return FileResponse(os.path.join(FRONTEND_HTML_DIR, "login.html"))  # troque pelo nome da página desejada
 
 # Servir HTML
 app.mount("/", StaticFiles(directory=FRONTEND_HTML_DIR, html=True), name="frontend")
