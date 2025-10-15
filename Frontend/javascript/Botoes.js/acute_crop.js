@@ -232,6 +232,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  // ---------- Persistência dos dados preenchidos ----------
+  function salvarDadosNoLocalStorage() {
+  dadosOriginais.forEach(item => {
+    const caso = String(item["Caso Fórmula"] || "").trim();
+
+    // 🔒 Bloqueios por caso
+    if (caso === "Caso 3") {
+      item["HR/MCR (mg/kg)"] = "NA";
+    }
+
+    if (["Caso 1", "Caso 2a", "Caso 2b"].includes(caso)) {
+      item["MREC/STMR (mg/kg)"] = "NA";
+    }
+
+    // 🧮 Cálculo de IMEA e DRFA
+    const imea = calcularIMEA(item);
+    item["IMEA (mg/kg p.c./dia)"] = imea;
+
+    const drfaAnvisa = calcularDRFA(imea, idaAnvisa);
+    const drfaSyngenta = calcularDRFA(imea, idaSyngenta);
+
+    item["%DRFA ANVISA"] = Number.isNaN(drfaAnvisa) ? "-" : `${drfaAnvisa.toFixed(2)}%`;
+    item["%DRFA SYNGENTA"] = Number.isNaN(drfaSyngenta) ? "-" : `${drfaSyngenta.toFixed(2)}%`;
+  });
+
+  // 💾 Salva os dados com os bloqueios e cálculos aplicados
+  localStorage.setItem("DADOS_CALCULADORA", JSON.stringify(dadosOriginais));
+}
+
   function replicarEdicao({ cultivo, ano, regiao, coluna, valor }) {
     // Captura caret do input atual (se existir)
     const active = document.activeElement;
@@ -257,6 +286,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Re-render preservando scroll e foco
     refreshPreservandoFocoEScroll(reselectInfo);
+    salvarDadosNoLocalStorage(); // ✅ salva os dados atualizados
+
   }
 
   // ---------- Inputs numéricos de célula ----------
@@ -517,7 +548,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // ---------- Carregar do backend ----------
-  async function carregarTabela() {
+  async function carregarTabela() {    
+    const dadosSalvos = localStorage.getItem("DADOS_CALCULADORA");
+      if (dadosSalvos) {
+        dadosOriginais = JSON.parse(dadosSalvos);
+        inicializarFiltros(dadosOriginais);
+        refreshPreservandoFocoEScroll();
+        return;
+      }
+
     try {
       const response = await fetch(API_URL);
       if (!response.ok) throw new Error("Erro ao buscar dados");
@@ -535,6 +574,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ---------- Inicialização ----------
   await carregarTabela();
   carregarIDAsDeLocalStorage();
+  refreshPreservandoFocoEScroll();
 
   // Wire dos inputs de IDA (topo)
   setupDecimalInput('.editable-btn', n => {
@@ -573,9 +613,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.removeItem(LS_KEYS.idaAnvisa);
     localStorage.removeItem(LS_KEYS.idaSyngenta);
 
-    // (opcional) resetar filtros:
-    // estadoFiltros["Cultivo/ Matriz Animal"] = "Todos";
-    // estadoFiltros["ANO POF"] = "Todos";
+   
+    // ✅ Limpa os dados preenchidos salvos
+    localStorage.removeItem("DADOS_CALCULADORA");
 
     refreshPreservandoFocoEScroll();
   });
