@@ -1,37 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="pt-BR">
+<head> 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Page</title>
-    <link rel="stylesheet" href="/css/login.css">
+    <title>RiskWise Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
 </head>
 <body>
-    
- <div class="container">
-        <div class="form-box login">
-            <form id="loginForm">
-                <h1>Login</h1>
-                <div class="input-box">
-                    <input type="text" name="username" placeholder="Username" required autocomplete="username">
-                </div>
-                <div class="input-box">
-                    <input type="password" name="password" placeholder="Password" required autocomplete="current-password">
-                </div>
-                <div class="input-box">
-                    <button type="submit" class="btn">Login</button>
-                </div>
-                <p id="errorMsg" style="color:red; display:none;">Usuário ou senha inválidos!</p>
-            </form>
+    <div class="container">
+        <!-- Botão de ajuda -->
+        <a href="https://app.smartsheet.com/sheets/pjRGcG7H8V3Qxc7rmVWPQM38G5X286QwpQCPxFw1" class="help-button" target="_blank" rel="noopener noreferrer" aria-label="Ajuda">?</a>
+        
+        <div class="header-container">
+            <img src="/imagens/LogoBrancoRisk.png" alt="Icone do RiskLogo" class="logo-rk">
+            <h1 class="welcome-text">Hi, welcome back !</h1>
         </div>
-        <div class="toggle-box">
-            <div class="toggle-panel toggle-left">
-               <img src="/imagens/LogoBrancoRisk.png" class="logo-login">
+        <!-- Área principal com os botões -->
+        
+        <main class="main">
+            <div class="button-container">
+
+                <div class="button" onclick="handleCardClick('calculator', event)">
+                    <img src="/imagens/calculator.png" alt="Ícone Calculadora">
+                    <h2>CALCULATOR</h2>
+                    <p>Calculation tool</p>
+                </div>
+
+                <div class="button" onclick="handleCardClick('document', event)">
+                    <img src="/imagens/documentation.png" alt="Ícone Documento" class="logo-doc">
+                    <h2>DOCUMENTS</h2>
+                    <p>Files and Reports</p>
+                </div>
+
+                <div class="button" onclick="handleCardClick('search', event)">
+                    <img src="/imagens/search.png" alt="Ícone Busca">
+                    <h2>SEARCH</h2>
+                    <p>Search Data</p>
+                </div>
             </div>
-        </div>
+        </main>
+
     </div>
+
     <script src="/javascript/auth-check.js" defer></script>
-    <script src="/javascript/login.js" defer></script>
+    <script src="/javascript/script.js"></script>
 </body>
 </html>
