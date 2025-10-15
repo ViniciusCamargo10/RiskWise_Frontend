@@ -57,8 +57,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function toNumberSafe(v) {
-    if (v === null || v === undefined || v === "") return null;
-    const n = Number(v);
+    if (v === null || v === undefined) return null;
+    const s = String(v).trim();
+    if (s === "") return null;
+    const n = Number(s);
     return Number.isFinite(n) ? n : null;
   }
 
@@ -72,25 +74,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   // --------------------- Calcular IDMT E Contribuição individual ---------------------------
 
   function calcularIDMT(item) {
-  const consumoRaw = toNumberSafe(getCampo(item, "Consumo diário per capita (g_dia_pessoa) C"));
-  const consumo = consumoRaw !== null ? consumoRaw / 1000 : null; // kg/dia/pessoa
+    const consumoRaw = toNumberSafe(getCampo(item, "Consumo diário per capita (g_dia_pessoa) C"));
+    const consumo = consumoRaw !== null ? consumoRaw / 1000 : null; // kg/dia/pessoa
 
-  const fp = toNumberSafe(getCampo(item, "Fator de Processamento FP"));
-  const fc = toNumberSafe(getCampo(item, "Fator de Conversão FC"));
-  const lmr = toNumberSafe(getCampo(item, "LMR (mg_kg)"));
-  const mrec = toNumberSafe(getCampo(item, "MREC_STMR (mg_kg)"));
-  const pc = toNumberSafe(getCampo(item, "PC (kg)")); // 🔹 precisa para dividir
+    const fp = toNumberSafe(getCampo(item, "Fator de Processamento FP"));
+    const fc = toNumberSafe(getCampo(item, "Fator de Conversão FC"));
+    const lmr = toNumberSafe(getCampo(item, "LMR (mg_kg)"));
+    const mrec = toNumberSafe(getCampo(item, "MREC_STMR (mg_kg)"));
+    const pc = toNumberSafe(getCampo(item, "PC (kg)")); // 🔹 precisa para dividir
 
-  const limite =
-    (lmr !== null && lmr > 0) ? lmr :
-    (mrec !== null && mrec > 0) ? mrec :
-    null;
+    const limite =
+      (lmr !== null && lmr > 0) ? lmr :
+      (mrec !== null && mrec > 0) ? mrec :
+      null;
 
-  if (consumo !== null && fp !== null && fc !== null && limite !== null && pc !== null && pc > 0) {
-    return (limite * consumo * fp * fc) / pc; // ✅ divide pelo PC
+    if (consumo !== null && fp !== null && fc !== null && limite !== null && pc !== null && pc > 0) {
+      return (limite * consumo * fp * fc) / pc; // ✅ divide pelo PC
+    }
+    return null;
   }
-  return null;
-}
 
   function calcularContribuicaoIndividual(idmt, item) {
     const pc = toNumberSafe(getCampo(item, "PC (kg)"));
@@ -103,50 +105,50 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ------------- % POF -------------------------
 
   function atualizarPOF() {
-  const regioes = ["Brasil", "Centro_Oeste", "Nordeste", "Norte", "Sudeste", "Sul"];
-  const anos = ["2008", "2017"];
+    const regioes = ["Brasil", "Centro_Oeste", "Nordeste", "Norte", "Sudeste", "Sul"];
+    const anos = ["2008", "2017"];
 
-  anos.forEach(ano => {
-    const resultado = {};
+    anos.forEach(ano => {
+      const resultado = {};
 
-    regioes.forEach(regiao => {
-      // 🔹 Soma IDMTs apenas da região e ano corretos
-      const idmtTotal = dadosOriginais
-        .filter(item =>
-          String(getCampo(item, "ANO_POF")) === ano &&
-          String(getCampo(item, "Região")) === regiao
-        )
-        .reduce((soma, item) => soma + (calcularIDMT(item) ?? 0), 0);
+      regioes.forEach(regiao => {
+        // 🔹 Soma IDMTs apenas da região e ano corretos
+        const idmtTotal = dadosOriginais
+          .filter(item =>
+            String(getCampo(item, "ANO_POF")) === ano &&
+            String(getCampo(item, "Região")) === regiao
+          )
+          .reduce((soma, item) => soma + (calcularIDMT(item) ?? 0), 0);
 
-      // 🔹 Calcula %IDA externa e interna
-      resultado[regiao] = {
-        "%IDA_ANVISA": idaAnvisa ? (idmtTotal * 100) / idaAnvisa : null,
-        "%IDA_SYNGENTA": idaSyngenta ? (idmtTotal * 100) / idaSyngenta : null
-      };
+        // 🔹 Calcula %IDA externa e interna
+        resultado[regiao] = {
+          "%IDA_ANVISA": idaAnvisa ? (idmtTotal * 100) / idaAnvisa : null,
+          "%IDA_SYNGENTA": idaSyngenta ? (idmtTotal * 100) / idaSyngenta : null
+        };
+      });
+
+      // 🔹 Atualiza tabela correspondente
+      atualizarTabelaPOF(resultado, ano === "2008" ? "tabela-pof-2008" : "tabela-pof-2017");
     });
-
-    // 🔹 Atualiza tabela correspondente
-    atualizarTabelaPOF(resultado, ano === "2008" ? "tabela-pof-2008" : "tabela-pof-2017");
-  });
-}
+  }
 
   function atualizarTabelaPOF(resultados, tabelaId) {
-  const tbody = document.getElementById(tabelaId);
-  if (!tbody) return;
+    const tbody = document.getElementById(tabelaId);
+    if (!tbody) return;
 
-  tbody.querySelectorAll("tr").forEach(tr => {
-    const metrica = tr.dataset.metrica || toBackendMetric(tr.children[0].textContent.trim());
+    tbody.querySelectorAll("tr").forEach(tr => {
+      const metrica = tr.dataset.metrica || toBackendMetric(tr.children[0].textContent.trim());
 
-    if (!["%IDA_ANVISA", "%IDA_SYNGENTA"].includes(metrica)) return;
+      if (!["%IDA_ANVISA", "%IDA_SYNGENTA"].includes(metrica)) return;
 
-    const regioes = ["Brasil", "Centro_Oeste", "Nordeste", "Norte", "Sudeste", "Sul"];
-    regioes.forEach((regiao, i) => {
-      const valor = resultados[regiao][metrica];
-      tr.children[i + 1].textContent =
-        typeof valor === "number" ? valor.toFixed(4) + "%" : "—";
+      const regioes = ["Brasil", "Centro_Oeste", "Nordeste", "Norte", "Sudeste", "Sul"];
+      regioes.forEach((regiao, i) => {
+        const valor = resultados[regiao][metrica];
+        tr.children[i + 1].textContent =
+          typeof valor === "number" ? valor.toFixed(4) + "%" : "—";
+      });
     });
-  });
-}
+  }
 
   // ---------------- Criação de Input Numérico com replicação (com re-render global) ----------------
   function criarInputNumerico(valorInicial, onValidChange, placeholderText = "-", ano = null, cultivo = null, coluna = null) {
@@ -159,10 +161,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     input.className = "editable-cell";
     input.value = (valorInicial === "-" ? "" : (valorInicial ?? "")).toString();
 
-    input.title = "Aceita números inteiros e decimais com ponto (.)";
+    input.title = "Accepts integers and decimals with dots (.)";
 
-    const regexParcial = /^\d*\.?\d*$/;
-    const regexFinal   = /^\d+(\.\d+)?$/;
+    const regexParcial = /^\d*\.?\d*$/;   // permite "0.", "0.0", "0.06"
+    const regexFinal   = /^\d+(\.\d+)?$/; // número completo com ponto
 
     let prev = input.value;
 
@@ -224,7 +226,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     function validarAtualizar() {
-      const v = input.value;
+      let v = input.value;
 
       if (!regexParcial.test(v)) {
         input.value = prev;
@@ -234,17 +236,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
+      // Remove pontos extras depois do primeiro
+      const i = v.indexOf('.');
+      if (i !== -1) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '');
+
       input.style.borderColor = "#ccc";
       prev = v;
+      input.value = v;
 
       if (typeof onValidChange !== "function") return;
 
-      // 🔹 Caso: o usuário APAGOU tudo (string vazia)
+      // 🔹 Usuário limpou tudo
       if (v === "") {
         onValidChange(null);
 
         if (ano != null && cultivo != null && coluna) {
-          // Atualiza o modelo de dados
           dadosOriginais.forEach(item => {
             if (
               String(getCampo(item, "ANO_POF")) === String(ano) &&
@@ -258,61 +264,16 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
           });
 
-          // 🔒 Preservar foco antes de re-renderizar
+          // 🔒 Preserva foco, re-renderiza e restaura
           const currentFocus = document.activeElement;
           const currentAno = currentFocus?.dataset?.ano;
           const currentCultivo = currentFocus?.dataset?.cultivo;
           const currentColuna = currentFocus?.dataset?.col;
 
-          // Recalcula e re-renderiza uma única vez
           atualizarPOF();
-          renderizarTabela(dadosOriginais);
+          // 🔧 re-render com filtros preservados
+          renderizarTabela(dadosComFiltrosAplicados());
 
-          // 🔁 Restaurar foco no mesmo input
-          if (currentAno && currentCultivo && currentColuna) {
-            const selector = `.editable-cell[data-ano="${esc(currentAno)}"][data-cultivo="${esc(currentCultivo)}"][data-col="${esc(currentColuna)}"]`;
-            const newInput = document.querySelector(selector);
-            if (newInput) {
-              newInput.focus();
-              const len = newInput.value.length;
-              try { newInput.setSelectionRange(len, len); } catch {}
-            }
-          }
-        }
-        return; // evita cair no branch numérico
-      }
-
-      // 🔹 Caso: número válido - replicar preenchimento
-      if (regexFinal.test(v)) {
-        const num = Number(v);
-        onValidChange(num);
-
-        if (ano != null && cultivo != null && coluna) {
-          // Atualiza o modelo de dados (sem re-render aqui)
-          dadosOriginais.forEach(item => {
-            if (
-              String(getCampo(item, "ANO_POF")) === String(ano) &&
-              String(getCampo(item, "Cultivo")) === String(cultivo)
-            ) {
-              item[coluna] = num;
-
-              const novoIDMT = calcularIDMT(item);
-              item["IDMT (Numerador)"] = novoIDMT;
-              item["Contribuição Individual do Cultivo"] = calcularContribuicaoIndividual(novoIDMT, item);
-            }
-          });
-
-          // 🔒 Preservar foco antes de re-renderizar
-          const currentFocus = document.activeElement;
-          const currentAno = currentFocus?.dataset?.ano;
-          const currentCultivo = currentFocus?.dataset?.cultivo;
-          const currentColuna = currentFocus?.dataset?.col;
-
-          // Agora sim, UMA vez só:
-          atualizarPOF();
-          renderizarTabela(dadosOriginais);
-
-          // 🔁 Restaurar foco no mesmo input
           if (currentAno && currentCultivo && currentColuna) {
             const selector = `.editable-cell[data-ano="${esc(currentAno)}"][data-cultivo="${esc(currentCultivo)}"][data-col="${esc(currentColuna)}"]`;
             const newInput = document.querySelector(selector);
@@ -326,7 +287,50 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      // 🔹 Estados intermediários (ex.: '10.')
+      // 🔹 Número completo — commit COMO STRING para preservar "0.0"
+      if (regexFinal.test(v)) {
+        const valueText = v; // <- mantém "0.0", "0.06", etc.
+        onValidChange(valueText);
+
+        if (ano != null && cultivo != null && coluna) {
+          dadosOriginais.forEach(item => {
+            if (
+              String(getCampo(item, "ANO_POF")) === String(ano) &&
+              String(getCampo(item, "Cultivo")) === String(cultivo)
+            ) {
+              // 🔸 Guardar STRING no modelo
+              item[coluna] = valueText;
+
+              const novoIDMT = calcularIDMT(item); // toNumberSafe converte string -> número
+              item["IDMT (Numerador)"] = novoIDMT;
+              item["Contribuição Individual do Cultivo"] = calcularContribuicaoIndividual(novoIDMT, item);
+            }
+          });
+
+          // 🔒 Preserva foco, re-renderiza e restaura
+          const currentFocus = document.activeElement;
+          const currentAno = currentFocus?.dataset?.ano;
+          const currentCultivo = currentFocus?.dataset?.cultivo;
+          const currentColuna = currentFocus?.dataset?.col;
+
+          atualizarPOF();
+          // 🔧 re-render com filtros preservados
+          renderizarTabela(dadosComFiltrosAplicados());
+
+          if (currentAno && currentCultivo && currentColuna) {
+            const selector = `.editable-cell[data-ano="${esc(currentAno)}"][data-cultivo="${esc(currentCultivo)}"][data-col="${esc(currentColuna)}"]`;
+            const newInput = document.querySelector(selector);
+            if (newInput) {
+              newInput.focus();
+              const len = newInput.value.length;
+              try { newInput.setSelectionRange(len, len); } catch {}
+            }
+          }
+        }
+        return;
+      }
+
+      // 🔹 Estado intermediário (ex.: "0." ou "0.0")
       onValidChange(null);
     }
 
@@ -342,7 +346,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const data = await response.json();
       dadosOriginais = Array.isArray(data.tabelaCompleta) ? data.tabelaCompleta : [];
 
-      renderizarTabela(dadosOriginais);
+      // 🔧 render inicial respeitando o estado do filtro (por padrão: "Todos")
+      renderizarTabela(dadosComFiltrosAplicados());
       inicializarFiltros(dadosOriginais);
       atualizarPOF();
     } catch (error) {
@@ -373,7 +378,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const valor = fmt(getCampo(item, col));
 
         if (["LMR (mg_kg)", "MREC_STMR (mg_kg)", "Market Share"].includes(col)) {
-          td.title = "Aceita números inteiros e decimais com ponto (.)";
+          td.title = "Accepts integers and decimals with dots (.)";
           td.setAttribute("aria-label", "Campo numérico. Aceita inteiros e decimais com ponto.");
 
           const anoItem = getCampo(item, "ANO_POF");
@@ -382,7 +387,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           const input = criarInputNumerico(
             valor,
-            (novoValor) => { item[col] = novoValor; },
+            (novoValor) => { item[col] = novoValor; }, // novoValor será string ("0.0", "0.06") ou null
             "-",
             anoItem,
             cultivoItem,
@@ -483,10 +488,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.querySelectorAll(".coluna-filtro.ativo").forEach(c => c.classList.remove("ativo"));
   }
 
-  function aplicarFiltros(coluna, valor) {
-    estadoFiltros[coluna] = valor;
-
-    let filtrados = dadosOriginais.filter(item => {
+  // 🔧 Helper central para reaplicar os filtros atuais
+  function dadosComFiltrosAplicados() {
+    return dadosOriginais.filter(item => {
       const cultivoItem = getCampo(item, "Cultivo");
       const anoItem = getCampo(item, "ANO_POF");
 
@@ -502,8 +506,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       return filtroCultivoOK && filtroAnoOK;
     });
+  }
 
-    renderizarTabela(filtrados);
+  // Simplifica: aplica valor e re-renderiza com os filtros vigentes
+  function aplicarFiltros(coluna, valor) {
+    estadoFiltros[coluna] = valor;
+    renderizarTabela(dadosComFiltrosAplicados());
   }
 
   // ---------------- Inicialização ----------------
@@ -556,7 +564,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     atualizarPOF();
-    renderizarTabela(dadosOriginais);
+    // 🔧 re-render com filtros preservados
+    renderizarTabela(dadosComFiltrosAplicados());
   });
 
   atualizarPOF(); // calcula e renderiza
@@ -575,7 +584,7 @@ function setupDecimalInput(selector, onValidNumber) {
     input.setAttribute('inputmode', 'decimal');
     input.autocomplete = 'off';
     input.spellcheck = false;
-    input.title = 'Aceita números inteiros e decimais com ponto (.)';
+    input.title = 'Accepts integers and decimals with dots (.)';
 
     // Mostra o rótulo “bonito” no começo, se não houver valor
     if (!input.value) input.value = defaultText;

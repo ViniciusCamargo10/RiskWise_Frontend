@@ -10,7 +10,7 @@
 <body>
     <div class="container">
         <!-- Botão de ajuda -->
-        <a href="mailto:vinicius.camargo@syngenta.com" class="help-button" aria-label="Ajuda">?</a>
+        <a href="https://app.smartsheet.com/sheets/pjRGcG7H8V3Qxc7rmVWPQM38G5X286QwpQCPxFw1" class="help-button" target="_blank" rel="noopener noreferrer" aria-label="Ajuda">?</a>
 
         <!-- Modal de contato -->
         <div id="modalEmail" class="modal">
@@ -74,6 +74,13 @@
                             <tbody id="tbodyMexico">
                                <!-- Será preenchido via JS -->
                             </tbody>
+                            <tfoot>
+                                <tr>                                    
+                                    <td colspan="6" style="text-align:left;">
+                                        <span id="note-link" style="color:#1976d2; text-decoration:underline; cursor:pointer;">Note</span>
+                                    </td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
                 </div>
@@ -85,6 +92,7 @@
                             <thead>
                                 <tr>
                                     <th>BW (kg)</th>
+                                    <th>Soma</th>
                                     <th>ADI (mg/kg bw/dia)</th>
                                     <th>IDMT</th>
                                     <th>%ADI</th>
@@ -93,6 +101,7 @@
                             <tbody>
                                 <tr>
                                     <td id="outBw">-</td>
+                                    <td id="outSum">-</td> 
                                     <td id="outAdi">-</td>
                                     <td id="outIdmt">-</td>
                                     <td id="outPercentAdi">-</td>
@@ -104,11 +113,38 @@
             </div>
 
             <div class="action-buttons">
+            
+            <button class="btn-infoC" aria-label="Ajuda">MX MRLs</button>
+
             <a href="/calculatorHome.html">
                 <button class="btn-back">Back to Calculator</button>
             </a>
             <button class="btn-clear" id="btnClear">Clear Report</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="btn-infoC" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p>
+                Access MX MRLs data: 
+                <a href="https://syngenta.sharepoint.com/:x:/r/sites/Armazenamentodedadosprovisrio-RSLATAM/Shared%20Documents/RPA%20-%20Captura%20de%20LMR/LMRs%20-%20COFEPRIS.xlsx?d=wf020f755b0304768b7e2a5592f14c710&csf=1&web=1&e=IR6lfs" target="_blank">Click Here</a>
+            </p>
+        </div>
+    </div>
+
+    
+    <div id="modalNote" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeNote">&times;</span>
+            <ol>
+            <li>Number one is where we get the ADI from.</li>
+            <li>Ávila Curiel A. Galindo Gómez C. Ambrosio Hernández R. Chávez Villasana A. Encuesta Urbana de Alimentación y Nutrición en la Zona Metropolitana do Estado de México 2007...</li>
+            <li>Ávila Curiel A. Shamah Levy T. Chávez Villasana A. Galindo Gómez C. Encuesta Urbana de Alimentación y Nutrición em la Zona Metropolitana de la Ciudad de México 2002...</li>
+            <li>GEMS/FOOD CONSUMPTION CLUSTER DIET by the Global Environment Monitoring System/Food Contamination Monitoring and Assessment Programme.</li>
+            </ol>
         </div>
     </div>
 

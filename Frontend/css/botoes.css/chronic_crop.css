@@ -251,13 +251,15 @@ body {
 .report-table {
     width: 100%; /* corrigido */
     table-layout: auto; /* corrigido */
-    border-collapse: separate;
+    border-collapse: collapse;
     border-spacing: 0;
     font-size: 0.85rem;
     color: #000000;
     background-color: rgba(255, 255, 255, 0.95);
     border-radius: 12px;
     overflow: hidden;
+    border-right: none;
+    background-clip: padding-box;
 }
 
 .report-table th,
@@ -267,6 +269,7 @@ body {
     padding: 0.6rem;
     text-align: center;
     border-bottom: 1px solid #ccc;
+    border: none;
 }
 
 .report-table th {

@@ -4,9 +4,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const criancaInput = document.getElementById("inputCrianca");
 
     const LS_KEYS = {
-        conc: "conc",
-        adulto: "adulto",
-        crianca: "crianca",
+        conc: "CRONICO_conc",
+        adulto: "CRONICO_adulto",
+        crianca: "CRONICO_crianca",
         idaAnvisa: "CRONICO_IDA_ANVISA_VAL",
         idaSyngenta: "CRONICO_IDA_SYNGENTA_VAL"
     };
@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
             input.setAttribute('inputmode', 'decimal');
             input.autocomplete = 'off';
             input.spellcheck = false;
-            input.title = 'Aceita números inteiros e decimais com ponto (.)';
+            input.title = 'Accepts integers and decimals with dots (.)';
 
             // Mostra rótulo inicial se vazio
             if (!input.value) input.value = defaultText;
@@ -157,9 +157,9 @@ document.addEventListener("DOMContentLoaded", () => {
         else localStorage.setItem(LS_KEYS.idaSyngenta, String(n));
         atualizarCalculo();
     });
-
-    const modal = document.getElementById("info-buttonC");
-    const btn = document.querySelector(".info-buttonC");
+});
+    const modal = document.getElementById("btn-infoC");
+    const btn = document.querySelector(".btn-infoC");
     const span = modal.querySelector(".close"); // pega o X dentro do modal
     
     if (btn && modal && span) {
@@ -177,6 +177,3 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 }
-
-
-});

@@ -76,6 +76,13 @@ function fmt6(n) {
   return Number(n).toFixed(6).replace('.', ',');
 }
 
+// ✅ Helper: aplica tooltip e aria-label para inputs/células numéricos
+function applyNumericTooltip(el, label = "Accepts integers and decimals with dots (.)") {
+  if (!el) return;
+  el.title = label;
+  el.setAttribute("aria-label", label);
+}
+
 /* =================================================
  * Inputs do usuário: dígitos e ponto (vírgula BLOQUEADA)
  * ================================================= */
@@ -275,6 +282,7 @@ function render(firstPaint = false) {
   if (outBw) outBw.textContent = state.meta.bw ?? "-";
 
   if (outAdi) {
+    
     const inpAdi = document.createElement("input");
     inpAdi.type = "text";
     // Mostra valor "cru" (sem força de casas), mas bloqueia vírgula no input
@@ -282,6 +290,10 @@ function render(firstPaint = false) {
     inpAdi.className = "editable-cell";
     inpAdi.style.width = "80px";
     wireDecimalOnly(inpAdi);
+
+    // ✅ Tooltip no botão/field de ADI
+    applyNumericTooltip(inpAdi, " Accepts integers and decimals with dots (.)");
+
 
     inpAdi.addEventListener("input", (e) => {
       let val = inpAdi.value;
@@ -345,15 +357,20 @@ function render(firstPaint = false) {
 
         cols.forEach((col) => {
           const td = document.createElement("td");
-
+          
           if (["LMR (mg/kg)", "R (mg/kg)"].includes(col)) {
+            // ✅ Tooltip na célula
+            applyNumericTooltip(td, `Accepts integers and decimals with dots (.)`);
+
             const inp = document.createElement("input");
             inp.type = "text";
-            // Mostra como string crua (sem casas forçadas); usuário editará
             inp.value = (row[col] ?? "") === "" ? "" : String(row[col]);
             inp.className = "editable-cell";
             inp.style.width = "100%";
             wireDecimalOnly(inp);
+
+            // ✅ Tooltip também no input
+            applyNumericTooltip(inp, `Accepts integers and decimals with dots (.)`);
 
             inp.addEventListener("input", () => {
               row[col] = inp.value;   // mantém string para o usuário
@@ -441,3 +458,43 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btnClear) btnClear.addEventListener("click", clearReport);
 
 })
+
+const modal = document.getElementById("btn-infoC");
+    const btn = document.querySelector(".btn-infoC");
+    const span = modal.querySelector(".close"); // pega o X dentro do modal
+    
+    if (btn && modal && span) {
+    btn.addEventListener("click", () => {
+        modal.style.display = "flex";
+    });
+
+    span.addEventListener("click", () => {
+        modal.style.display = "none";
+    });
+
+    window.addEventListener("click", (event) => {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+}
+
+const modalNote = document.getElementById("modalNote");
+const noteLink = document.getElementById("note-link");
+const closeNote = modalNote.querySelector(".close");
+
+if (noteLink && modalNote && closeNote) {
+  noteLink.addEventListener("click", () => {
+    modalNote.style.display = "flex";
+  });
+
+  closeNote.addEventListener("click", () => {
+    modalNote.style.display = "none";
+  });
+
+  window.addEventListener("click", (event) => {
+    if (event.target === modalNote) {
+      modalNote.style.display = "none";
+    }
+  });
+}

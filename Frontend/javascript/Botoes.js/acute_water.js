@@ -49,7 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
             input.setAttribute('inputmode', 'decimal');
             input.autocomplete = 'off';
             input.spellcheck = false;
-            input.title = 'Aceita números inteiros e decimais com ponto (.)';
+            input.title = 'Accepts integers and decimals with dots (.)';
 
             // Se não houver valor, mantém como está (para .editable-* pode mostrar rótulo via dataset.default)
             if (!input.value && defaultText) input.value = defaultText;
@@ -190,8 +190,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-    const modal = document.getElementById("info-button");
-    const btn = document.querySelector(".info-button");
+    const modal = document.getElementById("btn-info");
+    const btn = document.querySelector(".btn-info");
     const span = document.querySelector(".close");
 
     if (btn && modal && span) {

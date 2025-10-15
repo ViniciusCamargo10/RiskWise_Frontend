@@ -196,7 +196,7 @@ body {
     display: flex;
     align-items: center;
     width: 100%;
-    padding-left: 18px;
+    padding-left: 0;
     gap: 8px;
 }
 
@@ -212,7 +212,8 @@ body {
     font-size: 2rem;
     font-weight: 800;
     color: #fff;
-    padding: 0.5rem;
+    padding: 0;
+    margin-bottom: 8px;
 }
 
 .editable-cell {
@@ -297,13 +298,15 @@ body {
 .report-table {
     width: 100%;
     table-layout: auto;
-    border-collapse: separate;
+    border-collapse: collapse;
     border-spacing: 0;
     font-size: 0.85rem;
     color: #000000;
     background-color: rgba(255, 255, 255, 0.95);
     border-radius: 12px;
     overflow: hidden;
+    border-right: none;
+    background-clip: padding-box;
 }
 
 .report-table th,
@@ -314,6 +317,7 @@ body {
     padding: 0.6rem;
     text-align: center;
     border-bottom: 1px solid #ccc;
+    border: none;
 }
 
 .report-table th {
@@ -325,7 +329,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 1;
-    backdrop-filter: blur(4px);
+    backdrop-filter: none;
 }
 
 .report-table tr:hover td {
@@ -334,10 +338,10 @@ body {
 
 /* Ajuste largura colunas */
 .report-table th:nth-child(1),
-.report-table td:nth-child(1) { width: 125px; }
+.report-table td:nth-child(1) { max-width: 100px; }
 
 .report-table th:nth-child(2),
-.report-table td:nth-child(2) { width: 80px; }
+.report-table td:nth-child(2) { max-width: 80px; }
 
 .report-table th:nth-child(3),
 .report-table td:nth-child(3) { width: 100px; }
@@ -349,7 +353,7 @@ body {
 .report-table td:nth-child(5) { width: 100px; }
 
 .report-table th:nth-child(6),
-.report-table td:nth-child(6) { width: 100px; }
+.report-table td:nth-child(6) { min-width: 80px; }
 
 .report-table th:nth-child(7),
 .report-table td:nth-child(7) { width: 100px; }
@@ -459,10 +463,12 @@ body {
         padding: 1.5rem;
     }
 
+    
     .main-scroll {
-        min-height: 0;
-        overflow-y: auto;
+        width: 100%;       /* ocupa toda a largura da área main */
+        max-width: none;   /* remove limite de 720px */
     }
+
 
     h1 { font-size: 1.6rem; }
     h2 { font-size: 1.2rem; }

@@ -154,40 +154,61 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function setupDecimalInput(selector, onValidNumber) {
-    document.querySelectorAll(selector).forEach(input => {
-      const defaultText = input.dataset.default || input.value;
-      input.type = 'text';
-      input.setAttribute('inputmode', 'decimal');
-      input.autocomplete = 'off';
-      input.spellcheck = false;
+  document.querySelectorAll(selector).forEach(input => {
+    const defaultText = input.dataset.default || input.value;
+    input.type = 'text';
+    input.setAttribute('inputmode', 'decimal');
+    input.autocomplete = 'off';
+    input.spellcheck = false;
 
-      if (!input.value) input.value = defaultText;
+    
+    // ✅ Adiciona tooltip e acessibilidade
+    input.title = selector.includes('btn')
+      ? "Accepts integers and decimals with dots (.)"
+      : "Accepts integers and decimals with dots (.)";
 
-      input.addEventListener('focus', () => {
-        if (input.value === defaultText) input.value = '';
-      });
+    input.setAttribute('aria-label', input.title);
 
-      input.addEventListener('blur', () => {
-        if (input.value.trim() === '') {
-          onValidNumber(null);
-          input.value = defaultText;
-          refreshPreservandoFocoEScroll();
-        }
-      });
 
-      input.addEventListener('input', () => {
-        let v = input.value.replace(/[^0-9.,]/g, '');
-        v = v.replace(',', '.');
-        const i = v.indexOf('.');
-        if (i !== -1) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '');
-        if (v.startsWith('.')) v = '0' + v;
-        input.value = v;
-        const n = /^\d+(\.\d+)?$/.test(v) ? parseFloat(v) : null;
-        onValidNumber(n);
-        refreshPreservandoFocoEScroll();
-      });
+    if (!input.value) input.value = defaultText;
+
+    let prev = input.value;
+
+    input.addEventListener('focus', () => {
+      if (input.value === defaultText) input.value = '';
     });
-  }
+
+    input.addEventListener('blur', () => {
+      if (input.value.trim() === '') {
+        onValidNumber(null);
+        input.value = defaultText;
+        refreshPreservandoFocoEScroll();
+      }
+    });
+
+    input.addEventListener('input', () => {
+      let v = input.value;
+
+      // ✅ Permite dígitos e ponto (inclusive "0." ou "0.0")
+      if (!/^\d*\.?\d*$/.test(v)) {
+        input.value = prev; // volta para último válido
+        return;
+      }
+
+      // Remove pontos extras depois do primeiro
+      const i = v.indexOf('.');
+      if (i !== -1) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '');
+
+      prev = v;
+      input.value = v;
+
+      // ✅ Se for número completo, envia; senão, envia null
+      const n = /^\d+(\.\d+)?$/.test(v) ? parseFloat(v) : null;
+      onValidNumber(n);
+      
+    });
+  });
+}
 
   // ---------- Replicação e refresh com foco/scroll ----------
   function refreshPreservandoFocoEScroll(reselectInfo) {
@@ -231,7 +252,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (coluna === "HR/MCR (mg/kg)" && caso === "Caso 3") return;
       if (coluna === "MREC/STMR (mg/kg)" && (caso === "Caso 1" || caso === "Caso 2a" || caso === "Caso 2b")) return;
 
-      item[coluna] = (valor === null ? null : Number(valor));
+      item[coluna] = (valor === null ? null : valor); // mantém string "0.0" ou "0.06"
     });
 
     // Re-render preservando scroll e foco
@@ -244,56 +265,61 @@ document.addEventListener("DOMContentLoaded", async () => {
   //  - { kind: 'number', value:n} -> número válido (replica n)
   //  - { kind: 'intermediate' }   -> digitação parcial (não replica)
   function criarInputNumerico({ valorInicial, disabled, onDecision, placeholder, ctx }) {
-    const input = document.createElement("input");
-    input.type = "text";
-    input.inputMode = "decimal";
-    input.autocomplete = "off";
-    input.spellcheck = false;
-    input.placeholder = placeholder ?? "-";
-    input.className = "editable-cell";
-    input.disabled = !!disabled;
-    input.value = (valorInicial === "-" ? "" : (valorInicial ?? "")).toString();
+  const input = document.createElement("input");
+  input.type = "text";
+  input.inputMode = "decimal";
+  input.autocomplete = "off";
+  input.spellcheck = false;
+  input.placeholder = placeholder ?? "-";
+  input.className = "editable-cell";
+  input.disabled = !!disabled;
+  input.value = (valorInicial === "-" ? "" : (valorInicial ?? "")).toString();
 
-    // Carrega identificadores no dataset para re-selecionar depois
-    if (ctx) {
-      input.dataset.ano     = String(ctx.ano ?? "");
-      input.dataset.cultivo = String(ctx.cultivo ?? "");
-      input.dataset.regiao  = String(ctx.regiao ?? "");
-      input.dataset.col     = String(ctx.coluna ?? "");
+  if (ctx) {
+    input.dataset.ano     = String(ctx.ano ?? "");
+    input.dataset.cultivo = String(ctx.cultivo ?? "");
+    input.dataset.regiao  = String(ctx.regiao ?? "");
+    input.dataset.col     = String(ctx.coluna ?? "");
+  }
+
+  if (input.disabled) return input;
+
+  const regexParcial = /^\d*\.?\d*$/;   // permite "0.", "0.0", "0.06"
+  const regexFinal   = /^\d+(\.\d+)?$/; // número completo
+  let prev = input.value;
+
+  input.addEventListener("input", () => {
+    let v = input.value;
+
+    // Só dígitos e um ponto
+    if (!regexParcial.test(v)) {
+      input.value = prev;
+      return;
     }
 
-    if (input.disabled) return input;
+    // Remove pontos extras após o primeiro
+    const i = v.indexOf('.');
+    if (i !== -1) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '');
 
-    const regexParcial = /^\d*([.,]?\d*)?$/;
-    const regexFinal   = /^\d+([.,]\d+)?$/;
-    let prev = input.value;
+    prev = v;
+    input.value = v; // <- mantém exatamente o que o usuário vê/digitou
 
-    input.addEventListener("input", () => {
-      let v = input.value;
-      if (!regexParcial.test(v)) {
-        input.value = prev;
-        return;
-      }
-      v = v.replace(',', '.');
-      const i = v.indexOf('.');
-      if (i !== -1) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '');
-      if (v.startsWith('.')) v = '0' + v;
+    if (v === "") {
+      onDecision({ kind: 'clear' });
+      return;
+    }
 
-      prev = v;
+    if (regexFinal.test(v)) {
+      // Envia string (para preservar "0.0") e numérico (para quem precisar)
+      onDecision({ kind: 'number', valueText: v, value: parseFloat(v) });
+      return;
+    }
 
-      if (v === "") {
-        onDecision({ kind: 'clear' });
-        return;
-      }
-      if (regexFinal.test(v)) {
-        onDecision({ kind: 'number', value: parseFloat(v) });
-        return;
-      }
-      onDecision({ kind: 'intermediate' });
-    });
+    onDecision({ kind: 'intermediate' }); // não re-renderiza
+  });
 
-    return input;
-  }
+  return input;
+}
 
   // ---------- Filtros ----------
   function inicializarFiltros(data) {
@@ -433,6 +459,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         // Entradas com bloqueio por caso
         if (["LMR (mg/kg)", "HR/MCR (mg/kg)", "MREC/STMR (mg/kg)"].includes(col)) {
+  // ✅ Adiciona tooltip na célula
+          td.title = "Aceita números inteiros e decimais com ponto (.)";
+          td.setAttribute("aria-label", "Campo numérico. Aceita inteiros e decimais com ponto.");
+
           const caso = String(getCampo(item, "Caso Fórmula") || "");
           const isHR = (col === "HR/MCR (mg/kg)");
           const isST = (col === "MREC/STMR (mg/kg)");
@@ -443,7 +473,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           const placeholder = disabled ? "" : "";
           const raw = getCampo(item, col);
-          const valorInicial = (raw === null || raw === undefined) ? "" : raw;
+          const valorInicial = disabled ? "NA" : (raw === null || raw === undefined ? "" : raw);
 
           const anoItem     = String(getCampo(item, "ANO POF") ?? "");
           const cultivoItem = String(getCampo(item, "Cultivo/ Matriz Animal") ?? "");
@@ -455,23 +485,29 @@ document.addEventListener("DOMContentLoaded", async () => {
             placeholder,
             ctx: { ano: anoItem, cultivo: cultivoItem, regiao: regiaoItem, coluna: col },
             onDecision: (decision) => {
-              // Só replica ao limpar ou quando número válido
               if (decision?.kind === 'clear') {
                 replicarEdicao({ cultivo: cultivoItem, ano: anoItem, regiao: regiaoItem, coluna: col, valor: null });
               } else if (decision?.kind === 'number') {
-                replicarEdicao({ cultivo: cultivoItem, ano: anoItem, regiao: regiaoItem, coluna: col, valor: decision.value });
-              } else {
-                // intermediate: não re-renderiza para evitar "pular"
+                replicarEdicao({ cultivo: cultivoItem, ano: anoItem, regiao: regiaoItem, coluna: col, valor: decision.valueText });
               }
             }
           });
+
+          // ✅ Aqui fora do objeto, após o input ser criado
+          if (disabled) {
+            input.value = "NA";
+            input.readOnly = true;
+          }
+
+          // ✅ Também adiciona tooltip no input (opcional)
+          input.title = "Accepts integers and decimals with dots (.)";
+          input.setAttribute("aria-label", "Campo numérico. Aceita inteiros e decimais com ponto.");
 
           td.appendChild(input);
           tr.appendChild(td);
           return;
         }
-
-        // Demais colunas (somente exibição)
+                // Demais colunas (somente exibição)
         const valor = getCampo(item, col);
         td.textContent = (valor === null || valor === undefined || valor === '') ? "-" : valor;
         tr.appendChild(td);
