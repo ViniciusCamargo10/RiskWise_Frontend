@@ -478,7 +478,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           const anoItem     = String(getCampo(item, "ANO POF") ?? "");
           const cultivoItem = String(getCampo(item, "Cultivo/ Matriz Animal") ?? "");
           const regiaoItem  = String(getCampo(item, "Região") ?? "");
-
+          
           const input = criarInputNumerico({
             valorInicial,
             disabled,
@@ -493,7 +493,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
           });
 
-          // ✅ Aqui fora do objeto, após o input ser criado
           if (disabled) {
             input.value = "NA";
             input.readOnly = true;

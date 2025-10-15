@@ -20,11 +20,11 @@ app.add_middleware(
 )
 
 # Importa e inclui as rotas da API
-from .routes import chronic, acute, mexico, auth
+from .routes import chronic, acute, mexico
 app.include_router(chronic.router, tags=["Dieta Crônica"])
 app.include_router(acute.router, prefix="/acute", tags=["Nova Planilha"])
 app.include_router(mexico.router, prefix="/mexico", tags=["México Planilha"])
-app.include_router(auth.router)  # ✅ Inclui rota de login
+
 
 FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "Frontend")
 FRONTEND_HTML_DIR = os.path.join(FRONTEND_DIR, "html")

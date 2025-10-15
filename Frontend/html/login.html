@@ -9,31 +9,29 @@
 </head>
 <body>
     
-    <div class="container">
-        
-    <div class="form-box login">
-            <!-- Adicione method e action -->
-            /login
-            <form>
+ <div class="container">
+        <div class="form-box login">
+            <form id="loginForm">
                 <h1>Login</h1>
                 <div class="input-box">
-                    <input type="text" name="username" placeholder="Username" required>
+                    <input type="text" name="username" placeholder="Username" required autocomplete="username">
                 </div>
                 <div class="input-box">
-                    <input type="password" name="password" placeholder="Password" required>
+                    <input type="password" name="password" placeholder="Password" required autocomplete="current-password">
                 </div>
                 <div class="input-box">
                     <button type="submit" class="btn">Login</button>
                 </div>
+                <p id="errorMsg" style="color:red; display:none;">Usuário ou senha inválidos!</p>
             </form>
         </div>
-
         <div class="toggle-box">
             <div class="toggle-panel toggle-left">
-                <img src="/imagens/LogoBrancoRisk.png" class="logo-login">
+               <img src="/imagens/LogoBrancoRisk.png" class="logo-login">
             </div>
         </div>
     </div>
-
+    <script src="/javascript/auth-check.js" defer></script>
+    <script src="/javascript/login.js" defer></script>
 </body>
 </html>

@@ -63,15 +63,16 @@
                                     <th>Cultivo</th>
                                     <th>ANO POF</th>
                                     <th>Região</th>
+                                    <th>Caso Fórmula</th>
                                     <th>LMR (mg/kg)</th>
-                                    <th>HR/MCR</th>
-                                    <th>MREC/STMR</th>
+                                    <th>HR/MCR (mg/kg)</th>
+                                    <th>MREC/STMR (mg/kg)</th>
                                     <th>IMEA (mg/kg p.c./dia)</th>
-                                    <th>%DRFA ANVISA</th>
-                                    <th>%DRFA SYNGENTA</th>
+                                    <th>%DRFA EXTERNA</th>
+                                    <th>%DRFA INTERNA</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="report-acute-body">
                                 <tr>
                                     <td colspan="9" class="no-data">Nenhum dado disponível</td>
                                 </tr>
@@ -259,7 +260,8 @@
         </div>
     </div>
 
-    <script src="/javascript/calculator.js" defer></script>
+    <script src="/javascript/auth-check.js" defer></script>
+    <script src="/javascript/report.js" defer></script>
 </body>
 </html>
 
