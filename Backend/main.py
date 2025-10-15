@@ -35,10 +35,6 @@ app.mount("/css", StaticFiles(directory=os.path.join(FRONTEND_DIR, "css")), name
 app.mount("/javascript", StaticFiles(directory=os.path.join(FRONTEND_DIR, "javascript")), name="javascript")
 app.mount("/imagens", StaticFiles(directory=os.path.join(FRONTEND_DIR, "imagens")), name="imagens")
 
-app.get("/")
-async def custom_home():
-    return FileResponse(os.path.join(FRONTEND_HTML_DIR, "login.html"))  # troque pelo nome da página desejada
-
 # Servir HTML
 app.mount("/", StaticFiles(directory=FRONTEND_HTML_DIR, html=True), name="frontend")
 
