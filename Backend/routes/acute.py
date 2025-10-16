@@ -1,11 +1,15 @@
 from fastapi import APIRouter, HTTPException, Body
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse, FileResponse
 from fastapi.encoders import jsonable_encoder
-from typing import List, Dict
+from typing import List, Dict, Any
+from datetime import datetime, date
+from io import BytesIO
 import pandas as pd
 import numpy as np
 import os
 
+# Importa a função que gera PDF em memória
+from utils.report import gerar_pdf_bytes
 router = APIRouter()
 
 # ✅ Caminho relativo para o arquivo dentro do projeto
@@ -34,8 +38,10 @@ OPTIONAL_COLS = [
     "IMEA (mg/kg p.c./dia)",
 ]
 
+# -------------------------------
+# Funções auxiliares
+# -------------------------------
 def _normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
-    # Remove espaços e garante string
     df = df.copy()
     df.columns = [str(c).strip() for c in df.columns]
     return df
@@ -52,20 +58,20 @@ def _read_excel_validated(path: str) -> pd.DataFrame:
     df = _normalize_columns(df)
     missing = [c for c in REQUIRED_COLS if c not in df.columns]
     if missing:
-        # Ajuda a comparar: mostra o que veio no arquivo
         raise HTTPException(
             status_code=500,
             detail=f"Colunas ausentes na planilha: {missing}. Colunas disponíveis: {list(df.columns)}"
         )
 
-    # Mantém as obrigatórias + opcionais que existirem
     cols_to_keep = REQUIRED_COLS + [c for c in OPTIONAL_COLS if c in df.columns]
     df = df[cols_to_keep]
 
-    # Normaliza NaN/NA/inf para None
     df = df.replace({pd.NA: None, np.nan: None, np.inf: None, -np.inf: None})
-
     return df
+
+# -------------------------------
+# Endpoints
+# -------------------------------
 
 @router.get("/dados")
 def get_dados():
@@ -83,9 +89,9 @@ def get_dados():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao processar dados: {e}")
 
+
 @router.post("/atualizar")
 def atualizar(dados: List[Dict] = Body(...)):
-    # Ambiente de deploy (ex.: Vercel) é read-only
     if os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV"):
         raise HTTPException(
             status_code=501,
@@ -93,7 +99,6 @@ def atualizar(dados: List[Dict] = Body(...)):
         )
 
     try:
-        # Valida o payload
         novo_df = pd.DataFrame(dados)
         novo_df = _normalize_columns(novo_df)
 
@@ -101,7 +106,6 @@ def atualizar(dados: List[Dict] = Body(...)):
         if missing:
             raise HTTPException(status_code=400, detail=f"Faltam colunas obrigatórias no payload: {missing}")
 
-        # Reordena colunas: obrigatórias + opcionais presentes
         cols_to_save = REQUIRED_COLS + [c for c in OPTIONAL_COLS if c in novo_df.columns]
         novo_df = novo_df[cols_to_save].replace({pd.NA: None, np.nan: None})
 
@@ -117,3 +121,33 @@ def atualizar(dados: List[Dict] = Body(...)):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao processar atualização: {e}")
+
+
+# -------------------------------
+# Novo endpoint para gerar PDF
+# -------------------------------
+@router.post("/gerar-pdf")
+def gerar_pdf_endpoint(payload: Dict[str, Any]):
+    """
+    Espera um JSON:
+    {
+      "dados": [ { ... }, ... ],
+      "drfa_externo": "valor",
+      "drfa_interno": "valor"
+    }
+    """
+    try:
+        dados: List[Dict[str, Any]] = payload.get("dados", [])
+        drfa_externo: str = payload.get("drfa_externo", "-")
+        drfa_interno: str = payload.get("drfa_interno", "-")
+
+        pdf_bytes = gerar_pdf_bytes(drfa_externo, drfa_interno, dados)
+        filename = f"riskwise_acute_{date.today().isoformat()}.pdf"
+
+        return StreamingResponse(
+            BytesIO(pdf_bytes),
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao gerar PDF: {e}")
