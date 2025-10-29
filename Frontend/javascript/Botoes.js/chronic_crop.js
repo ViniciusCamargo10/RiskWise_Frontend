@@ -1,3 +1,12 @@
+// Chaves exclusivas para Crônica
+const LS_KEYS = {
+  chronicData: "RW_CRONIC_DATA", // dados da tabela crônica
+  idaAnvisa: "RW_CRONIC_IDA_ANVISA", // IDA externa
+  idaSyngenta: "RW_CRONIC_IDA_SYNGENTA", // IDA interna
+  pof2008: "RW_CRONIC_POF_2008", // POF 2008 recalculada
+  pof2017: "RW_CRONIC_POF_2017"  // POF 2017 recalculada
+};
+
 // === Mapa central de labels (somente exibição) ===
 const LABELS = {
   buttons: { Ext: "IDA_EXTERNA", Int: "IDA_INTERNA" },
@@ -15,6 +24,7 @@ function toBackendMetric(displayText) {
   return found ? found[0] : displayText;
 }
 
+
 document.addEventListener("DOMContentLoaded", async () => {
   'use strict';
 
@@ -22,7 +32,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const tbody = document.getElementById("tabela-dados");
 
   // Estado dos filtros (cumulativos)
-  const estadoFiltros = { Cultivo: "Todos", ANO_POF: "Todos" };
+  const estadoFiltros = { Cultivo: "Todos", ANO_POF: "Todos", Região: "Todos" };
 
   // Colunas na ordem desejada
   const COLUNAS = [
@@ -37,6 +47,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   ];
 
   let dadosOriginais = [];
+    
+  
+  function salvarDadosCronica() {
+    try {
+      if (Array.isArray(dadosOriginais) && dadosOriginais.length > 0) {
+        localStorage.setItem(LS_KEYS.chronicData, JSON.stringify(dadosOriginais));
+      }
+    } catch (e) {
+      console.warn("[CRONICA] Falha ao salvar dados:", e);
+    }
+  }
+
 
   // ---------------- Utilitários ----------------
 
@@ -104,33 +126,39 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ------------- % POF -------------------------
 
-  function atualizarPOF() {
-    const regioes = ["Brasil", "Centro_Oeste", "Nordeste", "Norte", "Sudeste", "Sul"];
-    const anos = ["2008", "2017"];
 
-    anos.forEach(ano => {
-      const resultado = {};
+function atualizarPOF() {
+  const regioes = ["Brasil", "Centro_Oeste", "Nordeste", "Norte", "Sudeste", "Sul"];
+  const anos = ["2008", "2017"];
 
-      regioes.forEach(regiao => {
-        // 🔹 Soma IDMTs apenas da região e ano corretos
-        const idmtTotal = dadosOriginais
-          .filter(item =>
-            String(getCampo(item, "ANO_POF")) === ano &&
-            String(getCampo(item, "Região")) === regiao
-          )
-          .reduce((soma, item) => soma + (calcularIDMT(item) ?? 0), 0);
+  anos.forEach(ano => {
+    const resultado = {};
 
-        // 🔹 Calcula %IDA externa e interna
-        resultado[regiao] = {
-          "%IDA_ANVISA": idaAnvisa ? (idmtTotal * 100) / idaAnvisa : null,
-          "%IDA_SYNGENTA": idaSyngenta ? (idmtTotal * 100) / idaSyngenta : null
-        };
-      });
+    regioes.forEach(regiao => {
+      const idmtTotal = dadosOriginais
+        .filter(item =>
+          String(getCampo(item, "ANO_POF")) === ano &&
+          String(getCampo(item, "Região")) === regiao
+        )
+        .reduce((soma, item) => soma + (calcularIDMT(item) ?? 0), 0);
 
-      // 🔹 Atualiza tabela correspondente
-      atualizarTabelaPOF(resultado, ano === "2008" ? "tabela-pof-2008" : "tabela-pof-2017");
+      resultado[regiao] = {
+        "%IDA_ANVISA": idaAnvisa ? (idmtTotal * 100) / idaAnvisa : null,
+        "%IDA_SYNGENTA": idaSyngenta ? (idmtTotal * 100) / idaSyngenta : null
+      };
     });
-  }
+
+    atualizarTabelaPOF(resultado, ano === "2008" ? "tabela-pof-2008" : "tabela-pof-2017");
+  });
+
+  // ✅ Salva snapshots no localStorage
+  const snap2008 = snapshotTabela('tabela-pof-2008');
+  if (snap2008) localStorage.setItem(LS_KEYS.pof2008, JSON.stringify(snap2008));
+
+  const snap2017 = snapshotTabela('tabela-pof-2017');
+  if (snap2017) localStorage.setItem(LS_KEYS.pof2017, JSON.stringify(snap2017));
+}
+
 
   function atualizarTabelaPOF(resultados, tabelaId) {
     const tbody = document.getElementById(tabelaId);
@@ -226,109 +254,163 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     function validarAtualizar() {
-      let v = input.value;
+  let v = input.value;
 
-      if (!regexParcial.test(v)) {
-        input.value = prev;
-        const caret = input.value.length;
-        try { input.setSelectionRange(caret, caret); } catch {}
-        input.style.borderColor = "#e53935";
-        return;
-      }
+  if (!regexParcial.test(v)) {
+    input.value = prev;
+    const caret = input.value.length;
+    try { input.setSelectionRange(caret, caret); } catch {}
+    input.style.borderColor = "#e53935";
+    return;
+  }
 
-      // Remove pontos extras depois do primeiro
-      const i = v.indexOf('.');
-      if (i !== -1) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '');
+  // Remove pontos extras depois do primeiro
+  const i = v.indexOf('.');
+  if (i !== -1) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '');
 
-      input.style.borderColor = "#ccc";
-      prev = v;
-      input.value = v;
+  input.style.borderColor = "#ccc";
+  prev = v;
+  input.value = v;
 
-      if (typeof onValidChange !== "function") return;
+  if (typeof onValidChange !== "function") return;
 
-      // 🔹 Usuário limpou tudo
-      if (v === "") {
-        onValidChange(null);
+  // ---------------------- LIMPAR (v === "") ----------------------
+  if (v === "") {
+    onValidChange(null);
 
-        if (ano != null && cultivo != null && coluna) {
-          dadosOriginais.forEach(item => {
-            if (
-              String(getCampo(item, "ANO_POF")) === String(ano) &&
-              String(getCampo(item, "Cultivo")) === String(cultivo)
-            ) {
-              item[coluna] = null;
+    if (cultivo != null && coluna) {
+      // ⬇️ REPLICA para 2008 e 2017, todas as regiões, do mesmo Cultivo
+      dadosOriginais.forEach(item => {
+        const anoItem = String(getCampo(item, "ANO_POF"));
+        const cultivoItem = String(getCampo(item, "Cultivo"));
+        if (
+          cultivoItem === String(cultivo) &&
+          (anoItem === "2008" || anoItem === "2017")
+        ) {
+          item[coluna] = null;
 
-              const novoIDMT = calcularIDMT(item);
-              item["IDMT (Numerador)"] = novoIDMT;
-              item["Contribuição Individual do Cultivo"] = calcularContribuicaoIndividual(novoIDMT, item);
-            }
-          });
-
-          // 🔒 Preserva foco, re-renderiza e restaura
-          const currentFocus = document.activeElement;
-          const currentAno = currentFocus?.dataset?.ano;
-          const currentCultivo = currentFocus?.dataset?.cultivo;
-          const currentColuna = currentFocus?.dataset?.col;
-
-          atualizarPOF();
-          // 🔧 re-render com filtros preservados
-          renderizarTabela(dadosComFiltrosAplicados());
-
-          if (currentAno && currentCultivo && currentColuna) {
-            const selector = `.editable-cell[data-ano="${esc(currentAno)}"][data-cultivo="${esc(currentCultivo)}"][data-col="${esc(currentColuna)}"]`;
-            const newInput = document.querySelector(selector);
-            if (newInput) {
-              newInput.focus();
-              const len = newInput.value.length;
-              try { newInput.setSelectionRange(len, len); } catch {}
-            }
-          }
+          const novoIDMT = calcularIDMT(item);
+          item["IDMT (Numerador)"] = novoIDMT;
+          item["Contribuição Individual do Cultivo"] = calcularContribuicaoIndividual(novoIDMT, item);
         }
-        return;
-      }
+      });
 
+      // 🔒 Preserva foco, re-renderiza e restaura
+      const currentFocus = document.activeElement;
+      const currentAno = currentFocus?.dataset?.ano;
+      const currentCultivo = currentFocus?.dataset?.cultivo;
+      const currentColuna = currentFocus?.dataset?.col;
+
+      atualizarPOF();
+      renderizarTabela(dadosComFiltrosAplicados());
+      salvarDadosCronica();
+
+      if (currentAno && currentCultivo && currentColuna) {
+        const selector = `.editable-cell[data-ano="${esc(currentAno)}"][data-cultivo="${esc(currentCultivo)}"][data-col="${esc(currentColuna)}"]`;
+        const newInput = document.querySelector(selector);
+        if (newInput) {
+          newInput.focus();
+          const len = newInput.value.length;
+          try { newInput.setSelectionRange(len, len); } catch {}
+        }
+      }
+    }
+    return;
+  }
+
+  // ---------------------- VALOR VÁLIDO ----------------------
+  if (regexFinal.test(v)) {
+    const valueText = v; // mantém "0.0", "0.06", etc.
+    onValidChange(valueText);
+
+    if (cultivo != null && coluna) {
+      // ⬇️ REPLICA para 2008 e 2017, todas as regiões, do mesmo Cultivo
+      dadosOriginais.forEach(item => {
+        const anoItem = String(getCampo(item, "ANO_POF"));
+        const cultivoItem = String(getCampo(item, "Cultivo"));
+        if (
+          cultivoItem === String(cultivo) &&
+          (anoItem === "2008" || anoItem === "2017")
+        ) {
+          // Guardar STRING no modelo
+          item[coluna] = valueText;
+
+          const novoIDMT = calcularIDMT(item); // toNumberSafe converte string -> número
+          item["IDMT (Numerador)"] = novoIDMT;
+          item["Contribuição Individual do Cultivo"] = calcularContribuicaoIndividual(novoIDMT, item);
+        }
+      });
+
+      // 💾 Persistência
+      salvarDadosCronica();
+
+      // 🔒 Preserva foco, re-renderiza e restaura
+      const currentFocus = document.activeElement;
+      const currentAno = currentFocus?.dataset?.ano;
+      const currentCultivo = currentFocus?.dataset?.cultivo;
+      const currentColuna = currentFocus?.dataset?.col;
+
+      atualizarPOF();
+      renderizarTabela(dadosComFiltrosAplicados());
+
+      if (currentAno && currentCultivo && currentColuna) {
+        const selector = `.editable-cell[data-ano="${esc(currentAno)}"][data-cultivo="${esc(currentCultivo)}"][data-col="${esc(currentColuna)}"]`;
+        const newInput = document.querySelector(selector);
+        if (newInput) {
+          newInput.focus();
+          const len = newInput.value.length;
+          try { newInput.setSelectionRange(len, len); } catch {}
+        }
+      }
+    }
+    return;
+  }
+  
       // 🔹 Número completo — commit COMO STRING para preservar "0.0"
-      if (regexFinal.test(v)) {
-        const valueText = v; // <- mantém "0.0", "0.06", etc.
-        onValidChange(valueText);
+      // 🔹 Número completo — commit COMO STRING para preservar "0.0"
+if (regexFinal.test(v)) {
+  const valueText = v; // mantém "0.0", "0.06", etc.
+  onValidChange(valueText);
 
-        if (ano != null && cultivo != null && coluna) {
-          dadosOriginais.forEach(item => {
-            if (
-              String(getCampo(item, "ANO_POF")) === String(ano) &&
-              String(getCampo(item, "Cultivo")) === String(cultivo)
-            ) {
-              // 🔸 Guardar STRING no modelo
-              item[coluna] = valueText;
+  if (ano != null && cultivo != null && coluna) {
+    dadosOriginais.forEach(item => {
+      if (
+        String(getCampo(item, "ANO_POF")) === String(ano) &&
+        String(getCampo(item, "Cultivo")) === String(cultivo)
+      ) {
+        // Guardar STRING no modelo
+        item[coluna] = valueText;
 
-              const novoIDMT = calcularIDMT(item); // toNumberSafe converte string -> número
-              item["IDMT (Numerador)"] = novoIDMT;
-              item["Contribuição Individual do Cultivo"] = calcularContribuicaoIndividual(novoIDMT, item);
-            }
-          });
-
-          // 🔒 Preserva foco, re-renderiza e restaura
-          const currentFocus = document.activeElement;
-          const currentAno = currentFocus?.dataset?.ano;
-          const currentCultivo = currentFocus?.dataset?.cultivo;
-          const currentColuna = currentFocus?.dataset?.col;
-
-          atualizarPOF();
-          // 🔧 re-render com filtros preservados
-          renderizarTabela(dadosComFiltrosAplicados());
-
-          if (currentAno && currentCultivo && currentColuna) {
-            const selector = `.editable-cell[data-ano="${esc(currentAno)}"][data-cultivo="${esc(currentCultivo)}"][data-col="${esc(currentColuna)}"]`;
-            const newInput = document.querySelector(selector);
-            if (newInput) {
-              newInput.focus();
-              const len = newInput.value.length;
-              try { newInput.setSelectionRange(len, len); } catch {}
-            }
-          }
-        }
-        return;
+        const novoIDMT = calcularIDMT(item); // toNumberSafe converte string -> número
+        item["IDMT (Numerador)"] = novoIDMT;
+        item["Contribuição Individual do Cultivo"] = calcularContribuicaoIndividual(novoIDMT, item);
       }
+    });
+
+    // 💾 >>> SALVAR TAMBÉM AQUI <<<
+    salvarDadosCronica();
+
+    // 🔒 Preserva foco, re-renderiza e restaura
+    const currentFocus = document.activeElement;
+    const currentAno = currentFocus?.dataset?.ano;
+    const currentCultivo = currentFocus?.dataset?.cultivo;
+    const currentColuna = currentFocus?.dataset?.col;
+
+    atualizarPOF();
+    renderizarTabela(dadosComFiltrosAplicados());
+
+    if (currentAno && currentCultivo && currentColuna) {
+      const selector = `.editable-cell[data-ano="${esc(currentAno)}"][data-cultivo="${esc(currentCultivo)}"][data-col="${esc(currentColuna)}"]`;
+      const newInput = document.querySelector(selector);
+      if (newInput) {
+        newInput.focus();
+        const len = newInput.value.length;
+        try { newInput.setSelectionRange(len, len); } catch {}
+      }
+    }
+  }
+  return;
+}
 
       // 🔹 Estado intermediário (ex.: "0." ou "0.0")
       onValidChange(null);
@@ -338,23 +420,52 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // ---------------- Carregamento ----------------
-
-  async function carregarTabela() {
+  
+  
+async function carregarTabela() {
+  // 1) Tenta restaurar do localStorage SOMENTE se houver dados válidos
+  const saved = localStorage.getItem(LS_KEYS.chronicData);
+  if (saved) {
     try {
-      const response = await fetch(API_URL);
-      if (!response.ok) throw new Error("Erro ao buscar dados");
-      const data = await response.json();
-      dadosOriginais = Array.isArray(data.tabelaCompleta) ? data.tabelaCompleta : [];
-
-      // 🔧 render inicial respeitando o estado do filtro (por padrão: "Todos")
-      renderizarTabela(dadosComFiltrosAplicados());
-      inicializarFiltros(dadosOriginais);
-      atualizarPOF();
-    } catch (error) {
-      console.error("Erro ao carregar tabela:", error);
-      tbody.innerHTML = `<tr><td class="no-data" colspan="${COLUNAS.length}">Falha ao carregar os dados.</td></tr>`;
+      const restored = JSON.parse(saved);
+      if (Array.isArray(restored) && restored.length > 0) {
+        dadosOriginais = restored;
+        renderizarTabela(dadosComFiltrosAplicados());
+        inicializarFiltros(dadosOriginais);
+        atualizarPOF();
+        return; // ✅ restauração bem-sucedida, não precisa backend
+      }
+      // Se chegou aqui, havia chave, mas vazia/ineficaz. Cai para o backend.
+      console.warn("[CRONICA] Salvo no localStorage vazio/ineficaz. Buscando do backend...");
+    } catch (e) {
+      console.warn("[CRONICA] JSON do localStorage inválido. Buscando do backend...", e);
+      // cai pro backend
     }
   }
+
+  // 2) Busca do backend se não tinha salvo válido
+  try {
+    const response = await fetch(API_URL);
+    if (!response.ok) throw new Error("Erro ao buscar dados");
+    const data = await response.json();
+
+    // 🔎 Ajuste aqui para o nome certo da propriedade do seu backend:
+    // Ex.: data.tabelaCompleta, data.tabela_cronica, etc.
+    dadosOriginais = Array.isArray(data.tabelaCompleta) ? data.tabelaCompleta : [];
+
+    renderizarTabela(dadosComFiltrosAplicados());
+    inicializarFiltros(dadosOriginais);
+    atualizarPOF();
+
+    // (opcional) Se quiser já “seedar” o storage na primeira carga:
+    // salvarDadosCronica();
+  } catch (error) {
+    console.error("Erro ao carregar tabela:", error);
+    tbody.innerHTML = `<tr><td class="no-data" colspan="${COLUNAS.length}">Falha ao carregar os dados.</td></tr>`;
+  }
+}
+
+
 
   // ---------------- Renderização ----------------
   function renderizarTabela(data) {
@@ -425,6 +536,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       .map(i => getCampo(i, "ANO_POF"))
       .filter(v => v && String(v).trim() !== "");
 
+    const regioesUnicas = [...new Set(
+      data.map(i => getCampo(i, "Região")).filter(v => v && String(v).trim() !== "")
+    )].sort((a, b) => String(a).localeCompare(String(b), "pt-BR", { sensitivity: "base" }));
+
     const anosUnicos = [...new Set(anosUnicosRaw.map(v => {
       const n = toNumberSafe(v);
       return n !== null ? n : String(v).trim();
@@ -452,6 +567,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           let opcoes = ["Todos"];
           if (tipo === "Cultivo") opcoes = ["Todos", ...cultivosUnicos];
           if (tipo === "ANO_POF") opcoes = ["Todos", ...anosUnicos];
+          if (tipo === "Região") opcoes = ["Todos", ...regioesUnicas];
 
           dropdown.innerHTML = opcoes.map(op => `<div data-value="${op}">${op}</div>`).join("");
           coluna.appendChild(dropdown);
@@ -493,6 +609,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return dadosOriginais.filter(item => {
       const cultivoItem = getCampo(item, "Cultivo");
       const anoItem = getCampo(item, "ANO_POF");
+      const regiaoItem = getCampo(item, "Região");
 
       const filtroCultivoOK =
         estadoFiltros.Cultivo === "Todos" ||
@@ -503,8 +620,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         (toNumberSafe(anoItem) !== null && toNumberSafe(estadoFiltros.ANO_POF) !== null
           ? toNumberSafe(anoItem) === toNumberSafe(estadoFiltros.ANO_POF)
           : String(anoItem) === String(estadoFiltros.ANO_POF));
+            
+      const filtroRegiaoOK =
+        estadoFiltros.Região === "Todos" ||
+        (regiaoItem && String(regiaoItem) === String(estadoFiltros.Região));
 
-      return filtroCultivoOK && filtroAnoOK;
+      
+      return filtroCultivoOK && filtroAnoOK && filtroRegiaoOK;
     });
   }
 
@@ -533,15 +655,44 @@ document.addEventListener("DOMContentLoaded", async () => {
       intInput.value = intInput.dataset.default;
     }
   }
+ 
+  setupDecimalInput('.editable-btn', n => {
+    idaAnvisa = n;
+    atualizarPOF();
+    salvarDadosCronica();
+  }, LS_KEYS.idaAnvisa);
 
-  // 2) Liga a lógica numérica (digitável) e recálculo da POF
-  setupDecimalInput('.editable-btn', n => { idaAnvisa = n; atualizarPOF(); });
-  setupDecimalInput('.editable-int', n => { idaSyngenta = n; atualizarPOF(); });
+  setupDecimalInput('.editable-int', n => {
+    idaSyngenta = n;
+    atualizarPOF();
+    salvarDadosCronica();
+  }, LS_KEYS.idaSyngenta);
 
-  // 3) Carrega dados e POF
+  // ✅ BLOCO CERTO AQUI:
   await carregarTabelaPOF2008();
   await carregarTabelaPOF2017();
-  await carregarTabela(); // carrega dados principais
+
+  // 🔁 Restaura POFs salvas, se existirem
+  const savedPOF2008 = localStorage.getItem(LS_KEYS.pof2008);
+  if (savedPOF2008) restaurarTabela('tabela-pof-2008', JSON.parse(savedPOF2008));
+
+  const savedPOF2017 = localStorage.getItem(LS_KEYS.pof2017);
+  if (savedPOF2017) restaurarTabela('tabela-pof-2017', JSON.parse(savedPOF2017));
+
+  // Agora carrega os dados principais
+  await carregarTabela();
+
+  // ✅ Garante persistência inicial
+  salvarDadosCronica();
+
+  // Eventos: beforeunload, botão back, botão clear
+  window.addEventListener("beforeunload", salvarDadosCronica);
+
+  const backBtn = document.querySelector(".btn-back");
+  if (backBtn) {
+    backBtn.addEventListener("click", () => salvarDadosCronica());
+  }
+
 
   // 4) Clear: volta rótulos visuais e zera lógicas
   document.querySelector(".btn-clear").addEventListener("click", () => {
@@ -563,21 +714,239 @@ document.addEventListener("DOMContentLoaded", async () => {
       return item;
     });
 
-    atualizarPOF();
     // 🔧 re-render com filtros preservados
     renderizarTabela(dadosComFiltrosAplicados());
+  
+  localStorage.removeItem(LS_KEYS.chronicData);
+  localStorage.removeItem(LS_KEYS.idaAnvisa);
+  localStorage.removeItem(LS_KEYS.idaSyngenta);
+  localStorage.removeItem(LS_KEYS.pof2008);
+  localStorage.removeItem(LS_KEYS.pof2017);
+
   });
 
   atualizarPOF(); // calcula e renderiza
+  salvarDadosCronica();
+
+  // === COLAR DO EXCEL (LMR/MREC) — Chronic ===
+(function enableChronicExcelPaste(){
+  const PASTE_COLUMNS = ["LMR (mg_kg)", "MREC_STMR (mg_kg)"];
+
+  document.addEventListener('paste', (event) => {
+    const active = document.activeElement;
+    if (!active || !active.classList.contains('editable-cell')) return;
+
+    const currentCol = active.dataset.col;
+    if (!PASTE_COLUMNS.includes(currentCol)) return; // só LMR/MREC
+
+    // Evita re-render a cada célula pelo handler padrão do input
+    event.preventDefault();
+
+    const clipboard = event.clipboardData?.getData('text') ?? '';
+    const matrix = parseClipboard(clipboard); // linhas -> colunas (TSV Excel)
+    if (!matrix.length) return;
+
+    // Inputs visíveis da coluna atual (respeita filtros)
+    const colSelector = `.editable-cell[data-col="${currentCol}"]`;
+    const inputs = Array.from(document.querySelectorAll(colSelector));
+    const startIndex = inputs.indexOf(active);
+
+    const ops = [];
+
+    // Mapeia linhas do Excel para baixo a partir do input focado
+    for (let i = 0; i < matrix.length; i++) {
+      const rowInput = inputs[startIndex + i];
+      if (!rowInput) break; // acabou a tabela visível
+
+      const ctx = {
+        ano: rowInput.dataset.ano,
+        cultivo: rowInput.dataset.cultivo,
+        regiao: rowInput.dataset.regiao
+      };
+
+      const colsThisRow = matrix[i];
+
+      if (colsThisRow.length === 1) {
+        // 1 coluna: preencher somente a coluna atual
+        const valText = normalizeNumberText(colsThisRow[0]);
+        const valor = interpretToken(valText); // null para vazio/'-'/NA
+        if (!rowInput.readOnly && !rowInput.disabled) {
+          ops.push({ ...ctx, coluna: currentCol, valor });
+        }
+      } else {
+        // Múltiplas colunas (TSV): espalhar para direita na ordem LMR -> MREC
+        const startColIdx = PASTE_COLUMNS.indexOf(currentCol);
+        for (let j = 0; j < colsThisRow.length; j++) {
+          const targetCol = PASTE_COLUMNS[startColIdx + j];
+          if (!targetCol) break; // ignorar excesso
+
+          const valText = normalizeNumberText(colsThisRow[j]);
+          const valor = interpretToken(valText);
+
+          // Localiza o input daquela linha/coluna para honrar disabled/readOnly (se houver)
+          const sel = `.editable-cell[data-ano="${esc(ctx.ano)}"][data-cultivo="${esc(ctx.cultivo)}"][data-regiao="${esc(ctx.regiao)}"][data-col="${esc(targetCol)}"]`;
+          const cell = document.querySelector(sel);
+          if (cell && !cell.readOnly && !cell.disabled) {
+            ops.push({ ...ctx, coluna: targetCol, valor });
+          }
+        }
+      }
+    }
+
+    aplicarEdicoesCrBatch(ops);
+    mostrarFeedback(`Colados ${ops.length} valor(es).`);
+  });
+
+  function aplicarEdicoesCrBatch(ops) {
+    if (!Array.isArray(ops) || ops.length === 0) return;
+
+    // Snapshot de scroll e foco para restaurar depois
+    const sc = document.querySelector('.table-wrapper');
+    const scrollTop  = sc ? sc.scrollTop  : 0;
+    const scrollLeft = sc ? sc.scrollLeft : 0;
+
+    const active = document.activeElement;
+    const caret = (active && typeof active.selectionStart === 'number') ? active.selectionStart : null;
+    const reselectInfo = active ? {
+      cultivo: active.dataset.cultivo,
+      ano: active.dataset.ano,
+      regiao: active.dataset.regiao,
+      coluna: active.dataset.col,
+      caret
+    } : null;
+
+    // Aplica cada operação replicando a MESMA regra do input:
+    // para o mesmo Cultivo, aplica em 2008 e 2017 em TODAS as regiões
+    for (const { cultivo, coluna, valor } of ops) {
+      dadosOriginais.forEach(item => {
+        const cultivoItem = String(getCampo(item, "Cultivo"));
+        const anoItem = String(getCampo(item, "ANO_POF"));
+        if (cultivoItem !== String(cultivo)) return;
+        if (!(anoItem === "2008" || anoItem === "2017")) return;
+
+        item[coluna] = (valor === null ? null : valor);
+
+        const novoIDMT = calcularIDMT(item);
+        item["IDMT (Numerador)"] = novoIDMT;
+        item["Contribuição Individual do Cultivo"] = calcularContribuicaoIndividual(novoIDMT, item);
+      });
+    }
+
+    // Persistência e re-render
+    salvarDadosCronica();
+    atualizarPOF();
+    renderizarTabela(dadosComFiltrosAplicados());
+
+    // Restaura scroll e foco
+    if (sc) { sc.scrollTop = scrollTop; sc.scrollLeft = scrollLeft; }
+    if (reselectInfo) {
+      const selector = `.editable-cell[data-ano="${esc(reselectInfo.ano)}"][data-cultivo="${esc(reselectInfo.cultivo)}"][data-regiao="${esc(reselectInfo.regiao)}"][data-col="${esc(reselectInfo.coluna)}"]`;
+      const el = document.querySelector(selector);
+      if (el) {
+        el.focus();
+        const pos = typeof reselectInfo.caret === 'number' ? reselectInfo.caret : el.value.length;
+        try { el.setSelectionRange(pos, pos); } catch {}
+      }
+    }
+  }
+
+  function parseClipboard(text) {
+    const trimmed = (text || '').trim();
+    if (!trimmed) return [];
+    // Separa por linhas e TAB (TSV do Excel)
+    return trimmed.split(/\r?\n/).map(line => line.split('\t').map(s => s.trim()));
+  }
+
+  function normalizeNumberText(s) {
+    // Trata decimais com vírgula do Excel pt-BR sem quebrar quem já usa ponto
+    if (s == null) return '';
+    let t = String(s).trim();
+
+    // Tokens especiais
+    if (/^(na|n\/a|n\.a\.|n\.a|--|-)$/i.test(t)) return '-';
+
+    // Se contiver vírgula, assume vírgula decimal e ponto como milhar
+    if (t.includes(',')) {
+      t = t.replace(/\./g, '').replace(',', '.');
+    }
+    // remove espaços não quebráveis
+    t = t.replace(/\u00A0/g, ' ').trim();
+
+    return t;
+  }
+
+  function interpretToken(s) {
+    if (!s) return null;
+    if (s === '-' || /^na$/i.test(s)) return null;
+
+    const n = Number(s);
+    if (Number.isFinite(n) && n === 0) return null;
+
+    // Mantém string para preservar "0.06" etc. (sem normalizar formato)
+    return /^\d+(\.\d+)?$/.test(s) ? s : null;
+  }
+
+  function mostrarFeedback(msg) {
+    try {
+      let toast = document.getElementById('paste-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'paste-toast';
+        toast.style.cssText = "position:fixed;bottom:16px;right:16px;background:#2d7;border-radius:6px;color:#fff;padding:8px 12px;font:600 12px/1.3 system-ui;box-shadow:0 4px 16px rgba(0,0,0,.2);z-index:9999;opacity:.98";
+        document.body.appendChild(toast);
+      }
+      toast.textContent = msg;
+      clearTimeout(toast._t);
+      toast.style.display = 'block';
+      toast._t = setTimeout(() => { toast.style.display = 'none'; }, 2000);
+    } catch {}
+  }
+})();
 
 }); // fim DOMContentLoaded
+
+
+function snapshotTabela(tabelaId) {
+  const tbody = document.getElementById(tabelaId);
+  if (!tbody) return null; // ⬅️ evita snapshot vazio
+
+  const rows = tbody.querySelectorAll('tr');
+  if (!rows || rows.length === 0) return null; // ⬅️ evita snapshot vazio
+
+  const linhas = [];
+  rows.forEach(tr => {
+    const metrica = tr.dataset.metrica || tr.children[0].textContent.trim();
+    const valores = [];
+    for (let i = 1; i < tr.children.length; i++) {
+      valores.push(tr.children[i].textContent.trim());
+    }
+    linhas.push({ metrica, valores });
+  });
+  return linhas;
+}
+
+// 🔽 ADICIONE ESTA FUNÇÃO (fora do DOMContentLoaded)
+function restaurarTabela(tabelaId, dados) {
+  const tbody = document.getElementById(tabelaId);
+  if (!tbody || !Array.isArray(dados)) return;
+
+  tbody.querySelectorAll('tr').forEach((tr, idx) => {
+    const linhaSalva = dados[idx];
+    if (linhaSalva && Array.isArray(linhaSalva.valores)) {
+      for (let i = 1; i < tr.children.length; i++) {
+        tr.children[i].textContent = linhaSalva.valores[i - 1] ?? '—';
+      }
+    }
+  });
+}
 
 // ---------------- Inputs Ext e Int ----------------
 
 let idaAnvisa = null;
 let idaSyngenta = null;
 
-function setupDecimalInput(selector, onValidNumber) {
+
+function setupDecimalInput(selector, onValidNumber, storageKey) {
   document.querySelectorAll(selector).forEach(input => {
     const defaultText = input.dataset.default || input.value; // "IDA_EXTERNA"/"IDA_INTERNA"
     input.type = 'text';
@@ -586,8 +955,15 @@ function setupDecimalInput(selector, onValidNumber) {
     input.spellcheck = false;
     input.title = 'Accepts integers and decimals with dots (.)';
 
-    // Mostra o rótulo “bonito” no começo, se não houver valor
-    if (!input.value) input.value = defaultText;
+    // ✅ Restaura valor salvo no localStorage (se existir)
+    const savedValue = localStorage.getItem(storageKey);
+    if (savedValue !== null && savedValue.trim() !== '') {
+      input.value = savedValue; // mostra o valor salvo
+      onValidNumber(parseFloat(savedValue)); // atualiza variável lógica
+    } else {
+      // Mostra o rótulo “bonito” no começo, se não houver valor
+      if (!input.value) input.value = defaultText;
+    }
 
     input.addEventListener('focus', () => {
       if (input.value === defaultText) input.value = '';
@@ -598,6 +974,7 @@ function setupDecimalInput(selector, onValidNumber) {
       if (input.value.trim() === '') {
         onValidNumber(null);           // 🔴 dispara recalcular como nulo
         input.value = defaultText;     // 🔵 restaura o rótulo visual
+        localStorage.removeItem(storageKey); // limpa do storage
       }
     });
 
@@ -610,10 +987,19 @@ function setupDecimalInput(selector, onValidNumber) {
       input.value = v;
 
       // Notifica número válido ou null (inclusive quando usuário apaga tudo)
-      onValidNumber(/^\d+(\.\d+)?$/.test(v) ? parseFloat(v) : null);
+      const isValid = /^\d+(\.\d+)?$/.test(v);
+      onValidNumber(isValid ? parseFloat(v) : null);
+
+      // ✅ Salva no localStorage sempre que mudar
+      if (isValid) {
+        localStorage.setItem(storageKey, v);
+      } else {
+        localStorage.removeItem(storageKey);
+      }
     });
   });
 }
+
 
 // ---------------- (Opcional) Destaque visual ao replicar ----------------
 
@@ -704,4 +1090,23 @@ async function carregarTabelaPOF2017() {
   } catch (error) {
     console.error("Erro ao carregar tabela POF 2017:", error);
   }
+}
+const modal = document.getElementById("btn-infoChronic");
+    const btn = document.querySelector(".btn-infoChronic");
+    const span = modal.querySelector(".close"); // pega o X dentro do modal
+    
+    if (btn && modal && span) {
+    btn.addEventListener("click", () => {
+        modal.style.display = "flex";
+    });
+
+    span.addEventListener("click", () => {
+        modal.style.display = "none";
+    });
+
+    window.addEventListener("click", (event) => {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    });
 }

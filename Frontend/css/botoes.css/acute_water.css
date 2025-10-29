@@ -117,9 +117,15 @@ body {
 }
 
 .modal-content p {
-    margin-right: 13px;
     font-size: 1.2rem;
     color: #333;
+}
+
+.left-align {
+    text-align: left;
+    margin-left: 28px;
+    padding-left: 0;
+    align-self: flex-start;
 }
 
 .close {
@@ -334,7 +340,7 @@ body {
     gap: 1rem;
     padding: 1rem;
     position: relative;
-    top: -50px; 
+    top: 5px; 
 }
 
 .action-buttons button {

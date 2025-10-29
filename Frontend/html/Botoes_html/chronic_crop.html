@@ -11,14 +11,6 @@
   <div class="container">
     <a href="https://app.smartsheet.com/sheets/pjRGcG7H8V3Qxc7rmVWPQM38G5X286QwpQCPxFw1" class="help-button" target="_blank" rel="noopener noreferrer" aria-label="Ajuda">?</a>
 
-    <div id="modalEmail" class="modal">
-      <div class="modal-content">
-        <span class="close" onclick="fecharModal()">&times;</span>
-        <h2>Contato do Responsável</h2>
-        <p>vinicius.camargo@syngenta.com</p>
-      </div>
-    </div>
-
     <div class="sidebar">
       <img src="/imagens/LogoBrancoRisk.png" alt="Logo RiskWise" class="sidebar-logo"/>
       <a href="/index.html" id="btn-home" class="sidebar-icon" aria-label="Voltar para a Home">
@@ -66,7 +58,9 @@
                   <th class="coluna-filtro" data-coluna="ANO_POF">
                     ANO_POF <span class="seta">&#9662;</span>
                   </th>
-                  <th>Região</th>
+                  <th class="coluna-filtro" data-coluna="Região">
+                    Região <span class="seta">&#9662;</span>
+                  </th>
                   <th>LMR (mg_kg)</th>
                   <th>MREC_STMR (mg_kg)</th>
                   <th>Market Share</th>
@@ -128,6 +122,9 @@
       </div>
 
       <div class="action-buttons">
+
+        <button class="btn-infoChronic" aria-label="Ajuda">IDA Data</button>
+
         <a href="/HomeCropBR.html">
           <button class="btn-back">Back to Calculator</button>
         </a>
@@ -135,7 +132,16 @@
       </div>
     </div>
   </div>
-  
+   <!-- Modal -->
+    <div id="btn-infoChronic" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p>
+                Access IDA data: 
+                <a href="https://syngenta.sharepoint.com/:x:/r/sites/ps-latam/_layouts/15/Doc.aspx?sourcedoc=%7B6DAEBB32-E9B9-456C-AFCE-3A9904F00DE9%7D&file=DietaCronica_Calculadora_V8.xlsx&action=default&mobileredirect=true" target="_blank">Click Here</a>
+            </p>
+        </div>
+    </div>
   <script src="/javascript/auth-check.js" defer></script>
   <script src="/javascript/Botoes.js/chronic_crop.js" defer></script>
   

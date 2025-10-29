@@ -382,3 +382,13 @@ body {
 .drfa-info p {
     margin: 0;
 }
+
+.drfa-infoCronica {
+    display: flex;  
+    gap: 40px;
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+.drfa-infoCronica p {
+    margin: 0;
+}

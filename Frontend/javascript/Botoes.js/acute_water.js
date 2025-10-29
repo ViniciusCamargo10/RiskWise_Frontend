@@ -4,12 +4,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const criancaInput = document.getElementById("inputCrianca");
 
     const LS_KEYS = {
-        conc: "conc",
-        adulto: "adulto",
-        crianca: "crianca",
-        idaAnvisa: "AGUDO_IDA_ANVISA_VAL",
-        idaSyngenta: "AGUDO_IDA_SYNGENTA_VAL"
-    };
+    conc: "water_acute_conc",
+    adulto: "water_acute_adulto",
+    crianca: "water_acute_crianca",
+    idaAnvisa: "water_acute_ida_anvisa_val",
+    idaSyngenta: "water_acute_ida_syngenta_val"
+};
+
 
     let idaAnvisa = null;
     let idaSyngenta = null;
@@ -97,22 +98,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ---------------- Cálculo ----------------
     function atualizarCalculo() {
-        const conc = parseFloat(concInput.value);
-        const pesoAdulto = parseFloat(adultoInput.value);
-        const pesoCrianca = parseFloat(criancaInput.value);
+    const conc = parseFloat(concInput.value);
+    const pesoAdulto = parseFloat(adultoInput.value);
+    const pesoCrianca = parseFloat(criancaInput.value);
 
-        const calc = (fator, peso, ida) => {
-            if (!isNaN(conc) && !isNaN(peso) && ida && !isNaN(ida) && ida !== 0) {
-                return (((fator * conc) / peso) / ida * 100).toFixed(2) + "%";
-            }
-            return "-";
-        };
+    const calc = (fator, peso, ida) => {
+        if (!isNaN(conc) && !isNaN(peso) && ida && !isNaN(ida) && ida !== 0) {
+            return (((fator * conc) / peso) / ida * 100).toFixed(2) + "%";
+        }
+        return "-";
+    };
 
-        document.getElementById("outExtAdulto").textContent = calc(2, pesoAdulto, idaAnvisa);
-        document.getElementById("outIntAdulto").textContent = calc(2, pesoAdulto, idaSyngenta);
-        document.getElementById("outExtCrianca").textContent = calc(1, pesoCrianca, idaAnvisa);
-        document.getElementById("outIntCrianca").textContent = calc(1, pesoCrianca, idaSyngenta);
+    const extAdulto = calc(2, pesoAdulto, idaAnvisa);
+    const intAdulto = calc(2, pesoAdulto, idaSyngenta);
+    const extCrianca = calc(1, pesoCrianca, idaAnvisa);
+    const intCrianca = calc(1, pesoCrianca, idaSyngenta);
+
+    document.getElementById("outExtAdulto").textContent = extAdulto;
+    document.getElementById("outIntAdulto").textContent = intAdulto;
+    document.getElementById("outExtCrianca").textContent = extCrianca;
+    document.getElementById("outIntCrianca").textContent = intCrianca;
+
+    // Salvar apenas se não for "-"
+    if (extAdulto !== "-" || intAdulto !== "-" || extCrianca !== "-" || intCrianca !== "-") {
+        localStorage.setItem("outExtAdulto", extAdulto);
+        localStorage.setItem("outIntAdulto", intAdulto);
+        localStorage.setItem("outExtCrianca", extCrianca);
+        localStorage.setItem("outIntCrianca", intCrianca);
     }
+}
 
     // ---------------- Botão Clear ----------------
     document.querySelector(".btn-clear").addEventListener("click", () => {
@@ -132,13 +146,20 @@ document.addEventListener("DOMContentLoaded", () => {
         // Resetar variáveis
         idaAnvisa = null;
         idaSyngenta = null;
-
         // Remover do localStorage
+            
         localStorage.removeItem(LS_KEYS.conc);
         localStorage.removeItem(LS_KEYS.adulto);
         localStorage.removeItem(LS_KEYS.crianca);
         localStorage.removeItem(LS_KEYS.idaAnvisa);
         localStorage.removeItem(LS_KEYS.idaSyngenta);
+        localStorage.removeItem("outExtAdulto");
+        localStorage.removeItem("outIntAdulto");
+        localStorage.removeItem("outExtCrianca");
+        localStorage.removeItem("outIntCrianca");
+        localStorage.removeItem("conc");
+        localStorage.removeItem("adulto");
+        localStorage.removeItem("crianca");
 
         // Atualizar a tabela (colocar "-" nos resultados)
         atualizarCalculo();
@@ -188,25 +209,22 @@ document.addEventListener("DOMContentLoaded", () => {
         atualizarCalculo();
     });
 });
-
-
     const modal = document.getElementById("btn-info");
     const btn = document.querySelector(".btn-info");
-    const span = document.querySelector(".close");
-
+    const span = modal.querySelector(".close"); // pega o X dentro do modal
+    
     if (btn && modal && span) {
-        btn.addEventListener("click", () => {
-            modal.style.display = "flex";
-        });
+    btn.addEventListener("click", () => {
+        modal.style.display = "flex";
+    });
 
-        span.addEventListener("click", () => {
+    span.addEventListener("click", () => {
+        modal.style.display = "none";
+    });
+
+    window.addEventListener("click", (event) => {
+        if (event.target === modal) {
             modal.style.display = "none";
-        });
-
-        window.addEventListener("click", (event) => {
-            if (event.target === modal) {
-                modal.style.display = "none";
-            }
-        });
-    }
-
+        }
+    });
+}

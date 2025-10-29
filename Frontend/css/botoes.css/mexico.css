@@ -92,7 +92,7 @@ body {
 
 .modal-content p {
     font-size: 1.2rem;
-    color: #333;
+    color: #333;  
 }
 
 .modal-content ol {
@@ -184,6 +184,13 @@ body {
     max-height: 85vh;
     overflow: hidden;
     width: 100%;
+}
+
+.left-align {
+    text-align: left;
+    margin-left: 28px;
+    padding-left: 0;
+    align-self: flex-start;
 }
 
 /* Conteúdo com rolagem */

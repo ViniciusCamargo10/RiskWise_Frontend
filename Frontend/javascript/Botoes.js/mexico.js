@@ -6,6 +6,26 @@ let state = {
   totals: {}
 };
 
+function salvarMexicoNoLocalStorage() {
+    localStorage.setItem("RW_MEXICO_DATA", JSON.stringify(state.rows));
+    localStorage.setItem("RW_MEXICO_META", JSON.stringify(state.meta));
+    localStorage.setItem("RW_MEXICO_TOTALS", JSON.stringify(state.totals));
+    // Salva também os campos individuais para a tabela de resultados
+    localStorage.setItem("RW_MEXICO_BW", state.meta.bw ?? "-");
+    localStorage.setItem("RW_MEXICO_SUM", state.totals.sumLC ?? "-");
+
+    // ✅ ADI: se vazio, remove do storage; se preenchido, grava como string
+    const adi = state.meta.adi_interno;
+    if (adi === null || adi === undefined || String(adi).trim() === "") {
+      localStorage.removeItem("RW_MEXICO_ADI");
+    } else {
+      localStorage.setItem("RW_MEXICO_ADI", String(adi));
+    }
+
+    localStorage.setItem("RW_MEXICO_IDMT", state.totals.idmt ?? "-");
+    localStorage.setItem("RW_MEXICO_PERCENT_ADI", state.totals["%ADI_interno"] ?? "-");
+}
+
 /* =========================================================
  * Normalização vindos do servidor (aceita vírgula do Excel)
  * ========================================================= */
@@ -178,6 +198,10 @@ function wireDecimalOnly(input) {
   });
 }
 
+function isPositive(x) {
+  return Number.isFinite(x) && x > 0;
+}
+
 /* ==========================================
  * Cálculo por linha e totais (sem arredondar)
  * ========================================== */
@@ -187,7 +211,7 @@ function calcRowAndPaint(i) {
   let r   = toNumOrNull(row["R (mg/kg)"]);
   let c   = toNumOrNull(row["C (Kg/person/day)"]);
 
-  const limite = (r !== null) ? r : (lmr !== null ? lmr : null);
+  const limite = isPositive(r) ? r : (isPositive(lmr) ? lmr : null);
   const val = (limite !== null && c !== null) ? limite * c : null;
 
   // Guarda valor exato (sem arredondar)
@@ -237,29 +261,42 @@ function calcularTudo() {
   // (Opcional) Se você criar um elemento #outSum, exibirá igual ao Excel (5 casas)
   const outSum = document.querySelector("#outSum");
   if (outSum) outSum.textContent = fmt5(sumLC);
+
+  salvarMexicoNoLocalStorage();
 }
 
 /* =========================
  * Carregar dados da API
  * ========================= */
 async function loadData() {
+  // 1. Tenta carregar do localStorage primeiro
+  const savedRows = JSON.parse(localStorage.getItem("RW_MEXICO_DATA") || "[]");
+  const savedMeta = JSON.parse(localStorage.getItem("RW_MEXICO_META") || "null");
+  const savedTotals = JSON.parse(localStorage.getItem("RW_MEXICO_TOTALS") || "null");
+
+  if (savedRows.length > 0 && savedMeta && savedTotals) {
+    state.rows = savedRows;
+    state.meta = savedMeta;
+    state.totals = savedTotals;
+    render(true);
+    return; // Não busca da API, pois já tem dados do usuário
+  }
+
+  // 2. Se não houver dados salvos, busca da API normalmente
   try {
     const res = await fetch(`${API}/dados`);
     if (!res.ok) throw new Error("Erro ao buscar dados");
     const data = await res.json();
 
     state.meta = data.meta;
-
-    // Normaliza (aceita vírgula do Excel) -> número
     state.rows = (data.rows ?? []).map(row => {
       return {
         ...row,
         "C (Kg/person/day)": toNumOrNull(normalizeFromServer(row["C (Kg/person/day)"])),
-        "LMR (mg/kg)":       toNumOrNull(normalizeFromServer(row["LMR (mg/kg)"])),
-        "R (mg/kg)":         toNumOrNull(normalizeFromServer(row["R (mg/kg)"]))
+        "LMR (mg/kg)": toNumOrNull(normalizeFromServer(row["LMR (mg/kg)"])),
+        "R (mg/kg)": toNumOrNull(normalizeFromServer(row["R (mg/kg)"]))
       };
     });
-
     state.totals = data.totals ?? {};
 
     render(true);
@@ -271,6 +308,7 @@ async function loadData() {
     }
   }
 }
+
 
 /* =========================
  * Renderização
@@ -326,6 +364,7 @@ function render(firstPaint = false) {
       inpAdi.value = val;
       state.meta.adi_interno = val;
       calcularTudo();
+      salvarMexicoNoLocalStorage();
     });
 
     // (Opcional) se quiser formatar ADI em exibição com X casas, basta trocar aqui
@@ -376,6 +415,7 @@ function render(firstPaint = false) {
               row[col] = inp.value;   // mantém string para o usuário
               calcRowAndPaint(i);     // calcula com toNumOrNull internamente
               calcularTudo();
+              salvarMexicoNoLocalStorage();
             });
 
             inp.addEventListener("blur", () => {
@@ -421,7 +461,6 @@ function clearReport() {
     row["LMR (mg/kg)"] = "";
     row["R (mg/kg)"] = "";
     row["(LMR or R)*C"] = "";
-
     const tr = document.querySelector(`tr[data-idx="${i}"]`);
     if (tr) {
       tr.querySelectorAll("input.editable-cell").forEach(inp => inp.value = "");
@@ -444,6 +483,11 @@ function clearReport() {
   if (outPercentAdi) outPercentAdi.textContent = "-";
 
   calcularTudo();
+
+  // ✅ Reflete "apagou" no storage
+  localStorage.removeItem("RW_MEXICO_ADI");
+  localStorage.setItem("RW_MEXICO_META", JSON.stringify(state.meta));
+  localStorage.setItem("RW_MEXICO_TOTALS", JSON.stringify(state.totals));
 }
 
 /* =========================

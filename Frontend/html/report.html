@@ -12,15 +12,6 @@
         <!-- Botão de ajuda -->
         <a href="https://app.smartsheet.com/sheets/pjRGcG7H8V3Qxc7rmVWPQM38G5X286QwpQCPxFw1" class="help-button" target="_blank" rel="noopener noreferrer" aria-label="Ajuda">?</a>
 
-        <!-- Modal de contato -->
-        <div id="modalEmail" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="fecharModal()">&times;</span>
-                <h2>Contato do Responsável</h2>
-                <p>vinicius.camargo@syngenta.com</p>
-            </div>
-        </div>
-
         <!-- Menu Lateral -->
         <div class="sidebar">
             <img src="/imagens/LogoBrancoRisk.png" alt="Logo RiskWise" class="sidebar-logo">
@@ -89,178 +80,185 @@
                 </div>
 
                 <!-- Chronic Diet Calculator -->
+                <p>-------------------------------------------------------------------------------</p>
+
                 <div class="section">
-                    <h2>Chronic DRA Calculator</h2>
-                    <div class="table-wrapper">
-                        <table class="report-table">
-                            <thead>
-                                <tr>
-                                    <th>Cultivo</th>
-                                    <th>ANO POF</th>
-                                    <th>Região</th>
-                                    <th>LMR (mg/kg)</th>
-                                    <th>MREC_STMR (mg/kg)</th>
-                                    <th>Market Share (%)</th>
-                                    <th>IDMT (%)</th>
-                                    <th>Contribuição Individual do Cultivo (%)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td colspan="8" class="no-data">Nenhum dado disponível</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <h2>Referências de IDA</h2>
+                    <div class="drfa-infoCronica">
+                        <p><strong>IDA Externa:</strong> <span id="ida-externo">-</span></p>
+                        <p><strong>IDA Interna:</strong> <span id="ida-interno">-</span></p>
                     </div>
                 </div>
 
-                <!-- POF 2008 -->
                 <div class="section">
-                    <h2>POF 2008</h2>
-                    <div class="table-wrapper">
-                        <table class="report-table">
-                            <thead>
-                                <tr>
-                                    <th>Métrica</th>
-                                    <th>Brasil</th>
-                                    <th>Centro-Oeste</th>
-                                    <th>Nordeste</th>
-                                    <th>Norte</th>
-                                    <th>Sudeste</th>
-                                    <th>Sul</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>PC (Kg)</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                </tr>
-                                <tr>
-                                    <td>%IDA ANVISA</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                </tr>
-                                <tr>
-                                    <td>%IDA SYNGENTA</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <h2>Chronic DRA Calculator</h2>
+                <div class="table-wrapper">
+                    <table class="report-table">
+                        <thead>
+                        <tr>
+                            <th>Cultivo</th><th>ANO POF</th><th>Região</th>
+                            <th>LMR (mg/kg)</th><th>MREC_STMR (mg/kg)</th>
+                            <th>Market Share (%)</th><th>IDMT (%)</th>
+                            <th>Contribuição Individual do Cultivo (%)</th>
+                        </tr>
+                        </thead>
+                        <tbody id="report-chronic-body">
+                        <tr><td colspan="8" class="no-data">Nenhum dado disponível</td></tr>
+                        </tbody>
+                    </table>
                 </div>
+            </div>
 
-                <!-- POF 2017 -->
-                <div class="section">
-                    <h2>POF 2017</h2>
-                    <div class="table-wrapper">
-                        <table class="report-table">
-                            <thead>
-                                <tr>
-                                    <th>Métrica</th>
-                                    <th>Brasil</th>
-                                    <th>Centro-Oeste</th>
-                                    <th>Nordeste</th>
-                                    <th>Norte</th>
-                                    <th>Sudeste</th>
-                                    <th>Sul</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>PC (Kg)</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                </tr>
-                                <tr>
-                                    <td>%IDA ANVISA</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                </tr>
-                                <tr>
-                                    <td>%IDA SYNGENTA</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                    <td>0.0000</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+            <!-- POF 2008 -->
+            <div class="section">
+                <h2>POF 2008</h2>
+                <div class="table-wrapper">
+                    <table class="report-table">
+                        <thead>
+                        <tr>
+                            <th>Métrica</th><th>Brasil</th><th>Centro-Oeste</th><th>Nordeste</th>
+                            <th>Norte</th><th>Sudeste</th><th>Sul</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tabela-pof-2008">
+                        <tr><td colspan="7" class="no-data">Nenhum dado disponível</td></tr>
+                        </tbody>
+                    </table>
                 </div>
+            </div>
 
+            <!-- POF 2017 -->
+            <div class="section">
+                <h2>POF 2017</h2>
+                <div class="table-wrapper">
+                    <table class="report-table">
+                        <thead>
+                        <tr>
+                            <th>Métrica</th><th>Brasil</th><th>Centro-Oeste</th><th>Nordeste</th>
+                            <th>Norte</th><th>Sudeste</th><th>Sul</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tabela-pof-2017">
+                        <tr><td colspan="7" class="no-data">Nenhum dado disponível</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <p>-------------------------------------------------------------------------------</p>
                 <!-- Water Acute Calculator -->
-                <div class="section">
-                    <h2>Water Acute Calculator</h2>
-                    <div class="table-wrapper">
-                        <table class="report-table">
-                            <thead>
-                                <tr>
-                                    <th>Concentração</th>
-                                    <th>%DRFA Syngenta (65 kg)</th>
-                                    <th>%DRFA ANVISA (65 kg)</th>
-                                    <th>%DRFA Syngenta (10 kg)</th>
-                                    <th>%DRFA ANVISA (10 kg)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td colspan="8" class="no-data">Nenhum dado disponível</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+
+            <div class="section">
+                <h2>Referências Water Acute</h2>
+                <div class="drfa-info">
+                    <p><strong>DRFA Externo:</strong> <span id="water-drfa-externo">-</span></p>
+                    <p><strong>DRFA Interno:</strong> <span id="water-drfa-interno">-</span></p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Water Acute Calculator</h2>
+                <div class="table-wrapper">
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Concentração água(mg/L)</th>
+                                <th>Peso Adulto (kg)</th>
+                                <th>Peso Criança (kg)</th>
+                                <th>%DRFA INTERNO Adulto (kg)</th>
+                                <th>%DRFA EXTERNO Adulto (kg)</th>
+                                <th>%DRFA INTERNO Criança (kg)</th>
+                                <th>%DRFA EXTERNO Criança (kg)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-water-acute">
+                            <tr>
+                                <td colspan="7" class="no-data">Nenhum dado disponível</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <p>-------------------------------------------------------------------------------</p>
+                <!-- Water Chronic Calculator -->
+            
+            <div class="section">
+                <h2>Referências Water Chronic</h2>
+                <div class="drfa-info">
+                    <p><strong>IDA Externa:</strong> <span id="water-chronic-ida-externo">-</span></p>
+                    <p><strong>IDA Interna:</strong> <span id="water-chronic-ida-interno">-</span></p>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2>Water Chronic Calculator</h2>
+                <div class="table-wrapper">
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Concentração água(mg/L)</th>
+                                <th>Peso Adulto (kg)</th>
+                                <th>Peso Criança (kg)</th>
+                                <th>%IDA INTERNO Adulto (kg)</th>
+                                <th>%IDA EXTERNO Adulto (kg)</th>
+                                <th>%IDA INTERNO Criança (kg)</th>
+                                <th>%IDA EXTERNO Criança (kg)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-water-chronic">
+                            <tr>
+                                <td colspan="7" class="no-data">Nenhum dado disponível</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
-                <!-- Water Chronic Calculator -->
+                <p>-------------------------------------------------------------------------------</p>
+
                 <div class="section">
-                    <h2>Water Chronic Calculator</h2>
-                    <div class="table-wrapper">
-                        <table class="report-table">
-                            <thead>
-                                <tr>
-                                    <th>Concentração</th>
-                                    <th>%IDA Syngenta (65 kg)</th>
-                                    <th>%IDA ANVISA (65 kg)</th>
-                                    <th>%IDA Syngenta (10 kg)</th>
-                                    <th>%IDA ANVISA (10 kg)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td colspan="8" class="no-data">Nenhum dado disponível</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <h2>Mexico Chronic Calculator</h2>
+                <div class="table-wrapper">
+                    <table class="report-table">
+                        <thead>
+                        <tr>
+                            <th>Crop</th><th>Cultivo</th><th>LMR (mg/kg)</th>
+                            <th>R (mg/kg)</th><th>C (Kg/person/day)</th>
+                            <th>(LMR or R)*C</th>
+                        </tr>
+                        </thead>
+                        <tbody id="report-mexico-body">
+                        <tr><td colspan="6" class="no-data">Nenhum dado disponível</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>RESULTS OUTPUT</h2>
+                <div class="table-wrapper">
+                    <table class="report-table">
+                        <thead>
+                        <tr>
+                            <th>BW (kg)</th><th>Sum</th><th>ADI (mg/kg bw/dia)</th><th>IDMT</th>
+                            <th>%ADI</th>
+                        </tr>
+                        </thead>
+                        <tbody id="mexico-results-output">
+                        <tr><td colspan="5" class="no-data">Nenhum dado disponível</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+                <div id="conteudoWord" style="display: none;"></div>
+
                 </div>
                 <div class="action-buttons">
                     <div class="tooltip-wrapper">
-                        <button class="btn-excel">Download Report Excel</button>
-                        <button class="btn-pdf">Download Report PDF</button>
+                        <button class="btn-excel">Report Excel</button>
+                        <button class="btn-pdf">Report PDF</button>
+                        <button class="btn-word">Report Word</button>
                     </div>
                 </div>
             </div>
@@ -270,6 +268,7 @@
     <script src="/javascript/auth-check.js" defer></script>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.min.js"></script>
     <script src="/javascript/report.js" defer></script>
 </body>
 </html>

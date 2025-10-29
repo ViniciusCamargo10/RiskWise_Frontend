@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const estadoFiltros = {
     "Cultivo/ Matriz Animal": "Todos",
     "ANO POF": "Todos",
+    "Região": "Todos",
   };
 
   // Persistência das IDAs
@@ -83,53 +84,63 @@ document.addEventListener("DOMContentLoaded", async () => {
     return document.querySelector(".table-wrapper");
   }
 
+  function isPositive(x) {
+  return Number.isFinite(x) && x > 0;
+  }
+
   // ---------- Cálculos ----------
   function calcularIMEA(item) {
-    const caso = String(getCampo(item, "Caso Fórmula") || "").trim();
+  const caso = String(getCampo(item, "Caso Fórmula") || "").trim();
 
-    const LMR  = parseNum(getCampo(item, "LMR (mg/kg)"));
-    const HR   = parseNum(getCampo(item, "HR/MCR (mg/kg)"));
-    const STMR = parseNum(getCampo(item, "MREC/STMR (mg/kg)"));
+  const LMR  = parseNum(getCampo(item, "LMR (mg/kg)"));
+  const HR   = parseNum(getCampo(item, "HR/MCR (mg/kg)"));
+  const STMR = parseNum(getCampo(item, "MREC/STMR (mg/kg)"));
 
-    const MP = parseNum(getCampo(item, "Maior porção MP (g/dia/pessoa)"));
-    const PC = parseNum(getCampo(item, "Peso Corpóreo médio dos consumidores PC (kg)"));
-    const FP = parseNum(getCampo(item, "Fator de Processamento FP"));
-    const FC = parseNum(getCampo(item, "Fator de Conversão FC"));
-    const Uc = parseNum(getCampo(item, "Peso Unitário da Parte Comestível Uc (g)"));
-    const v  = parseNum(getCampo(item, "Fator de variabilidade v"));
+  const MP = parseNum(getCampo(item, "Maior porção MP (g/dia/pessoa)"));
+  const PC = parseNum(getCampo(item, "Peso Corpóreo médio dos consumidores PC (kg)"));
+  const FP = parseNum(getCampo(item, "Fator de Processamento FP"));
+  const FC = parseNum(getCampo(item, "Fator de Conversão FC"));
+  const Uc = parseNum(getCampo(item, "Peso Unitário da Parte Comestível Uc (g)"));
+  const v  = parseNum(getCampo(item, "Fator de variabilidade v"));
 
-    if ([MP, PC, FP, FC].some(Number.isNaN)) return NaN;
+  if ([MP, PC, FP, FC].some(Number.isNaN)) return NaN;
 
-    const MPkg = MP / 1000;
-    const Uckg = Uc / 1000;
+  const MPkg = MP / 1000;
+  const Uckg = Uc / 1000;
 
-    switch (caso) {
-      case 'Caso 1': {
-        const res = Number.isNaN(LMR) ? HR : LMR;
-        if (Number.isNaN(res)) return NaN;
-        return (MPkg * res * FP * FC) / PC;
-      }
-      case 'Caso 2a': {
-        const res = Number.isNaN(LMR) ? HR : LMR;
-        if (Number.isNaN(res) || Number.isNaN(v) || Number.isNaN(Uckg)) return NaN;
-        const parteUc = Uckg * res * FC * FP * v;
-        const resto   = (MPkg - Uckg) * res * FC * FP;
-        return (parteUc + resto) / PC;
-      }
-      case 'Caso 2b': {
-        const res = Number.isNaN(LMR) ? HR : LMR;
-        if (Number.isNaN(res) || Number.isNaN(v)) return NaN;
-        return (MPkg * res * FP * FC * v) / PC;
-      }
-      case 'Caso 3': {
-        const res = Number.isNaN(LMR) ? STMR : LMR;
-        if (Number.isNaN(res)) return NaN;
-        return (MPkg * res * FP * FC) / PC;
-      }
-      default:
-        return NaN;
+  // 🔁 Regra de prioridade:
+  // - Casos 1/2a/2b: usa LMR se válido (>0), senão HR/MCR
+  // - Caso 3:        usa LMR se válido (>0), senão STMR
+  const baseC12 = isPositive(LMR) ? LMR : HR;    // fallback HR
+  const baseC3  = isPositive(LMR) ? LMR : STMR;  // fallback STMR
+
+  switch (caso) {
+    case 'Caso 1': {
+      const res = baseC12;
+      if (!isPositive(res)) return NaN;
+      return (MPkg * res * FP * FC) / PC;
     }
+    case 'Caso 2a': {
+      const res = baseC12;
+      if (!isPositive(res) || Number.isNaN(v) || Number.isNaN(Uckg)) return NaN;
+      const parteUc = Uckg * res * FC * FP * v;
+      const resto   = (MPkg - Uckg) * res * FC * FP;
+      return (parteUc + resto) / PC;
+    }
+    case 'Caso 2b': {
+      const res = baseC12;
+      if (!isPositive(res) || Number.isNaN(v)) return NaN;
+      return (MPkg * res * FP * FC * v) / PC;
+    }
+    case 'Caso 3': {
+      const res = baseC3;
+      if (!isPositive(res)) return NaN;
+      return (MPkg * res * FP * FC) / PC;
+    }
+    default:
+      return NaN;
   }
+}
 
   function calcularDRFA(imea, idaRef) {
     if (Number.isNaN(imea) || idaRef === null || idaRef === undefined) return NaN;
@@ -269,11 +280,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       : null;
 
     const reselectInfo = { cultivo, ano, regiao, coluna, caret };
+    const anoComplementar = (ano === "2017") ? "2008" : (ano === "2008") ? "2017" : null;
 
     dadosOriginais.forEach(item => {
       const sameCultivo = String(getCampo(item, "Cultivo/ Matriz Animal")) === String(cultivo);
       const sameAno     = String(getCampo(item, "ANO POF")) === String(ano);
-      if (!(sameCultivo && sameAno)) return;
+      const sameAnoComplementar = String(getCampo(item, "ANO POF")) === String(anoComplementar);
+      
+      if (!(sameCultivo && (sameAno || sameAnoComplementar))) return;
 
       const caso = String(getCampo(item, "Caso Fórmula") || "");
 
@@ -370,6 +384,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       return a.localeCompare(b, "pt-BR");
     });
 
+    const regioes = [...new Set(
+      data.map(i => getCampo(i, "Região"))
+        .filter(Boolean)
+        .map(String)
+    )].sort((a, b) => a.localeCompare(b, "pt-BR", { sensitivity: "base" }));
+
     document.querySelectorAll(".coluna-filtro").forEach((coluna) => {
       coluna.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -387,6 +407,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           let opcoes = ["Todos"];
           if (tipo === "Cultivo/ Matriz Animal") opcoes = ["Todos", ...cultivos];
           if (tipo === "ANO POF") opcoes = ["Todos", ...anos];
+          if (tipo === "Região") opcoes = ["Todos", ...regioes];
 
           dropdown.innerHTML = opcoes.map(op => `<div data-value="${op}">${op}</div>`).join("");
           coluna.appendChild(dropdown);
@@ -431,6 +452,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return dadosOriginais.filter(item => {
       const cultivo = String(getCampo(item, "Cultivo/ Matriz Animal") ?? "");
       const ano    = String(getCampo(item, "ANO POF") ?? "");
+      const regiao = String(getCampo(item, "Região") ?? "");
 
       const filtroCultivoOK =
         estadoFiltros["Cultivo/ Matriz Animal"] === "Todos" ||
@@ -440,7 +462,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         estadoFiltros["ANO POF"] === "Todos" ||
         ano === String(estadoFiltros["ANO POF"]);
 
-      return filtroCultivoOK && filtroAnoOK;
+      const filtroRegiaoOK =
+        estadoFiltros["Região"] === "Todos" ||
+        regiao === String(estadoFiltros["Região"]);
+
+      return filtroCultivoOK && filtroAnoOK && filtroRegiaoOK;
     });
   }
 
@@ -454,12 +480,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     data.forEach(item => {
-      const tr = document.createElement("tr");
+      const tr = document.createElement("tr");      
 
-      // Destaque Região = Brasil
-      const regiao = getCampo(item, "Região");
-      if (typeof regiao === "string" && regiao.trim() === "Brasil") {
-        tr.classList.add("linha-verde");
+      const imea = calcularIMEA(item);
+      const pctAnvisa = calcularDRFA(imea, idaAnvisa);
+      const pctSyngenta = calcularDRFA(imea, idaSyngenta);
+
+      // Se passar de 100%, linha vermelha
+      if ((pctAnvisa > 100) || (pctSyngenta > 100)) {
+        tr.classList.add("linha-vermelha");
+      } else {
+        // Só aplica verde se NÃO estiver vermelha
+        const regiao = getCampo(item, "Região");
+        if (typeof regiao === "string" && regiao.trim() === "Brasil") {
+          tr.classList.add("linha-verde");
+        }
       }
 
       COLUNAS.forEach(col => {
@@ -620,4 +655,182 @@ document.addEventListener("DOMContentLoaded", async () => {
     refreshPreservandoFocoEScroll();
   });
 
+// === COLAR COLUNA DO EXCEL -> preenche de onde estiver o foco até o final (LMR/HR/MCR/MREC) ===
+(function enableExcelPaste(){
+  const PASTE_COLUMNS = ["LMR (mg/kg)", "HR/MCR (mg/kg)", "MREC/STMR (mg/kg)"];
+
+  document.addEventListener('paste', (event) => {
+    const active = document.activeElement;
+    if (!active || !active.classList.contains('editable-cell')) return;
+
+    const currentCol = active.dataset.col;
+    if (!PASTE_COLUMNS.includes(currentCol)) return; // só nessas 3 colunas
+
+    // Evita que o onInput padrão dispare re-render a cada célula
+    event.preventDefault();
+
+    const clipboard = event.clipboardData?.getData('text') ?? '';
+    const matrix = parseClipboard(clipboard); // linhas -> colunas (TSV Excel)
+
+    if (!matrix.length) return;
+
+    // Inputs visíveis da coluna atual, na ordem renderizada (respeita filtros)
+    const colSelector = `.editable-cell[data-col="${currentCol}"]`;
+    const inputs = Array.from(document.querySelectorAll(colSelector));
+    const startIndex = inputs.indexOf(active);
+
+    const ops = [];
+
+    // Mapeia linhas do Excel para baixo a partir do input focado
+    for (let i = 0; i < matrix.length; i++) {
+      const rowInput = inputs[startIndex + i];
+      if (!rowInput) break; // acabou a tabela visível
+
+      const ctx = {
+        ano: rowInput.dataset.ano,
+        cultivo: rowInput.dataset.cultivo,
+        regiao: rowInput.dataset.regiao
+      };
+
+      const colsThisRow = matrix[i];
+
+      if (colsThisRow.length === 1) {
+        // 1 coluna: preencher somente a coluna atual
+        const valText = normalizeNumberText(colsThisRow[0]);
+        const valor = interpretToken(valText); // null para vazio/'-'/NA
+        if (!rowInput.readOnly && !rowInput.disabled) {
+          ops.push({ ...ctx, coluna: currentCol, valor });
+        }
+      } else {
+        // Múltiplas colunas (TSV): espalhar para colunas à direita na ordem LMR -> HR/MCR -> MREC/STMR
+        const startColIdx = PASTE_COLUMNS.indexOf(currentCol);
+        for (let j = 0; j < colsThisRow.length; j++) {
+          const targetCol = PASTE_COLUMNS[startColIdx + j];
+          if (!targetCol) break; // ignorar excesso
+          const valText = normalizeNumberText(colsThisRow[j]);
+          const valor = interpretToken(valText);
+
+          // Localiza o input daquela linha/coluna
+          const sel = `.editable-cell[data-ano="${esc(ctx.ano)}"][data-cultivo="${esc(ctx.cultivo)}"][data-regiao="${esc(ctx.regiao)}"][data-col="${esc(targetCol)}"]`;
+          const cell = document.querySelector(sel);
+          if (cell && !cell.readOnly && !cell.disabled) {
+            ops.push({ ...ctx, coluna: targetCol, valor });
+          }
+        }
+      }
+    }
+
+    aplicarEdicoesEmLote(ops);
+    mostrarFeedback(`Colados ${ops.length} valor(es).`);
+  });
+
+  function parseClipboard(text) {
+    const trimmed = (text || '').trim();
+    if (!trimmed) return [];
+    // Separa por linhas e por TAB (TSV vindo do Excel)
+    return trimmed.split(/\r?\n/).map(line => line.split('\t').map(s => s.trim()));
+  }
+
+  function normalizeNumberText(s) {
+    // Trata decimais com vírgula do Excel pt-BR sem quebrar quem já usa ponto
+    if (s == null) return '';
+    let t = String(s).trim();
+
+    // Tokens especiais
+    if (/^(na|n\/a|n\.a\.|n\.a|--|-)$/i.test(t)) return '-';
+
+    // Se contiver vírgula, assume vírgula decimal e ponto como milhar
+    if (t.includes(',')) {
+      t = t.replace(/\./g, '').replace(',', '.');
+    }
+    // remove espaços não quebráveis
+    t = t.replace(/\u00A0/g, ' ').trim();
+
+    return t;
+  }
+
+  function interpretToken(s) {
+    if (!s) return null;
+    if (s === '-' || /^na$/i.test(s)) return null;
+    // Mantém como string para preservar "0.0" (sua UI lida bem com string numérica)
+    return /^\d+(\.\d+)?$/.test(s) ? s : null;
+  }
+
+  function aplicarEdicoesEmLote(ops) {
+    if (!Array.isArray(ops) || ops.length === 0) return;
+
+    // Snapshot do foco para restaurar depois
+    const active = document.activeElement;
+    const caret = (active && typeof active.selectionStart === 'number') ? active.selectionStart : null;
+    const reselectInfo = active ? {
+      cultivo: active.dataset.cultivo,
+      ano: active.dataset.ano,
+      regiao: active.dataset.regiao,
+      coluna: active.dataset.col,
+      caret
+    } : null;
+
+    // Aplica cada operação replicando lógica de bloqueio e ano complementar (igual ao replicarEdicao)
+    for (const { cultivo, ano, regiao, coluna, valor } of ops) {
+      const anoComplementar = (ano === "2017") ? "2008" : (ano === "2008") ? "2017" : null;
+
+      for (const item of dadosOriginais) {
+        const sameCultivo = String(getCampo(item, "Cultivo/ Matriz Animal")) === String(cultivo);
+        const sameAno     = String(getCampo(item, "ANO POF")) === String(ano);
+        const sameAnoComp = anoComplementar && String(getCampo(item, "ANO POF")) === String(anoComplementar);
+        if (!(sameCultivo && (sameAno || sameAnoComp))) continue;
+
+        const caso = String(getCampo(item, "Caso Fórmula") || "");
+        // Regras de bloqueio por caso (mesmas do render)
+        if (coluna === "HR/MCR (mg/kg)" && caso === "Caso 3") continue;
+        if (coluna === "MREC/STMR (mg/kg)" && (caso === "Caso 1" || caso === "Caso 2a" || caso === "Caso 2b")) continue;
+
+        item[coluna] = (valor === null ? null : valor);
+      }
+    }
+
+    // Recalcula/bloqueia/persistir (seu método já faz tudo isso)
+    salvarDadosNoLocalStorage();
+
+    // Re-render preservando scroll e foco
+    refreshPreservandoFocoEScroll(reselectInfo);
+  }
+
+  function mostrarFeedback(msg) {
+    try {
+      let toast = document.getElementById('paste-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'paste-toast';
+        toast.style.cssText = "position:fixed;bottom:16px;right:16px;background:#2d7;border-radius:6px;color:#fff;padding:8px 12px;font:600 12px/1.3 system-ui;box-shadow:0 4px 16px rgba(0,0,0,.2);z-index:9999;opacity:.98";
+        document.body.appendChild(toast);
+      }
+      toast.textContent = msg;
+      clearTimeout(toast._t);
+      toast.style.display = 'block';
+      toast._t = setTimeout(() => { toast.style.display = 'none'; }, 2000);
+    } catch {}
+  }
+})();
+
 });
+
+    const modal = document.getElementById("btn-infoCrop");
+    const btn = document.querySelector(".btn-infoCrop");
+    const span = modal.querySelector(".close"); // pega o X dentro do modal
+    
+    if (btn && modal && span) {
+    btn.addEventListener("click", () => {
+        modal.style.display = "flex";
+    });
+
+    span.addEventListener("click", () => {
+        modal.style.display = "none";
+    });
+
+    window.addEventListener("click", (event) => {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+}

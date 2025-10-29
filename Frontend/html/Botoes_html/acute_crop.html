@@ -10,16 +10,7 @@
 <body>
     <div class="container">
         <!-- Botão de ajuda -->
-        <a href="mailto:vinicius.camargo@syngenta.com" class="help-button" aria-label="Ajuda">?</a>
-
-        <!-- Modal de contato -->
-        <div id="modalEmail" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="fecharModal()">&times;</span>
-                <h2>Contato do Responsável</h2>
-                <p>vinicius.camargo@syngenta.com</p>
-            </div>
-        </div>
+        <a href="https://app.smartsheet.com/sheets/pjRGcG7H8V3Qxc7rmVWPQM38G5X286QwpQCPxFw1" class="help-button" target="_blank" rel="noopener noreferrer" aria-label="Ajuda">?</a>
             
         <!-- Menu Lateral -->
         <div class="sidebar">
@@ -71,7 +62,9 @@
                             <th class="coluna-filtro" data-coluna="ANO POF">
                             Ano POF <span class="seta">&#9662;</span>
                             </th>
-                            <th>Região</th>
+                            <th class="coluna-filtro" data-coluna="Região">
+                            Região <span class="seta">&#9662;</span>
+                            </th>
                             <th>Caso Fórmula</th>
                             <th>LMR (mg/kg)</th>
                             <th>HR/MCR (mg/kg)</th>
@@ -90,12 +83,26 @@
             </div>
             
             <div class="action-buttons">
+
+                <button class="btn-infoCrop" aria-label="Ajuda">DRFA Data</button>
+
                 <a href="/HomeCropBR.html">
                     <button class="btn-back">Back to Calculator</button>
                 </a>
                 <button class="btn-clear">Clear Report</button>
             </div>
 
+        </div>
+    </div>
+
+     <!-- Modal -->
+    <div id="btn-infoCrop" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p>
+                Access DRFA data: 
+                <a href="https://syngenta.sharepoint.com/:x:/r/sites/ps-latam/_layouts/15/Doc.aspx?sourcedoc=%7BA8EA0ECD-C56F-42F0-BFD2-D69CDBE30335%7D&file=DietaAguda_Calculadora_V4.xlsx&action=default&mobileredirect=true" target="_blank">Click Here</a>
+            </p>
         </div>
     </div>
 

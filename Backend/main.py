@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
 
+
 # Ajusta o path para permitir imports do Backend
 sys.path.append(os.path.dirname(__file__))
 
@@ -21,11 +22,11 @@ app.add_middleware(
 )
 
 # Importa e inclui as rotas da API
-from .routes import chronic, acute, mexico
+from .routes import chronic, acute, mexico, report_combined
 app.include_router(chronic.router, tags=["Dieta Crônica"])
 app.include_router(acute.router, prefix="/acute", tags=["Nova Planilha"])
 app.include_router(mexico.router, prefix="/mexico", tags=["México Planilha"])
-
+app.include_router(report_combined.router, prefix="/report", tags=["Report"])
 
 FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "Frontend")
 FRONTEND_HTML_DIR = os.path.join(FRONTEND_DIR, "html")
