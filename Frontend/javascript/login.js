@@ -1,8 +1,12 @@
 console.log("Script carregado");
 
 const USERS = {
-    "banana9790": "1065chuchu",
-    "banana7437": "4799chuchu"
+    "tomate3728": "5483laranja",
+    "tomate6640": "6073laranja",
+    "tomate5410": "1874laranja",
+    "tomate3168": "8346laranja",
+    "tomate1484": "3767laranja",
+    "tomate5207": "5531laranja"
 };
 
 document.getElementById("loginForm").addEventListener("submit", function(e) {
