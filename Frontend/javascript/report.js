@@ -268,7 +268,7 @@ if (btnWord) {
       ]);
       const chronicUserSetExt = isNumberLike(localStorage.getItem(LS_CRONIC.idaAnvisa));
       const chronicUserSetInt = isNumberLike(localStorage.getItem(LS_CRONIC.idaSyngenta));
-      const shouldExportChronic = (chronicUserSetExt || chronicUserSetInt) && chronicPreenchido.length;
+      const shouldExportChronic = (chronicUserSetExt || chronicUserSetInt) && chronicPreenchido.length > 0;
 
       // Water Acute
       const waterAcuteRow = [
