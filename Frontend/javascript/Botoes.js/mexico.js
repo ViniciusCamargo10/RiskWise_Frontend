@@ -7,23 +7,23 @@ let state = {
 };
 
 function salvarMexicoNoLocalStorage() {
-    localStorage.setItem("RW_MEXICO_DATA", JSON.stringify(state.rows));
-    localStorage.setItem("RW_MEXICO_META", JSON.stringify(state.meta));
-    localStorage.setItem("RW_MEXICO_TOTALS", JSON.stringify(state.totals));
-    // Salva também os campos individuais para a tabela de resultados
-    localStorage.setItem("RW_MEXICO_BW", state.meta.bw ?? "-");
-    localStorage.setItem("RW_MEXICO_SUM", state.totals.sumLC ?? "-");
+  localStorage.setItem("RW_MEXICO_DATA", JSON.stringify(state.rows));
+  localStorage.setItem("RW_MEXICO_META", JSON.stringify(state.meta));
+  localStorage.setItem("RW_MEXICO_TOTALS", JSON.stringify(state.totals));
+  // Salva também os campos individuais para a tabela de resultados
+  localStorage.setItem("RW_MEXICO_BW", state.meta.bw ?? "-");
+  localStorage.setItem("RW_MEXICO_SUM", state.totals.sumLC ?? "-");
 
-    // ✅ ADI: se vazio, remove do storage; se preenchido, grava como string
-    const adi = state.meta.adi_interno;
-    if (adi === null || adi === undefined || String(adi).trim() === "") {
-      localStorage.removeItem("RW_MEXICO_ADI");
-    } else {
-      localStorage.setItem("RW_MEXICO_ADI", String(adi));
-    }
+  // ✅ ADI: se vazio, remove do storage; se preenchido, grava como string
+  const adi = state.meta.adi_interno;
+  if (adi === null || adi === undefined || String(adi).trim() === "") {
+    localStorage.removeItem("RW_MEXICO_ADI");
+  } else {
+    localStorage.setItem("RW_MEXICO_ADI", String(adi));
+  }
 
-    localStorage.setItem("RW_MEXICO_IDMT", state.totals.idmt ?? "-");
-    localStorage.setItem("RW_MEXICO_PERCENT_ADI", state.totals["%ADI_interno"] ?? "-");
+  localStorage.setItem("RW_MEXICO_IDMT", state.totals.idmt ?? "-");
+  localStorage.setItem("RW_MEXICO_PERCENT_ADI", state.totals["%ADI_interno"] ?? "-");
 }
 
 /* =========================================================
@@ -140,38 +140,42 @@ function wireDecimalOnly(input) {
   });
 
   input.addEventListener("paste", (e) => {
-    e.preventDefault();
     const clip = (e.clipboardData || window.clipboardData).getData("text") ?? "";
 
-    // ❌ Recusa vírgula e qualquer coisa fora de [0-9.]
-    if (/,/.test(clip) || /[^0-9.]/.test(clip)) {
-      input.style.borderColor = "#e53935";
-      setTimeout(() => (input.style.borderColor = "#ccc"), 800);
-      return;
+    // ✅ Se for matriz (tem TAB ou QUEBRA DE LINHA), deixa o handler global tratar
+    if (/\t|\r?\n/.test(clip)) {
+      return; // não chama preventDefault aqui
     }
 
-    let sanitized = clip.replace(/[^0-9.]/g, "");
+    // ✅ Colagem simples (uma célula): sanitiza aqui mesmo
+    e.preventDefault();
 
-    // Monta o próximo valor respeitando seleção
-    const selStart = input.selectionStart ?? 0;
-    const selEnd = input.selectionEnd ?? 0;
-    const nextValue = input.value.slice(0, selStart) + sanitized + input.value.slice(selEnd);
+    // Converter vírgula -> ponto; remover separador de milhar (.)
+    let sanitized = clip.trim();
+    if (sanitized.includes(",")) {
+      sanitized = sanitized.replace(/\./g, "").replace(/,/g, ".");
+    }
 
-    // Permite apenas um ponto no total
+    // Mantém apenas [0-9 .], e só um ponto
+    sanitized = sanitized.replace(/[^0-9.]/g, "");
     let dotSeen = false;
     let final = "";
-    for (const c of nextValue) {
+    for (const c of sanitized) {
       if (c === ".") {
         if (dotSeen) continue;
         dotSeen = true;
       }
       final += c;
     }
-
     if (final.startsWith(".")) final = "0" + final;
 
-    input.value = final;
-    prev = final;
+    // Aplica respeitando a seleção
+    const selStart = input.selectionStart ?? 0;
+    const selEnd = input.selectionEnd ?? 0;
+    const nextValue = input.value.slice(0, selStart) + final + input.value.slice(selEnd);
+
+    input.value = nextValue;
+    prev = nextValue;
     input.dispatchEvent(new Event("input", { bubbles: true }));
   });
 
@@ -309,7 +313,6 @@ async function loadData() {
   }
 }
 
-
 /* =========================
  * Renderização
  * ========================= */
@@ -320,7 +323,6 @@ function render(firstPaint = false) {
   if (outBw) outBw.textContent = state.meta.bw ?? "-";
 
   if (outAdi) {
-    
     const inpAdi = document.createElement("input");
     inpAdi.type = "text";
     // Mostra valor "cru" (sem força de casas), mas bloqueia vírgula no input
@@ -331,7 +333,6 @@ function render(firstPaint = false) {
 
     // ✅ Tooltip no botão/field de ADI
     applyNumericTooltip(inpAdi, " Accepts integers and decimals with dots (.)");
-
 
     inpAdi.addEventListener("input", (e) => {
       let val = inpAdi.value;
@@ -396,7 +397,8 @@ function render(firstPaint = false) {
 
         cols.forEach((col) => {
           const td = document.createElement("td");
-          
+          td.dataset.col = col; // ✅ marca o nome da coluna no TD
+
           if (["LMR (mg/kg)", "R (mg/kg)"].includes(col)) {
             // ✅ Tooltip na célula
             applyNumericTooltip(td, `Accepts integers and decimals with dots (.)`);
@@ -406,6 +408,7 @@ function render(firstPaint = false) {
             inp.value = (row[col] ?? "") === "" ? "" : String(row[col]);
             inp.className = "editable-cell";
             inp.style.width = "100%";
+            inp.dataset.col = col; // ✅ marca também no INPUT
             wireDecimalOnly(inp);
 
             // ✅ Tooltip também no input
@@ -454,6 +457,127 @@ function render(firstPaint = false) {
 }
 
 /* =========================
+ * Colagem tipo Excel (matriz)
+ * ========================= */
+(function enableExcelPasteMexico() {
+  const PASTE_COLUMNS = ["LMR (mg/kg)", "R (mg/kg)"];
+
+  // Fallback para CSS.escape em navegadores antigos
+  const cssEscape = (s) =>
+    (window.CSS && typeof window.CSS.escape === "function")
+      ? window.CSS.escape(s)
+      : String(s).replace(/"/g, '\\"');
+
+  document.addEventListener("paste", (event) => {
+    const active = document.activeElement;
+    if (!active || !active.classList.contains("editable-cell")) return;
+
+    const td = active.closest("td");
+    const currentCol = active.dataset.col || td?.dataset.col || ""; // ✅ usa data-col
+
+    if (!PASTE_COLUMNS.includes(currentCol)) return; // só LMR e R
+
+    const clipboard = event.clipboardData?.getData("text") ?? "";
+    const isMatrix = /\t|\r?\n/.test(clipboard);
+
+    // ✅ Deixe colagem de matriz para o handler global; colagem simples é tratada no input
+    if (!isMatrix) return;
+
+    event.preventDefault();
+
+    const matrix = parseClipboard(clipboard); // linhas -> colunas (TSV Excel)
+    if (!matrix.length) return;
+
+    // ✅ inputs da MESMA COLUNA usando data-col (e escapando nome com espaços/parênteses)
+    const inputs = Array.from(
+      document.querySelectorAll(`td[data-col="${cssEscape(currentCol)}"] input.editable-cell`)
+    );
+
+    const startIndex = inputs.indexOf(active);
+    const ops = [];
+
+    for (let i = 0; i < matrix.length; i++) {
+      const rowInput = inputs[startIndex + i];
+      if (!rowInput) break;
+
+      const rowIdx = rowInput.closest("tr").dataset.idx;
+      const colsThisRow = matrix[i];
+
+      if (colsThisRow.length === 1) {
+        const valText = normalizeNumberText(colsThisRow[0]);
+        const valor = interpretToken(valText);
+        ops.push({ idx: rowIdx, coluna: currentCol, valor });
+      } else {
+        const startColIdx = PASTE_COLUMNS.indexOf(currentCol);
+        for (let j = 0; j < colsThisRow.length; j++) {
+          const targetCol = PASTE_COLUMNS[startColIdx + j];
+          if (!targetCol) break;
+          const valText = normalizeNumberText(colsThisRow[j]);
+          const valor = interpretToken(valText);
+          ops.push({ idx: rowIdx, coluna: targetCol, valor });
+        }
+      }
+    }
+
+    const applied = ops.filter(o => o.valor !== "").length;
+    aplicarEdicoesEmLote(ops, cssEscape);
+    mostrarFeedback(`Colados ${applied} valor(es).`);
+  });
+
+  function parseClipboard(text) {
+    const trimmed = (text || "").trim();
+    if (!trimmed) return [];
+    return trimmed.split(/\r?\n/).map(line => line.split("\t").map(s => s.trim()));
+  }
+
+  function normalizeNumberText(s) {
+    if (s == null) return "";
+    let t = String(s).trim();
+    if (/^(na|n\/a|--|-)$/i.test(t)) return "-";
+    if (t.includes(",")) {
+      t = t.replace(/\./g, "").replace(",", ".");
+    }
+    return t;
+  }
+
+  function interpretToken(s) {
+    if (!s || s === "-" || /^na$/i.test(s)) return "";
+    // aceita inteiros e decimais com ponto
+    return /^\d+(\.\d+)?$/.test(s) ? s : "";
+  }
+
+  function aplicarEdicoesEmLote(ops, esc) {
+    ops.forEach(({ idx, coluna, valor }) => {
+      const row = state.rows[idx];
+      if (row) {
+        row[coluna] = valor;
+
+        // ✅ seleciona o INPUT correto por linha + coluna
+        const sel = `tr[data-idx="${idx}"] td[data-col="${esc(coluna)}"] input.editable-cell`;
+        const input = document.querySelector(sel);
+        if (input) input.value = valor;
+      }
+    });
+    calcularTudo();
+    salvarMexicoNoLocalStorage();
+  }
+
+  function mostrarFeedback(msg) {
+    let toast = document.getElementById("paste-toast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "paste-toast";
+      toast.style.cssText = "position:fixed;bottom:16px;right:16px;background:#2d7;border-radius:6px;color:#fff;padding:8px 12px;font:600 12px/1.3 system-ui;box-shadow:0 4px 16px rgba(0,0,0,.2);z-index:9999;opacity:.98";
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    clearTimeout(toast._t);
+    toast.style.display = "block";
+    toast._t = setTimeout(() => { toast.style.display = "none"; }, 2000);
+  }
+})();
+
+/* =========================
  * Limpar relatório
  * ========================= */
 function clearReport() {
@@ -500,32 +624,36 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnClearByClass = document.querySelector(".btn-clear");
   const btnClear = btnClearById || btnClearByClass;
   if (btnClear) btnClear.addEventListener("click", clearReport);
+});
 
-})
-
+/* =========================
+ * Modais (mantidos)
+ * ========================= */
 const modal = document.getElementById("btn-infoC");
-    const btn = document.querySelector(".btn-infoC");
-    const span = modal.querySelector(".close"); // pega o X dentro do modal
-    
-    if (btn && modal && span) {
-    btn.addEventListener("click", () => {
-        modal.style.display = "flex";
-    });
+const btn = document.querySelector(".btn-infoC");
+// Cuidado: se 'modal' for na verdade o botão, esse seletor vai falhar.
+// Mantive como estava, mas ideal é que modal seja um <div id="modal-infoC">.
+const span = modal ? modal.querySelector(".close") : null;
 
-    span.addEventListener("click", () => {
-        modal.style.display = "none";
-    });
+if (btn && modal && span) {
+  btn.addEventListener("click", () => {
+    modal.style.display = "flex";
+  });
 
-    window.addEventListener("click", (event) => {
-        if (event.target === modal) {
-            modal.style.display = "none";
-        }
-    });
+  span.addEventListener("click", () => {
+    modal.style.display = "none";
+  });
+
+  window.addEventListener("click", (event) => {
+    if (event.target === modal) {
+      modal.style.display = "none";
+    }
+  });
 }
 
 const modalNote = document.getElementById("modalNote");
 const noteLink = document.getElementById("note-link");
-const closeNote = modalNote.querySelector(".close");
+const closeNote = modalNote ? modalNote.querySelector(".close") : null;
 
 if (noteLink && modalNote && closeNote) {
   noteLink.addEventListener("click", () => {
