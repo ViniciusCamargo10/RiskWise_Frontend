@@ -1,12 +1,12 @@
 console.log("Script carregado");
 
 const USERS = {
-    "tomate3728": "5483laranja",
-    "tomate6640": "6073laranja",
-    "tomate5410": "1874laranja",
-    "tomate3168": "8346laranja",
-    "tomate1484": "3767laranja",
-    "tomate5207": "5531laranja"
+    "tomate2273": "7519laranja",
+    "tomate9883": "5658laranja",
+    "tomate5623": "8299laranja",
+    "tomate7539": "9646laranja",
+    "tomate9783": "2154laranja",
+    "tomate1111": "7503laranja"
 };
 
 document.getElementById("loginForm").addEventListener("submit", function(e) {
