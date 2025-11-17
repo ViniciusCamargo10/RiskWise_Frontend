@@ -29,7 +29,12 @@ def safe_json(obj):
     return obj
 
 # -------------------- Função para ler metadados e tabela --------------------
+
 def carregar_dados():
+    # Log para verificar caminho e existência do arquivo
+    print(f"EXCEL_PATH: {EXCEL_PATH}")
+    print(f"Arquivo existe? {os.path.exists(EXCEL_PATH)}")
+
     if not os.path.exists(EXCEL_PATH):
         raise HTTPException(status_code=500, detail=f"Arquivo não encontrado: {EXCEL_PATH}")
 
