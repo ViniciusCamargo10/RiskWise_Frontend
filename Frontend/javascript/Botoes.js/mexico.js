@@ -1,4 +1,4 @@
-const API = `${window.location.origin}/mexico`;
+const API = `${window.location.origin}/api/mexico`;
 
 let state = {
   meta: { bw: 70, adi_interno: 0.05 },
