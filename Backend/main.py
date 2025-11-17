@@ -5,8 +5,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
-
-
 # Ajusta o path para permitir imports do Backend
 sys.path.append(os.path.dirname(__file__))
 
@@ -20,6 +18,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ✅ Middleware para desativar cache
+@app.middleware("http")
+async def add_cache_headers(request, call_next):
+    response = await call_next(request)
+    response.headers["Cache-Control"] = "no-store, max-age=0"
+    return response
 
 # Importa e inclui as rotas da API
 from .routes import chronic, acute, mexico, report_combined
