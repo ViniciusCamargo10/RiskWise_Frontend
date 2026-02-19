@@ -6,7 +6,7 @@ const USERS = {
     "tomate6902": "5316laranja",
     "tomate7414": "5491laranja",
     "tomate5301": "3125laranja",
-    "tomate9649": "3950laranja"
+    "tomate9649": "3950laranja",
 };
 
 document.getElementById("loginForm").addEventListener("submit", function(e) {
