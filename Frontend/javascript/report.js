@@ -222,6 +222,7 @@ window.addEventListener("storage", (e) => {
         // Coleta POFs (DOM com fallback para API)
         const { pof2008, pof2017 } = await collectPOFs();
         await exportToExcelMulti({ ...pacoteBase, pof2008, pof2017 });
+        await exportToExcelBackupAll({ ...pacoteBase, pof2008, pof2017 });
       } catch (err) {
         console.error("Falha ao exportar Excel:", err);
         alert("Falha ao exportar Excel. Veja o console para detalhes.");
@@ -1411,6 +1412,165 @@ async function exportPdfCombinedFromBackend(pacote) {
   a.remove();
   window.URL.revokeObjectURL(url);
 }
+
+async function exportToExcelBackupAll(pacote) {
+  const {
+    acute, chronic, pof2008, pof2017,
+    acute_drfa_externo, acute_drfa_interno,
+    chronic_ida_externo, chronic_ida_interno
+  } = pacote;
+
+  const wbAll = XLSX.utils.book_new();
+
+  // ===== Cabeçalhos e mapeamentos iguais ao arquivo principal =====
+  const cabecalhoAcute = [
+    "Cultivo", "ANO POF", "Região", "Caso Fórmula", "LMR",
+    "HR/MCR", "MREC/STMR", "IMEA", "%DRFA Externo", "%DRFA Interno"
+  ];
+  const keyMapAcute = {
+    "Cultivo": ["Cultivo", "Cultivo/ Matriz Animal"],
+    "ANO POF": ["ANO POF"],
+    "Região": ["Região"],
+    "Caso Fórmula": ["Caso Fórmula"],
+    "LMR": ["LMR (mg/kg)"],
+    "HR/MCR": ["HR/MCR (mg/kg)"],
+    "MREC/STMR": ["MREC/STMR (mg/kg)"],
+    "IMEA": ["IMEA (mg/kg p.c./dia)"],
+    "%DRFA Externo": ["%DRFA ANVISA"],
+    "%DRFA Interno": ["%DRFA SYNGENTA"],
+  };
+  const getValA = (row, col) => {
+    const keys = keyMapAcute[col] || [col];
+    for (const k of keys) if (row[k] !== undefined && row[k] !== null) return row[k];
+    return "";
+  };
+
+  const cabecalhoChronic = [
+    "Cultivo", "ANO_POF", "Região",
+    "LMR (mg/kg)", "MREC_STMR (mg/kg)",
+    "Market Share (%)", "IDMT (%)", "Contribuição Individual do Cultivo (%)"
+  ];
+  const keyMapC = {
+    "Cultivo": ["Cultivo"],
+    "ANO_POF": ["ANO_POF"],
+    "Região": ["Região"],
+    "LMR (mg/kg)": ["LMR (mg_kg)", "LMR (mg/kg)"],
+    "MREC_STMR (mg/kg)": ["MREC_STMR (mg_kg)", "MREC_STMR (mg/kg)"],
+    "Market Share (%)": ["Market Share (%)", "Market Share"],
+    "IDMT (%)": ["IDMT (%)", "IDMT (Numerador)"],
+    "Contribuição Individual do Cultivo (%)": ["Contribuição Individual do Cultivo (%)", "Contribuição Individual do Cultivo"],
+  };
+  const getValC = (row, col) => {
+    const keys = keyMapC[col] || [col];
+    for (const k of keys) if (row[k] !== undefined && row[k] !== null) return row[k];
+    return "";
+  };
+
+  const mIDA_EXT = displayMetricLabel("%IDA_ANVISA");   // "IDA_EXTERNA"
+  const mIDA_INT = displayMetricLabel("%IDA_SYNGENTA"); // "IDA_INTERNA"
+  const regioesHeader = ["Métrica", "Brasil", "Centro-Oeste", "Nordeste", "Norte", "Sudeste", "Sul"];
+
+  // ===== Acute (ALL) — sem filtrar por preenchimento =====
+  if (Array.isArray(acute) && acute.length > 0) {
+    const aoaAcuteAll = [
+      ["DRFA Externo", acute_drfa_externo],
+      ["DRFA Interno", acute_drfa_interno],
+      [],
+      cabecalhoAcute,
+      ...acute.map(item => cabecalhoAcute.map(col => getValA(item, col))),
+    ];
+    const wsAAll = XLSX.utils.aoa_to_sheet(aoaAcuteAll);
+    autoWidth(wsAAll, cabecalhoAcute, (row, col) => getValA(row, col), acute);
+    XLSX.utils.book_append_sheet(wbAll, wsAAll, "Acute Diet (ALL)");
+  }
+
+  // ===== Chronic (ALL) — sem filtrar por preenchimento =====
+  if (Array.isArray(chronic) && chronic.length > 0) {
+    const aoaChronicAll = [
+      ["IDA (Externo)", chronic_ida_externo],
+      ["IDA (Interno)", chronic_ida_interno],
+      [],
+      ["Chronic DRA Calculator"],
+      cabecalhoChronic,
+      ...chronic.map(item => cabecalhoChronic.map(col => getValC(item, col))),
+      [],
+    ];
+
+    // POF 2008 (mesmo bloco do principal)
+    if (pof2008) {
+      aoaChronicAll.push(
+        ["POF 2008"],
+        regioesHeader,
+        ["PC (Kg)",
+          pof2008.PC_Kg?.Brasil ?? 0,
+          (pof2008.PC_Kg?.["Centro_Oeste"] ?? pof2008.PC_Kg?.["Centro-Oeste"]) ?? 0,
+          pof2008.PC_Kg?.Nordeste ?? 0,
+          pof2008.PC_Kg?.Norte ?? 0,
+          pof2008.PC_Kg?.Sudeste ?? 0,
+          pof2008.PC_Kg?.Sul ?? 0
+        ],
+        [mIDA_EXT,
+          pof2008["%IDA_ANVISA"]?.Brasil ?? 0,
+          (pof2008["%IDA_ANVISA"]?.["Centro_Oeste"] ?? pof2008["%IDA_ANVISA"]?.["Centro-Oeste"]) ?? 0,
+          pof2008["%IDA_ANVISA"]?.Nordeste ?? 0,
+          pof2008["%IDA_ANVISA"]?.Norte ?? 0,
+          pof2008["%IDA_ANVISA"]?.Sudeste ?? 0,
+          pof2008["%IDA_ANVISA"]?.Sul ?? 0
+        ],
+        [mIDA_INT,
+          pof2008["%IDA_SYNGENTA"]?.Brasil ?? 0,
+          (pof2008["%IDA_SYNGENTA"]?.["Centro_Oeste"] ?? pof2008["%IDA_SYNGENTA"]?.["Centro-Oeste"]) ?? 0,
+          pof2008["%IDA_SYNGENTA"]?.Nordeste ?? 0,
+          pof2008["%IDA_SYNGENTA"]?.Norte ?? 0,
+          pof2008["%IDA_SYNGENTA"]?.Sudeste ?? 0,
+          pof2008["%IDA_SYNGENTA"]?.Sul ?? 0
+        ],
+        []
+      );
+    }
+
+    // POF 2017 (mesmo bloco do principal)
+    if (pof2017) {
+      aoaChronicAll.push(
+        ["POF 2017"],
+        regioesHeader,
+        ["PC (Kg)",
+          pof2017.PC_Kg?.Brasil ?? 0,
+          (pof2017.PC_Kg?.["Centro_Oeste"] ?? pof2017.PC_Kg?.["Centro-Oeste"]) ?? 0,
+          pof2017.PC_Kg?.Nordeste ?? 0,
+          pof2017.PC_Kg?.Norte ?? 0,
+          pof2017.PC_Kg?.Sudeste ?? 0,
+          pof2017.PC_Kg?.Sul ?? 0
+        ],
+        [mIDA_EXT,
+          pof2017["%IDA_ANVISA"]?.Brasil ?? 0,
+          (pof2017["%IDA_ANVISA"]?.["Centro_Oeste"] ?? pof2017["%IDA_ANVISA"]?.["Centro-Oeste"]) ?? 0,
+          pof2017["%IDA_ANVISA"]?.Nordeste ?? 0,
+          pof2017["%IDA_ANVISA"]?.Norte ?? 0,
+          pof2017["%IDA_ANVISA"]?.Sudeste ?? 0,
+          pof2017["%IDA_ANVISA"]?.Sul ?? 0
+        ],
+        [mIDA_INT,
+          pof2017["%IDA_SYNGENTA"]?.Brasil ?? 0,
+          (pof2017["%IDA_SYNGENTA"]?.["Centro_Oeste"] ?? pof2017["%IDA_SYNGENTA"]?.["Centro-Oeste"]) ?? 0,
+          pof2017["%IDA_SYNGENTA"]?.Nordeste ?? 0,
+          pof2017["%IDA_SYNGENTA"]?.Norte ?? 0,
+          pof2017["%IDA_SYNGENTA"]?.Sudeste ?? 0,
+          pof2017["%IDA_SYNGENTA"]?.Sul ?? 0
+        ]
+      );
+    }
+
+    const wsCAll = XLSX.utils.aoa_to_sheet(aoaChronicAll);
+    autoWidth(wsCAll, cabecalhoChronic, (row, col) => getValC(row, col), chronic);
+    XLSX.utils.book_append_sheet(wbAll, wsCAll, "Chronic Diet (ALL)");
+  }
+
+  // ===== Nome do arquivo =====
+  const fnameAll = `riskwise_backup_all_crops_${new Date().toISOString().slice(0, 10)}.xlsx`;
+  XLSX.writeFile(wbAll, fnameAll);
+}
+
 
 function renderizarReferenciasWaterAcute() {
 
